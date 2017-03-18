@@ -12,6 +12,9 @@
 		<el-form-item label="年级">
 			<el-input v-model="form.grade" :readonly="true"></el-input>
 		</el-form-item>
+		<el-form-item label="类别">
+			<el-input v-model="form.type" :readonly="true"></el-input>
+		</el-form-item>
 		<el-form-item label="电话" prop="phone">
 			<el-input v-model="form.phone"></el-input>
 		</el-form-item>
@@ -73,6 +76,7 @@
 					name: '林梓楠',
 					studentId: '2013011217',
 					class: '无37',
+					type: '本科生',
 					grade: '2013',
 					phone: '18800182102',
 					email: 'linzinan1995@126.com'
