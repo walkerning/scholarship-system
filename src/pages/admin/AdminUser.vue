@@ -38,7 +38,7 @@
 			</el-table-column>
 			<el-table-column prop="group" label="年级" width="120" sortable>
 			</el-table-column>
-			<el-table-column prop="type" label="类别" width="120" sortable>
+			<el-table-column prop="type" label="类别" width="120" :formatter="typeFormatter" sortable>
 			</el-table-column>
 			<el-table-column label="操作" width="150">
 				<template scope="scope">
@@ -72,8 +72,8 @@
 				</el-form-item>
 				<el-form-item label="类别" prop="type">
 					<el-select v-model="editForm.type">
-						<el-option label="本科生" value="本科生"></el-option>
-						<el-option label="研究生" value="研究生"></el-option>
+						<el-option label="本科生" value="undergraduate"></el-option>
+						<el-option label="研究生" value="graduate"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="电话" prop="phone">
@@ -90,6 +90,16 @@
 				</el-form-item>
 				<el-form-item label="年级排名" prop="yearRank">
 					<el-input v-model.number="editForm.yearRank" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="权限" prop="permission">
+					<el-checkbox-group v-model="editForm.permission">
+						<el-checkbox label="login">有效</el-checkbox>
+						<el-checkbox label="user">用户管理</el-checkbox>
+						<el-checkbox label="form">表单管理</el-checkbox>
+						<el-checkbox label="scholarship">奖学金管理</el-checkbox>
+						<el-checkbox label="honor">荣誉管理</el-checkbox>
+						<el-checkbox label="export">学校奖助系统对接</el-checkbox>
+					</el-checkbox-group>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -116,8 +126,8 @@
 				</el-form-item>
 				<el-form-item label="类别" prop="type">
 					<el-select v-model="addForm.type">
-						<el-option label="本科生" value="本科生"></el-option>
-						<el-option label="研究生" value="研究生"></el-option>
+						<el-option label="本科生" value="undergraduate"></el-option>
+						<el-option label="研究生" value="graduate"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="电话" prop="phone">
@@ -207,10 +217,10 @@
 
 				users: [ 
 					{ 
-						id: 1, name: "林梓楠", studentId: "2013011217", class: "无37", group: "2013", type: "本科生", phone: "18800182102", email: "linzinan1995@126.com", gpa: 93.6, classRank: 1, yearRank: 2 
+						id: 1, name: "林梓楠", studentId: "2013011217", class: "无37", group: "2013", type: "undergraduate", phone: "18800182102", email: "linzinan1995@126.com", gpa: 93.6, classRank: 1, yearRank: 2, permission: ["login", "user", "form", "scholarship", "honor", "export"] 
 					}, 
 					{ 
-						id: 2, name: "林梓楠2", studentId: "2013011218", class: "无30", group: "2017", type: "研究生", phone: "18800182103", email: "linzn13@mails.tsinghua.edu.cn", gpa: 93.5, classRank: 2, yearRank: 2 
+						id: 2, name: "林梓楠2", studentId: "2013011218", class: "无30", group: "2017", type: "graduate", phone: "18800182103", email: "linzn13@mails.tsinghua.edu.cn", gpa: 93.5, classRank: 2, yearRank: 2, permission: ["login"] 
 					}
 				],
 				total: 1,
@@ -348,6 +358,9 @@
 			},
 			singleResetPasswd: function() {
 
+			},
+			typeFormatter(row, column) {
+				return row.type === "undergraduate" ? "本科生" : "研究生";
 			}
 		}
 	}
