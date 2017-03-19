@@ -10,7 +10,7 @@
 			<el-input v-model="form.class" :readonly="true"></el-input>
 		</el-form-item>
 		<el-form-item label="年级">
-			<el-input v-model="form.grade" :readonly="true"></el-input>
+			<el-input v-model="form.group" :readonly="true"></el-input>
 		</el-form-item>
 		<el-form-item label="类别">
 			<el-input v-model="form.type" :readonly="true"></el-input>
@@ -39,7 +39,7 @@
 			var validatePhone = (rule, value, callback) => {
 				var re = /^1\d{10}$/;
 				if (!re.test(value)) {
-					callback(new Error('请输入正确的电话号码'));
+					callback(new Error("请输入正确的电话号码"));
 				} else {
 					callback();
 				}
@@ -48,24 +48,24 @@
 			var validateEmail = (rule, value, callback) => {
 				var re = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
 				if (!re.test(value)) {
-					callback(new Error('请输入正确的邮箱'));
+					callback(new Error("请输入正确的邮箱"));
 				} else {
 					callback();
 				}
 			};
 
 			var validatePass = (rule, value, callback) => {
-				if (this.form.dupPass !== '') {
-					this.$refs.form.validateField('dupPass');
+				if (this.form.dupPass !== "") {
+					this.$refs.form.validateField("dupPass");
 				}
 				callback();
 			};
 
 			var validateDupPass = (rule, value, callback) => {
-				if (this.form.pass !== '' && value === '') {
-					callback(new Error('请再次输入密码'));
+				if (this.form.pass !== "" && value === "") {
+					callback(new Error("请再次输入密码"));
 				} else if (value !== this.form.pass) {
-					callback(new Error('两次输入密码不一致!'));
+					callback(new Error("两次输入密码不一致!"));
 				} else {
 					callback();
 				}
@@ -73,33 +73,33 @@
 
 			return {
 				form: {
-					name: '林梓楠',
-					studentId: '2013011217',
-					class: '无37',
-					type: '本科生',
-					grade: '2013',
-					phone: '18800182102',
-					email: 'linzinan1995@126.com'
+					name: "林梓楠",
+					studentId: "2013011217",
+					class: "无37",
+					type: "本科生",
+					group: "2013",
+					phone: "18800182102",
+					email: "linzinan1995@126.com"
 				},
 				rules: {
 					phone: [
-						{ validator: validatePhone, trigger: 'blur' }
+						{ required: true,  validator: validatePhone, trigger: "blur" }
 					],
 					email: [
-						{ validator: validateEmail, trigger: 'blur' }
+						{ required: true,  validator: validateEmail, trigger: "blur" }
 					],
 					pass: [
-						{ validator: validatePass, trigger: 'blur' }
+						{ validator: validatePass, trigger: "blur" }
 					],
 					dupPass: [
-						{ validator: validateDupPass, trigger: 'blur' }
+						{ validator: validateDupPass, trigger: "blur" }
 					]
 				}
 			}
 		},
 		methods: {
 			onSubmit() {
-				console.log('submit!');
+				console.log("submit!");
 			}
 		}		
 	}
