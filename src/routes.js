@@ -5,6 +5,7 @@ import User from './pages/User.vue'
 import Honor from './pages/Honor.vue'
 import Scholarship from './pages/Scholarship.vue'
 import AdminUser from './pages/admin/AdminUser.vue'
+import AdminForm from './pages/admin/AdminForm.vue'
 import AdminHonor from './pages/admin/AdminHonor.vue'
 import AdminScholarship from './pages/admin/AdminScholarship.vue'
 
@@ -59,6 +60,7 @@ let routes = [
         iconCls: 'el-icon-setting',
         children: [
             { path: '/admin/user', component: AdminUser, name: '用户管理' },
+            { path: '/admin/form', component: AdminForm, name: '表单管理' },
             { path: '/admin/honor', component: AdminHonor, name: '荣誉管理' },
             { path: '/admin/scholarship', component: AdminScholarship, name: '奖学金管理' }
         ]
