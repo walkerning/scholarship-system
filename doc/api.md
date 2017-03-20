@@ -32,7 +32,7 @@ Resources
     // Number: 年级排名
     "year_rank": 3, 
     // [String]: 该用户有的权限列表: login有效, user用户管理, form表单管理, honor荣誉管理, scholarship奖学金管理, export学校对接
-    "permissions": [login]
+    "permissions": ["login"]
 }
 ```
 
@@ -85,30 +85,6 @@ Resources
 }
 ```
 
-### 字段 Field
-```javascript
-{
-    // Number[required]: id唯一标识字段
-    "id": 5, 
-    // Number[required]: 字段类型说明文字、数字、邮箱、手机、单行字符串、
-    //                   多行字符串、附件(管理员上传的说明文件)、
-    //                   上传文件(用户需要上传的材料)。
-    "type": 2, 
-    // Number[required]: 限制字段填写的最长/最短长度。当类型为数字、邮箱、手机、字符串时,
-    //                   含义为字符串长度;当类型为上传文件时,含义为文件大小限制(byte);
-    //                   当为其他类型时,无用。当值<0,表示没有限制。
-    "max_len": 1000, 
-    "min_len": 1000,
-    // Boolean[required]: 这个字段是否必填
-    "required": true, 
-    // String: 该字段的说明文字
-    "description": "请填写您的科创经历, 此项最好不要为空", 
-    // Object: key为字段type; 如果type为*附件*, value为String, 代表附件id; 
-    //        如果type为*选项*, value为多个可选项的列表Array[String]
-    "content": {7: "555555555"} 
-}
-```
-
 ### 表单 Form
 ```javascript
 {
@@ -119,10 +95,29 @@ Resources
     // String: 表单名字, 如果对于apply表单不给定名字, 可能不方便创建荣誉时选择
     "name": "学业优秀荣誉申请模版2",
     // Array(Field)[required]: 有序字段列表
-    "fields": [Field], 
-    // Number: 格式文件id(暂定latex模版),
-    //        如果不存在则代表该表单不支持打印格式输出
-    "template_id": 9
+    "fields": [
+		{
+		    // Number[required]: 字段类型：说明文字（1）、数字（2）、邮箱（3）、手机（4）、单行字符串（5）、
+		    //                   多行字符串（6）、多选框（7）、单选框（8）、附件(管理员上传的说明文件)（9）、
+		    //                   上传文件(用户需要上传的材料)（10）。
+		    "type": 2, 
+		    // Number[required]: 限制字段填写的最长/最短长度。当字段类型为数字、邮箱、手机、单行字符串、多行字符串时，
+		    //                   含义为字符串长度;当字段类型为上传文件时,含义为文件大小限制(byte);
+		    //                   当为其他字段类型时，无用。当值<0，表示没有限制。
+		    "max_len": 1000, 
+		    "min_len": 1000,
+		    // Boolean[required]: 这个字段是否必填
+		    "required": true, 
+		    // String: 该字段的说明文字
+		    "description": "请填写您的科创经历, 此项最好不要为空", 
+		    // Object: 当字段类型为附件时，为附件id; 当字段类型为多选框或单选框时，为选项的列表Array[String]；
+			//         当为其他字段类型时，无用。
+		    "content": null
+		}
+	], 
+    // String: 打印格式(暂定latex模版),
+    //         如果不存在则代表该表单不支持打印格式输出
+    "template": ""
 }
 ```
 
