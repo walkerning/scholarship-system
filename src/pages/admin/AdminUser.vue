@@ -13,6 +13,9 @@
 					<el-input v-model="filters.studentId" placeholder="学号"></el-input>
 				</el-form-item>
 				<el-form-item>
+					<el-checkbox v-model="filters.admin">管理员</el-checkbox>
+				</el-form-item>
+				<el-form-item>
 					<el-button type="primary" v-on:click="allSearch">查询</el-button>
 				</el-form-item>
 				<el-form-item>
@@ -200,7 +203,8 @@
 				filters: {
 					name: "",
 					grade: "",
-					studentId: ""
+					studentId: "",
+					admin: false
 				},
 				listLoading: false,
 
