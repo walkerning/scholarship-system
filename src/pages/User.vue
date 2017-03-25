@@ -83,10 +83,10 @@
 				},
 				rules: {
 					phone: [
-						{ required: true,  validator: validatePhone, trigger: "blur" }
+						{ required: true,  validator: validatePhone, trigger: "change" }
 					],
 					email: [
-						{ required: true,  validator: validateEmail, trigger: "blur" }
+						{ required: true,  validator: validateEmail, trigger: "change" }
 					],
 					pass: [
 						{ validator: validatePass, trigger: "blur" }

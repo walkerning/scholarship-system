@@ -86,13 +86,13 @@
 					<el-input v-model="editForm.email" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="GPA" prop="gpa">
-					<el-input v-model.number="editForm.gpa" auto-complete="off"></el-input>
+					<el-input v-model="editForm.gpa" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="班级排名" prop="classRank">
-					<el-input v-model.number="editForm.classRank" auto-complete="off"></el-input>
+					<el-input v-model="editForm.classRank" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="年级排名" prop="yearRank">
-					<el-input v-model.number="editForm.yearRank" auto-complete="off"></el-input>
+					<el-input v-model="editForm.yearRank" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="权限" prop="permission">
 					<el-checkbox-group v-model="editForm.permission">
@@ -140,13 +140,13 @@
 					<el-input v-model="addForm.email" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="GPA" prop="gpa">
-					<el-input v-model.number="addForm.gpa" auto-complete="off"></el-input>
+					<el-input v-model="addForm.gpa" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="班级排名" prop="classRank">
-					<el-input v-model.number="addForm.classRank" auto-complete="off"></el-input>
+					<el-input v-model="addForm.classRank" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="年级排名" prop="yearRank">
-					<el-input v-model.number="addForm.yearRank" auto-complete="off"></el-input>
+					<el-input v-model="addForm.yearRank" auto-complete="off"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -155,6 +155,7 @@
 			</div>
 		</el-dialog>
 
+		<!--导入界面-->
 		<el-dialog title="导入" v-model="importFormVisible" :close-on-click-modal="false">
 			<el-form :model="importForm" label-width="20px" ref="importForm">
 				<h4> 导入新用户 </h4>
@@ -197,6 +198,17 @@
 				} else {
 					callback();
 				}
+			};
+
+			var validateNumber = (rule, value, callback) => {
+				if (value !== null && value !== "") {
+					var a = parseFloat(value);
+					if (a.toString() !== value) {
+						callback(new Error("请输入数字"));
+						return;
+					}
+				}
+				callback();
 			};
 
 			return {
@@ -248,34 +260,34 @@
 				},
 				addFormRules: {
 					name: [ 
-						{ required: true, message: "请输入姓名", trigger: "blur"}
+						{ required: true, message: "请输入姓名", trigger: "change"}
 					],
 					studentId: [ 
-						{ required: true, message: "请输入学号", trigger: "blur"}
+						{ required: true, message: "请输入学号", trigger: "change"}
 					],
 					class: [ 
-						{ required: true, message: "请输入班级", trigger: "blur"}
+						{ required: true, message: "请输入班级", trigger: "change"}
 					],
 					group: [ 
-						{ required: true, message: "请输入年级", trigger: "blur"}
+						{ required: true, message: "请输入年级", trigger: "change"}
 					],
 					type: [ 
-						{ required: true, message: "请输入类别", trigger: "blur"}
+						{ required: true, message: "请输入类别", trigger: "change"}
 					],
 					phone: [
-						{ required: true, validator: validatePhone, trigger: "blur" }
+						{ required: true, validator: validatePhone, trigger: "change" }
 					],
 					email: [
-						{ required: true, validator: validateEmail, trigger: "blur" }
+						{ required: true, validator: validateEmail, trigger: "change" }
 					],
 					gpa: [
-						{ type: "number", message: "请输入正确的GPA", trigger: "blur" }
+						{ validator: validateNumber, trigger: "change" }
 					],
 					classRank: [
-						{ type: "number", message: "请输入正确的班级排名", trigger: "blur" }
+						{ validator: validateNumber, trigger: "change" }
 					],
 					yearRank: [
-						{ type: "number", message: "请输入正确的年级排名", trigger: "blur" }
+						{ validator: validateNumber, trigger: "change" }
 					]
 				},
 
@@ -293,34 +305,34 @@
 				},
 				editFormRules: {
 					name: [ 
-						{ required: true, message: "请输入姓名", trigger: "blur"}
+						{ required: true, message: "请输入姓名", trigger: "change"}
 					],
 					studentId: [ 
-						{ required: true, message: "请输入学号", trigger: "blur"}
+						{ required: true, message: "请输入学号", trigger: "change"}
 					],
 					class: [ 
-						{ required: true, message: "请输入班级", trigger: "blur"}
+						{ required: true, message: "请输入班级", trigger: "change"}
 					],
 					group: [ 
-						{ required: true, message: "请输入年级", trigger: "blur"}
+						{ required: true, message: "请输入年级", trigger: "change"}
 					],
 					type: [ 
-						{ required: true, message: "请输入类别", trigger: "blur"}
+						{ required: true, message: "请输入类别", trigger: "change"}
 					],
 					phone: [
-						{ required: true, validator: validatePhone, trigger: "blur" }
+						{ required: true, validator: validatePhone, trigger: "change" }
 					],
 					email: [
-						{ required: true, validator: validateEmail, trigger: "blur" }
+						{ required: true, validator: validateEmail, trigger: "change" }
 					],
 					gpa: [
-						{ type: "number", message: "请输入正确的GPA", trigger: "blur" }
+						{ validator: validateNumber, trigger: "change" }
 					],
 					classRank: [
-						{ type: "number", message: "请输入正确的班级排名", trigger: "blur" }
+						{ validator: validateNumber, trigger: "change" }
 					],
 					yearRank: [
-						{ type: "number", message: "请输入正确的年级排名", trigger: "blur" }
+						{ validator: validateNumber, trigger: "change" }
 					]
 				}
 			}
@@ -355,7 +367,7 @@
 			},
 			singleEdit: function (index, row) {
 				this.editFormVisible = true;
-				this.editForm = Object.assign({}, row);
+				this.editForm = JSON.parse(JSON.stringify(row));
 			},
 			singleEditSubmit: function() {
 

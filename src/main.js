@@ -7,6 +7,10 @@ import 'element-ui/lib/theme-default/index.css'
 import VueRouter from 'vue-router'
 import store from './vuex/store'
 import Vuex from 'vuex'
+import FormView from './components/formView'
+import FormEdit from './components/formEdit'
+import QueEditPanel from './components/queEditPanel'
+import './components/queEditPanel/queEditPanel.css'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import routes from './routes'
@@ -17,6 +21,9 @@ import 'font-awesome/css/font-awesome.min.css'
 Vue.use(ElementUI)
 Vue.use(VueRouter)
 Vue.use(Vuex)
+Vue.use(QueEditPanel)
+Vue.use(FormEdit)
+Vue.use(FormView)
 
 NProgress.configure({ showSpinner: false });
 

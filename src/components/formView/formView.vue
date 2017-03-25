@@ -1,0 +1,210 @@
+<template>
+	<section>
+		<el-form :model="getFill" label-width="250px" :rules="formRules" ref="getForm">
+			<template v-for="(field, index) in getFields">
+
+				<template v-if="field.type === _QUE_TYPE.ILLUSTRATION"> <!--说明文字-->
+					<el-row>
+						<pre>{{ field.description }}</pre>
+					</el-row>
+					<hr />
+				</template>
+				<template v-else-if="field.type === _QUE_TYPE.NUMBER"><!--数字-->
+					<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
+						<el-input v-model="getFill['data' + index]" :placeholder="'数字' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '~' + String(field.max_len) + ')' : '') "  auto-complete="off"></el-input>
+					</el-form-item>
+				</template>
+				<template v-else-if="field.type === _QUE_TYPE.EMAIL"><!--邮箱-->
+					<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
+						<el-input v-model="getFill['data' + index]" placeholder="邮箱"></el-input>
+					</el-form-item>					
+				</template>
+				<template v-else-if="field.type === _QUE_TYPE.PHONE"><!--手机-->
+					<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
+						<el-input v-model="getFill['data' + index]" placeholder="手机"></el-input>
+					</el-form-item>								
+				</template>
+				<template v-else-if="field.type === _QUE_TYPE.STRING_SINGLE_LINE"><!--单行字符串-->
+					<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
+						<el-input v-model="getFill['data' + index]" :placeholder="'单行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')"></el-input>
+					</el-form-item>
+				</template>
+				<template v-else-if="field.type === _QUE_TYPE.STRING_MULTIPLE_LINE"><!--多行字符串-->
+					<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
+						<el-input v-model="getFill['data' + index]" type="textarea" autosize :placeholder="'多行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')"></el-input>
+					</el-form-item>						
+				</template>
+				<template v-else-if="field.type === _QUE_TYPE.CHECKBOX"><!--多选框-->
+					<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
+						<el-checkbox-group v-model="getFill['data' + index]">
+							<template v-for="choice in field.content">
+								<el-checkbox :label="choice"></el-checkbox>
+							</template>
+						</el-checkbox-group>
+						<template v-if="field.min_len <= field.max_len">
+							<font color="blue"><i>请选择{{ field.min_len }}至{{ field.max_len }}个选项</i></font>
+						</template>
+					</el-form-item>								
+				</template>
+				<template v-else-if="field.type === _QUE_TYPE.RATIO"><!--单选框-->
+					<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
+						<el-radio-group v-model="getFill['data' + index]">
+							<template v-for="choice in field.content">
+								<el-radio :label="choice"></el-radio>
+							</template>
+						</el-radio-group>
+					</el-form-item>							
+				</template>
+			</template>
+		</el-form>
+	</section>
+</template>
+
+<script>
+	import { mapGetters } from "vuex"
+	import { mapActions } from "vuex"
+	import QueType from "../../common/js/queType"
+
+	export default {
+		props: {
+		},
+		computed: {
+			...mapGetters([
+				"getForm",
+				"getFields",
+				"getFill"
+			]),
+			_QUE_TYPE: function() {
+				return QueType.QUE_TYPE;
+			},
+			formRules: function() {
+				var validator = (rule, value, callback) => {
+					if (value === undefined) {
+						callback();
+						return;
+					}
+					var id = parseInt(rule.field.substring(4));
+					var field = this.getFields[id];
+					switch(field.type) {
+						case this._QUE_TYPE.ILLUSTRATION:
+							callback();
+							break;
+						case this._QUE_TYPE.NUMBER:
+							if (field.required && (value === null || value === "")) {
+								callback(new Error("不能为空"));
+								break;
+							}
+							if (value !== null && value !== "") {
+								var a = parseFloat(value);
+								if (a.toString() !== value) {
+									callback(new Error("请输入数字"));
+									break;
+								}
+								if (field.min_len < field.max_len) {
+									if (!((field.min_len <= a) && (a <= field.max_len))) {
+										callback(new Error("数字需要在" + field.min_len + "到" + field.max_len + "之间"));
+										break;
+									}
+								}
+							}
+							callback();
+							break;
+						case this._QUE_TYPE.EMAIL:
+							if (field.required && (value === null || value === "")) {
+								callback(new Error("不能为空"));
+								break;								
+							}
+							var re = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
+							if (!re.test(value)) {
+								callback(new Error("请输入正确的邮箱"));
+								break;
+							}
+							callback();
+							break;
+						case this._QUE_TYPE.PHONE:
+							if (field.required && (value === null || value === "")) {
+								callback(new Error("不能为空"));
+								break;								
+							}
+							var re = /^1\d{10}$/;
+							if (!re.test(value)) {
+								callback(new Error("请输入正确的电话号码"));
+								break;
+							}
+							callback();
+							break;
+						case this._QUE_TYPE.STRING_SINGLE_LINE:
+						case this._QUE_TYPE.STRING_MULTIPLE_LINE:
+							if (field.required && (value === null || value === "")) {
+								callback(new Error("不能为空"));
+								break;								
+							}
+							if (value !== null && value !== "") {
+								var a = value.length;
+								if (field.min_len < field.max_len) {
+									if (!((field.min_len <= a) && (a <= field.max_len))) {
+										callback(new Error("字符数需要在" + field.min_len + "到" + field.max_len + "之间，已有" + a + "字符"));
+										break;
+									}
+								}
+							}
+							callback();
+							break;
+						case this._QUE_TYPE.CHECKBOX:
+							if (field.required && (value === null || value.length === 0)) {
+								callback(new Error("不能为空"));
+								break;								
+							}
+							if (value !== null && value.length !== 0) {
+								var a = value.length;
+								if (field.min_len < field.max_len) {
+									if (!((field.min_len <= a) && (a <= field.max_len))) {
+										callback(new Error("选项数需要在" + field.min_len + "到" + field.max_len + "之间，已选" + a + "个选项"));
+										break;
+									}
+								}
+							}
+							callback();
+							break;
+						case this._QUE_TYPE.RATIO:
+							if (field.required && (value === null || value === "")) {
+								callback(new Error("不能为空"));
+								break;								
+							}
+							callback();
+							break;
+						case this._QUE_TYPE.ATTACHMENT:
+							callback();
+							break;
+						case this._QUE_TYPE.UPLOAD:
+							callback();
+							break;
+						default:
+							callback();
+							break;
+					}
+				};
+				var rule = {};
+				for (var i in this.getFields) {
+					var field = this.getFields[i];
+					var key = "data" + i;
+					if (field.type === this._QUE_TYPE.RATIO || field.type === this._QUE_TYPE.CHECKBOX) {
+						rule[key] = [{validator: validator, trigger: "change"}];
+					} else {
+						rule[key] = [{validator: validator, trigger: "blur"}];
+					}
+				}
+				return rule;
+			}
+		},
+		data() {
+			return {
+			}
+		},
+		methods: {
+			...mapActions([
+				"setFill"
+			])
+		}
+	}
+</script>
