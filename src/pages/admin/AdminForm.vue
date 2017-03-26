@@ -49,13 +49,21 @@
 
 		<!--编辑界面-->
 		<el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false">
-			
 			<form-edit></form-edit>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="editFormVisible = false">取消</el-button>
 				<el-button type="primary" @click.native="singleEditSubmit" :loading="editLoading">提交</el-button>
 			</div>
 		</el-dialog>
+
+		<!--新增界面-->
+		<el-dialog title="编辑" v-model="addFormVisible" :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false">
+			<form-edit></form-edit>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="addFormVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="singleAddSubmit" :loading="addLoading">提交</el-button>
+			</div>
+		</el-dialog>		
 
 		<!--预览界面-->
 		<el-dialog title="预览" v-model="previewFormVisible" :close-on-click-modal="false">
@@ -91,6 +99,9 @@
 
 				editFormVisible: false,
 				editLoading: false,
+
+				addFormVisible: false,
+				addLoading: false,
 
 				previewFormVisible: false,
 
@@ -247,7 +258,7 @@
 								content: null
 							}
 						],
-						template: ""
+						template: "<latex></latex>"
 					}
 				],
 				total: 2
@@ -258,7 +269,14 @@
 
 			},
 			allAdd() {
-
+				this.setForm({
+					id: -1,
+					name: "未命名表单",
+					type: "apply",
+					fields: [],
+					template: ""
+				});
+				this.addFormVisible = true;
 			},
 			allSelsChange: function (sels) {
 				this.sels = sels;
@@ -273,8 +291,8 @@
 
 			},
 			singleEdit: function (index, row) {
-				this.editFormVisible = true;
 				this.setForm(JSON.parse(JSON.stringify(row)));
+				this.editFormVisible = true;
 			},
 			singlePreview: function (index, row) {
 				this.setForm(JSON.parse(JSON.stringify(row)));
@@ -291,6 +309,9 @@
 				this.previewFormVisible = true;
 			},
 			singleEditSubmit: function() {
+
+			},
+			singleAddSubmit: function() {
 
 			},
 			typeFormatter (row, column) {
