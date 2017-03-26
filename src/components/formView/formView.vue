@@ -11,34 +11,34 @@
 					</template>
 					<template v-else-if="field.type === _QUE_TYPE.NUMBER"><!--数字-->
 						<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
-							<el-input v-model="getFill['data' + index]" :placeholder="'数字' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '~' + String(field.max_len) + ')' : '') "  auto-complete="off"></el-input>
+							<el-input v-model="getFill['data' + index]" :placeholder="'数字' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '~' + String(field.max_len) + ')' : '') "  auto-complete="off" :disabled="disabled"></el-input>
 						</el-form-item>
 					</template>
 					<template v-else-if="field.type === _QUE_TYPE.EMAIL"><!--邮箱-->
 						<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
-							<el-input v-model="getFill['data' + index]" placeholder="邮箱"></el-input>
+							<el-input v-model="getFill['data' + index]" placeholder="邮箱" :disabled="disabled"></el-input>
 						</el-form-item>					
 					</template>
 					<template v-else-if="field.type === _QUE_TYPE.PHONE"><!--手机-->
 						<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
-							<el-input v-model="getFill['data' + index]" placeholder="手机"></el-input>
+							<el-input v-model="getFill['data' + index]" placeholder="手机" :disabled="disabled"></el-input>
 						</el-form-item>								
 					</template>
 					<template v-else-if="field.type === _QUE_TYPE.STRING_SINGLE_LINE"><!--单行字符串-->
 						<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
-							<el-input v-model="getFill['data' + index]" :placeholder="'单行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')"></el-input>
+							<el-input v-model="getFill['data' + index]" :placeholder="'单行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')" :disabled="disabled"></el-input>
 						</el-form-item>
 					</template>
 					<template v-else-if="field.type === _QUE_TYPE.STRING_MULTIPLE_LINE"><!--多行字符串-->
 						<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
-							<el-input v-model="getFill['data' + index]" type="textarea" autosize :placeholder="'多行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')"></el-input>
+							<el-input v-model="getFill['data' + index]" type="textarea" autosize :placeholder="'多行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')" :disabled="disabled"></el-input>
 						</el-form-item>						
 					</template>
 					<template v-else-if="field.type === _QUE_TYPE.CHECKBOX"><!--多选框-->
 						<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
 							<el-checkbox-group v-model="getFill['data' + index]">
 								<template v-for="choice in field.content">
-									<el-checkbox :label="choice"></el-checkbox>
+									<el-checkbox :label="choice" :disabled="disabled"></el-checkbox>
 								</template>
 							</el-checkbox-group>
 							<template v-if="field.min_len <= field.max_len">
@@ -50,7 +50,7 @@
 						<el-form-item :label="field.description" :required="field.required" :prop="'data' + index">
 							<el-radio-group v-model="getFill['data' + index]">
 								<template v-for="choice in field.content">
-									<el-radio :label="choice"></el-radio>
+									<el-radio :label="choice" :disabled="disabled"></el-radio>
 								</template>
 							</el-radio-group>
 						</el-form-item>							
@@ -58,7 +58,7 @@
 				</template>
 			</div>
 			<div v-if="getForm.template !== null && getForm.template != ''">
-				<el-row>
+				<el-row type="flex" justify="center">
 					<el-button type="warning" @click.native="print">打印</el-button>
 				</el-row>
 			</div>
@@ -73,6 +73,10 @@
 
 	export default {
 		props: {
+			disabled: {
+				type: Boolean,
+				default: false
+			}
 		},
 		computed: {
 			...mapGetters([
