@@ -265,10 +265,10 @@
 			}
 		},
 		methods: {
-			allSearch() {
+			allSearch: function() {
 
 			},
-			allAdd() {
+			allAdd: function() {
 				this.setForm({
 					id: -1,
 					name: "未命名表单",
@@ -284,7 +284,7 @@
 			allBatchRemove: function () {
 				
 			},
-			allCurrentChange (val) {
+			allCurrentChange: function (val) {
 
 			},
 			singleDel: function (index, row) {
@@ -314,7 +314,7 @@
 			singleAddSubmit: function() {
 
 			},
-			typeFormatter (row, column) {
+			typeFormatter: function (row, column) {
 				return row.type === "apply" ? "荣誉申请表" : "奖学金感谢信表";
 			},
 			...mapActions([
