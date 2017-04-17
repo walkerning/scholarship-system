@@ -32,6 +32,8 @@ export default {
 			return "附件说明";
 		} else if (type === this.QUE_TYPE.UPLOAD) {
 			return "上传附件";
+		} else {
+			return "";
 		}
 	}
 }

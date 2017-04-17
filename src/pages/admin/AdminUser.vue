@@ -7,10 +7,10 @@
 					<el-input v-model="filters.name" placeholder="姓名"></el-input>
 				</el-form-item>
 				<el-form-item>
-					<el-input v-model="filters.grade" placeholder="年级"></el-input>
+					<el-input v-model="filters.group" placeholder="年级"></el-input>
 				</el-form-item>
 				<el-form-item>
-					<el-input v-model="filters.studentId" placeholder="学号"></el-input>
+					<el-input v-model="filters.student_id" placeholder="学号"></el-input>
 				</el-form-item>
 				<el-form-item>
 					<el-checkbox v-model="filters.admin">管理员</el-checkbox>
@@ -35,7 +35,7 @@
 			</el-table-column>
 			<el-table-column prop="name" label="姓名" width="120" sortable>
 			</el-table-column>
-			<el-table-column prop="studentId" label="学号" width="150" sortable>
+			<el-table-column prop="student_id" label="学号" width="150" sortable>
 			</el-table-column>
 			<el-table-column prop="class" label="班级" width="100" sortable>
 			</el-table-column>
@@ -64,8 +64,8 @@
 				<el-form-item label="姓名" prop="name">
 					<el-input v-model="editForm.name" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="学号" prop="studentId">
-					<el-input v-model="editForm.studentId" auto-complete="off"></el-input>
+				<el-form-item label="学号" prop="student_id">
+					<el-input v-model="editForm.student_id" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="班级" prop="class">
 					<el-input v-model="editForm.class" auto-complete="off"></el-input>
@@ -75,8 +75,9 @@
 				</el-form-item>
 				<el-form-item label="类别" prop="type">
 					<el-select v-model="editForm.type">
-						<el-option label="本科生" value="undergraduate"></el-option>
-						<el-option label="研究生" value="graduate"></el-option>
+						<template v-for="userType in _USER_TYPE">
+							<el-option :label="_userTypeString(userType)" :value="userType"></el-option>
+						</template>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="电话" prop="phone">
@@ -88,20 +89,17 @@
 				<el-form-item label="GPA" prop="gpa">
 					<el-input v-model="editForm.gpa" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="班级排名" prop="classRank">
-					<el-input v-model="editForm.classRank" auto-complete="off"></el-input>
+				<el-form-item label="班级排名" prop="class_rank">
+					<el-input v-model="editForm.class_rank" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="年级排名" prop="yearRank">
-					<el-input v-model="editForm.yearRank" auto-complete="off"></el-input>
+				<el-form-item label="年级排名" prop="year_rank">
+					<el-input v-model="editForm.year_rank" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="权限" prop="permission">
-					<el-checkbox-group v-model="editForm.permission">
-						<el-checkbox label="login">有效</el-checkbox>
-						<el-checkbox label="user">用户管理</el-checkbox>
-						<el-checkbox label="form">表单管理</el-checkbox>
-						<el-checkbox label="scholarship">奖学金管理</el-checkbox>
-						<el-checkbox label="honor">荣誉管理</el-checkbox>
-						<el-checkbox label="export">学校奖助系统对接</el-checkbox>
+				<el-form-item label="权限" prop="permissions">
+					<el-checkbox-group v-model="editForm.permissions">
+						<template v-for="permissionType in _PERMISSION_TYPE">
+							<el-checkbox :label="permissionType">{{ _permissionTypeString(permissionType) }}</el-checkbox>
+						</template>
 					</el-checkbox-group>
 				</el-form-item>
 			</el-form>
@@ -118,8 +116,8 @@
 				<el-form-item label="姓名" prop="name">
 					<el-input v-model="addForm.name" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="学号" prop="studentId">
-					<el-input v-model="addForm.studentId" auto-complete="off"></el-input>
+				<el-form-item label="学号" prop="student_id">
+					<el-input v-model="addForm.student_id" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="班级" prop="class">
 					<el-input v-model="addForm.class" auto-complete="off"></el-input>
@@ -129,8 +127,9 @@
 				</el-form-item>
 				<el-form-item label="类别" prop="type">
 					<el-select v-model="addForm.type">
-						<el-option label="本科生" value="undergraduate"></el-option>
-						<el-option label="研究生" value="graduate"></el-option>
+						<template v-for="userType in _USER_TYPE">
+							<el-option :label="_userTypeString(userType)" :value="userType"></el-option>
+						</template>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="电话" prop="phone">
@@ -142,11 +141,11 @@
 				<el-form-item label="GPA" prop="gpa">
 					<el-input v-model="addForm.gpa" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="班级排名" prop="classRank">
-					<el-input v-model="addForm.classRank" auto-complete="off"></el-input>
+				<el-form-item label="班级排名" prop="class_rank">
+					<el-input v-model="addForm.class_rank" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="年级排名" prop="yearRank">
-					<el-input v-model="addForm.yearRank" auto-complete="off"></el-input>
+				<el-form-item label="年级排名" prop="year_rank">
+					<el-input v-model="addForm.year_rank" auto-complete="off"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -180,7 +179,18 @@
 </template>
 
 <script>
+	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroups, apiAddGroup, apiDeleteUser } from "../../api/api"
+	import UserType from "../../common/js/userType"
+	import PermissionType from "../../common/js/permissionType"
 	export default {
+		computed: {
+			_USER_TYPE: function() {
+				return UserType.USER_TYPE;
+			},
+			_PERMISSION_TYPE: function() {
+				return PermissionType.PERMISSION_TYPE;
+			}
+		},
 		data() {
 			var validatePhone = (rule, value, callback) => {
 				var re = /^1\d{10}$/;
@@ -200,8 +210,19 @@
 				}
 			};
 
-			var validateNumber = (rule, value, callback) => {
-				if (value !== null && value !== "") {
+			var validateInteger = (rule, value, callback) => {
+				if (value && value !== "") {
+					var a = parseInt(value);
+					if (a.toString() !== value) {
+						callback(new Error("请输入整数"));
+						return;
+					}
+				}
+				callback();
+			};
+
+			var validateFloat = (rule, value, callback) => {
+				if (value && value !== "") {
 					var a = parseFloat(value);
 					if (a.toString() !== value) {
 						callback(new Error("请输入数字"));
@@ -214,8 +235,8 @@
 			return {
 				filters: {
 					name: "",
-					grade: "",
-					studentId: "",
+					group: "",
+					student_id: "",
 					admin: false
 				},
 				listLoading: false,
@@ -231,14 +252,7 @@
 
 				sels: [],//列表选中列
 
-				users: [ 
-					{ 
-						id: 1, name: "林梓楠", studentId: "2013011217", class: "无37", group: "2013", type: "undergraduate", phone: "18800182102", email: "linzinan1995@126.com", gpa: 93.6, classRank: 1, yearRank: 2, permission: ["login", "user", "form", "scholarship", "honor", "export"] 
-					}, 
-					{ 
-						id: 2, name: "林梓楠2", studentId: "2013011218", class: "无30", group: "2017", type: "graduate", phone: "18800182103", email: "linzn13@mails.tsinghua.edu.cn", gpa: 93.5, classRank: 2, yearRank: 2, permission: ["login"] 
-					}
-				],
+				users: [],
 				total: 1,
 
 				importForm: {
@@ -248,21 +262,21 @@
 
 				addForm: {
 					name: "",
-					studentId: "",
+					student_id: "",
 					class: "",
 					group: "",
 					type: "",
 					phone: "",
 					email: "",
-					gap: null,
-					classRank: null,
-					yearRank: null
+					gpa: null,
+					class_rank: null,
+					year_rank: null
 				},
 				addFormRules: {
 					name: [ 
 						{ required: true, message: "请输入姓名", trigger: "change"}
 					],
-					studentId: [ 
+					student_id: [ 
 						{ required: true, message: "请输入学号", trigger: "change"}
 					],
 					class: [ 
@@ -281,33 +295,33 @@
 						{ required: true, validator: validateEmail, trigger: "change" }
 					],
 					gpa: [
-						{ validator: validateNumber, trigger: "change" }
+						{ validator: validateFloat, trigger: "change" }
 					],
-					classRank: [
-						{ validator: validateNumber, trigger: "change" }
+					class_rank: [
+						{ validator: validateInteger, trigger: "change" }
 					],
-					yearRank: [
-						{ validator: validateNumber, trigger: "change" }
+					year_rank: [
+						{ validator: validateInteger, trigger: "change" }
 					]
 				},
 
 				editForm: {
 					name: "",
-					studentId: "",
+					student_id: "",
 					class: "",
 					group: "",
 					type: null,
 					phone: "",
 					email: "",
 					gap: null,
-					classRank: null,
-					yearRank: null
+					class_rank: null,
+					year_rank: null
 				},
 				editFormRules: {
 					name: [ 
 						{ required: true, message: "请输入姓名", trigger: "change"}
 					],
-					studentId: [ 
+					student_id: [ 
 						{ required: true, message: "请输入学号", trigger: "change"}
 					],
 					class: [ 
@@ -326,31 +340,31 @@
 						{ required: true, validator: validateEmail, trigger: "change" }
 					],
 					gpa: [
-						{ validator: validateNumber, trigger: "change" }
+						{ validator: validateFloat, trigger: "change" }
 					],
-					classRank: [
-						{ validator: validateNumber, trigger: "change" }
+					class_rank: [
+						{ validator: validateInteger, trigger: "change" }
 					],
-					yearRank: [
-						{ validator: validateNumber, trigger: "change" }
+					year_rank: [
+						{ validator: validateInteger, trigger: "change" }
 					]
 				}
 			}
 		},
 		methods: {
-			allSearch() {
-
+			allSearch: function () {
+				this.getUserList();
 			},
-			allAdd() {
+			allAdd: function () {
 				this.addFormVisible = true;
 			},
-			allImport() {
+			allImport: function () {
 				this.importFormVisible = true;
 			},
-			allImportUser() {
+			allImportUser: function () {
 
 			},
-			allImportScore() {
+			allImportScore: function () {
 
 			},
 			allBatchRemove: function () {
@@ -359,25 +373,210 @@
 			allSelsChange: function (sels) {
 				this.sels = sels;
 			},
-			allCurrentChange(val) {
+			allCurrentChange: function(val) {
 
 			},
 			singleDel: function (index, row) {
-
+				apiDeleteUser(row.id).then(res => {
+					this.$notify({
+						title: "删除成功",
+						message: "删除用户成功",
+						type: "success"
+					});
+					this.getUserList();
+				}).catch(error => {
+					this.$notify({
+						title: "删除失败",
+						message: "删除用户失败",
+						type: "error"
+					});	
+				});
 			},
 			singleEdit: function (index, row) {
-				this.editFormVisible = true;
 				this.editForm = JSON.parse(JSON.stringify(row));
+				if (this.editForm.hasOwnProperty("gpa")) {
+					this.editForm.gpa = this.editForm.gpa.toString();
+				}
+				if (this.editForm.hasOwnProperty("class_rank")) {
+					this.editForm.class_rank = this.editForm.class_rank.toString();
+				}
+				if (this.editForm.hasOwnProperty("year_rank")) {
+					this.editForm.year_rank = this.editForm.year_rank.toString();
+				}
+				this.editFormVisible = true;
 			},
-			singleEditSubmit: function() {
+			getGroupId: function(group_name) {
+				return apiGetGroups().then(res => {
+					var start = null;
+					var groups = res.data;
+					for (var i = 0; i < groups.length; i++) {
+						if (groups[i].name == group_name) {
+							start = Promise.resolve(groups[i].id);
+							break;
+						}
+					}
+					if (start == null) {
+						var params = {
+							name: group_name,
+							description: group_name
+						};
+						start = apiAddGroup(params).then(res => {
+							return res.data.id;
+						})
+					}
+					return start;
+				})
+			},
+			singleEditSubmit: function () {
+				this.$refs.editForm.validate((valid) => {
+					if (valid) {
+						this.getGroupId(this.editForm.group).then(group_id => {
+							var uid = this.editForm.id;
+							var params = {
+								name: this.editForm.name,
+								student_id: this.editForm.student_id,
+								class: this.editForm.class,
+								group_id: group_id,
+								type: this.editForm.type,
+								phone: this.editForm.phone,
+								email: this.editForm.email
+							};
+							if (this.editForm.gpa && this.editForm.gpa !== "") {
+								params.gpa = this.editForm.gpa;
+							}
+							if (this.editForm.class_rank && this.editForm.class_rank !== "") {
+								params.class_rank = this.editForm.class_rank;
+							}
+							if (this.editForm.year_rank && this.editForm.year_rank != "") {
+								params.year_rank = this.editForm.year_rank;
+							}
+							apiUpdateUser(uid, params).then(res => {
+								this.$notify({
+									title: "更新成功",
+									message: "更新用户信息成功",
+									type: "success"
+								});
+								this.editFormVisible = false;
+								this.getUserList();
+							}).catch(error => {
+								this.$notify({
+									title: "更新失败",
+									message: error.response.data.message,
+									type: "error"
+								});
+							}).catch(error => {
+								this.$notify({
+									title: "更新失败",
+									message: "请检查网络连接",
+									type: "error"
+								});	
+							});
+						}).catch(error => {
+							this.$notify({
+								title: "更新失败",
+								message: "获取组id失败",
+								type: "error"
+							});	
+						});
+					}
+				})
+			},
+			singleResetPasswd: function () {
 
 			},
-			singleResetPasswd: function() {
-
+			singleAddSubmit: function () {
+				this.$refs.addForm.validate((valid) => {
+					if (valid) {
+						this.getGroupId(this.addForm.group).then(group_id => {
+							var params = {
+								name: this.addForm.name,
+								student_id: this.addForm.student_id,
+								class: this.addForm.class,
+								group_id: group_id,
+								type: this.addForm.type,
+								phone: this.addForm.phone,
+								email: this.addForm.email
+							};
+							if (this.addForm.gpa && this.addForm.gpa !== "") {
+								params.gpa = this.addForm.gpa;
+							}
+							if (this.addForm.class_rank && this.addForm.class_rank !== "") {
+								params.class_rank = this.addForm.class_rank;
+							}
+							if (this.addForm.year_rank && this.addForm.year_rank != "") {
+								params.year_rank = this.addForm.year_rank;
+							}
+							apiAddUser(params).then(res => {
+								this.$notify({
+									title: "新增成功",
+									message: "新增用户成功",
+									type: "success"
+								});
+								this.addFormVisible = false;
+								this.getUserList();
+							}).catch(error => {
+								this.$notify({
+									title: "新增失败",
+									message: error.response.data.message,
+									type: "error"
+								});
+							}).catch(error => {
+								this.$notify({
+									title: "新增失败",
+									message: "请检查网络连接",
+									type: "error"
+								});	
+							});
+						}).catch(error => {
+							this.$notify({
+								title: "新增失败",
+								message: "获取组id失败",
+								type: "error"
+							});	
+						});;
+					}
+				})
 			},
-			typeFormatter(row, column) {
-				return row.type === "undergraduate" ? "本科生" : "研究生";
+			typeFormatter: function (row, column) {
+				return UserType.userTypeString(row.type);
+			},
+			getUserList: function () {
+				this.listLoading = true;
+				var params = {};
+				if (this.filters.name != "") {
+					params["name"] = this.filters.name;
+				}
+				if (this.filters.group != "") {
+					params["group"] = this.filters.group;
+				}
+				if (this.filters.student_id != "") {
+					params["student_id"] = this.filters.student_id;
+				}
+				if (this.filters.admin) {
+					params["admin"] = 1;
+				}
+				apiGetUserList(params).then(res => {
+					this.users = res.data;
+					this.listLoading = false;
+					console.log(this.users);
+				}).catch(error => {
+					this.$notify({
+						title: "加载失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+					this.listLoading = false;
+				});
+			},
+			_userTypeString: function(type) {
+				return UserType.userTypeString(type);
+			},
+			_permissionTypeString: function(type) {
+				return PermissionType.permissionTypeString(type);
 			}
+		},
+		mounted() {
+			this.getUserList();
 		}
 	}
 

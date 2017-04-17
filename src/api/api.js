@@ -1,17 +1,46 @@
 import axios from 'axios';
 
-let base = '';
+let base = 'http://foxfi.eva6.nics.cc:8080';
 
-export const requestLogin = params => { return axios.post(`${base}/login`, params).then(res => res.data); };
+const getWithToken = (url, params) => {
+	return axios.get(url, { params: params, headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
+}
 
-export const getUserList = params => { return axios.get(`${base}/user/list`, { params: params }); };
+const postWithToken = (url, params) => {
+	return axios.post(url, params, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
+}
 
-export const getUserListPage = params => { return axios.get(`${base}/user/listpage`, { params: params }); };
+const putWithToken = (url, params) => {
+	return axios.put(url, params, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
+}
 
-export const removeUser = params => { return axios.get(`${base}/user/remove`, { params: params }); };
+const deleteWithToken = (url) => {
+	return axios.delete(url, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
+}
 
-export const batchRemoveUser = params => { return axios.get(`${base}/user/batchremove`, { params: params }); };
+export const apiRequestLogin = params => { return axios.post(`${base}/auth`, params) };
 
-export const editUser = params => { return axios.get(`${base}/user/edit`, { params: params }); };
+export const apiGetUser = id => { return getWithToken(`${base}/api/v1/users/${id}`, {}) };
 
-export const addUser = params => { return axios.get(`${base}/user/add`, { params: params }); };
+export const apiGetUserList = params => { return getWithToken(`${base}/api/v1/users`, params) };
+
+export const apiAddUser = params => { return postWithToken(`${base}/api/v1/users`, params) };
+
+export const apiUpdateUser = (id, params) => { return putWithToken(`${base}/api/v1/users/${id}`, params) };
+
+export const apiDeleteUser = (id) => { return deleteWithToken(`${base}/api/v1/users/${id}`) };
+
+export const apiGetGroups = () => { return getWithToken(`${base}/api/v1/groups`, {}) };
+
+export const apiAddGroup = (params) => { return postWithToken(`${base}/api/v1/groups`, params) };
+
+export const apiLogout = () => {
+	sessionStorage.removeItem("token");
+	sessionStorage.removeItem("uid");
+	sessionStorage.removeItem("userName");
+}
+
+export const apiLogin = (data) => {
+	sessionStorage.setItem("token", data.token);
+	sessionStorage.setItem("uid", data.id);
+}

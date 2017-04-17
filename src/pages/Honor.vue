@@ -53,11 +53,12 @@
 			<form-view :disabled="true"></form-view>
 		</el-dialog>
 
-		<!--预览界面-->
+		<!--申请界面-->
 		<el-dialog title="申请" v-model="applyVisible" :close-on-click-modal="false">
 			<form-view></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="applyVisible = false">取消</el-button>
+				<el-button @click.native="singleSave">暂存</el-button>
 				<el-button type="primary" @click.native="singleApplySubmit" :loading="applyLoading">提交</el-button>
 			</div>
 		</el-dialog>
@@ -335,6 +336,9 @@
 
 			},
 			singleApplySubmit: function () {
+
+			},
+			singleSave: function() {
 
 			},
 			...mapActions([

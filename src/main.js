@@ -15,7 +15,7 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import routes from './routes'
 import Mock from './mock'
-Mock.bootstrap();
+//Mock.bootstrap();
 import 'font-awesome/css/font-awesome.min.css'
 
 Vue.use(ElementUI)
@@ -34,10 +34,10 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   //NProgress.start();
   if (to.path == '/login') {
-    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
   }
-  let user = JSON.parse(sessionStorage.getItem('user'));
-  if (!user && to.path != '/login') {
+  let token = sessionStorage.getItem('token');
+  if (!token && to.path != '/login') {
     next({ path: '/login' })
   } else {
     next()

@@ -38,6 +38,7 @@
 			<form-view></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="fillVisible = false">取消</el-button>
+				<el-button @click.native="singleFillSave">暂存</el-button>
 				<el-button type="primary" @click.native="singleFillSubmit" :loading="fillLoading">提交</el-button>
 			</div>
 		</el-dialog>
@@ -280,6 +281,9 @@
 
 			},
 			singleFillSubmit: function () {
+
+			},
+			singleFillSave: function() {
 
 			},
 			...mapActions([

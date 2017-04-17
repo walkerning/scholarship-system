@@ -2,7 +2,7 @@
 	<el-row class="container">
 		<el-col :span="24" class="header">
 			<el-col :span="10" class="logo" :class="collapsed?'logo-collapse-width':'logo-width'">
-				{{collapsed?'':sysName}}
+				{{collapsed?"":sysName}}
 			</el-col>
 			<el-col :span="10">
 				<div class="tools" @click.prevent="collapse">
@@ -71,12 +71,13 @@
 </template>
 
 <script>
+	import { apiGetUser, apiLogout } from "../api/api";
 	export default {
 		data() {
 			return {
-				sysName: '清华电子奖学金系统',
+				sysName: "清华电子奖学金系统",
 				collapsed:  false,
-				sysUserName: '',
+				sysUserName: ""
 			}
 		},
 		methods: {
@@ -90,14 +91,11 @@
 			},
 			//退出登录
 			logout: function () {
-				var _this = this;
-				this.$confirm('确认退出吗?', '提示', {
-					//type: 'warning'
-				}).then(() => {
-					sessionStorage.removeItem('user');
-					_this.$router.push('/login');
-				}).catch(() => {
-
+				this.$confirm("确认退出吗?", "提示").then(() => {
+					apiLogout();
+					this.$router.push({ path: "/login" });
+				}).catch(error => {
+					console.log(error);
 				});
 			},
 			//折叠导航栏
@@ -105,19 +103,31 @@
 				this.collapsed=!this.collapsed;
 			},
 			showMenu(i,status){
-				this.$refs.menuCollapsed.getElementsByClassName('submenu-hook-'+i)[0].style.display=status?'block':'none';
+				this.$refs.menuCollapsed.getElementsByClassName("submenu-hook-"+i)[0].style.display=status?"block":"none";
 			},
-			userinfo: function() {
-				this.$router.push('/user');
+			userinfo: function () {
+				this.$router.push("/user");
 			}
 		},
 		mounted() {
-			var user = sessionStorage.getItem('user');
-			if (user) {
-				user = JSON.parse(user);
-				this.sysUserName = user.name || '';
+			var userName = sessionStorage.getItem("userName");
+			if (userName) {
+				this.sysUserName = userName;
+			} else {
+				var uid = sessionStorage.getItem("uid");
+				apiGetUser(uid).then(res => {
+					userName = res.data.name;
+					sessionStorage.setItem("userName", userName);
+					this.sysUserName = userName;
+				}).catch(error => {
+					this.$notify({
+						title: "加载用户信息失败",
+						message: "",
+						type: "error"
+					});
+					this.sysUserName = "";
+				});
 			}
-
 		}
 	}
 
