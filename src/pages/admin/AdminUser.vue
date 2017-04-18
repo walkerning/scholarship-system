@@ -179,7 +179,7 @@
 </template>
 
 <script>
-	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroups, apiAddGroup, apiDeleteUser } from "../../api/api"
+	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroups, apiAddGroup, apiDeleteUser, apiResetPassword } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import PermissionType from "../../common/js/permissionType"
 	export default {
@@ -482,7 +482,20 @@
 				})
 			},
 			singleResetPasswd: function () {
-
+				var uid = this.editForm.id;
+				apiResetPassword(uid).then(() => {
+					this.$notify({
+						title: "重设密码成功",
+						message: "重设密码成功。新密码已发送至该用户邮箱！",
+						type: "success"
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "重设密码失败",
+						message: "重设密码失败",
+						type: "error"
+					});
+				})
 			},
 			singleAddSubmit: function () {
 				this.$refs.addForm.validate((valid) => {
@@ -558,7 +571,7 @@
 				apiGetUserList(params).then(res => {
 					this.users = res.data;
 					this.listLoading = false;
-					console.log(this.users);
+					//console.log(this.users);
 				}).catch(error => {
 					this.$notify({
 						title: "加载失败",
