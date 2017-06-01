@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 let base = 'http://foxfi.eva6.nics.cc:8080';
+//let base = 'http://localhost:3000';
 
 const getWithToken = (url, params) => {
 	return axios.get(url, { params: params, headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
