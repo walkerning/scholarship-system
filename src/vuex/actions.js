@@ -29,3 +29,11 @@ export const setFill = ({commit}, fill) => {
 export const addQue = ({commit}, que) => {
 	commit("ADD_QUE", que);
 }
+
+export const addFillOption = ({commit}, param) => {
+	commit("ADD_FILL_OPTION", param);
+}
+
+export const deleteFillOption = ({commit}, indexes) => {
+	commit("DELETE_FIELD_OPTION", indexes);
+}

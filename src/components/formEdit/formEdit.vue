@@ -153,6 +153,50 @@
 							</div>
 						</que-edit-panel>							
 					</template>
+					<template v-else-if="field.type === _QUE_TYPE.TABLE"><!--表格-->
+						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="false" :disableDescription="false" :disableControl="false">
+							<div slot="slotPreivew">
+								<el-row>
+									<pre>{{ field.description }}</pre>
+								</el-row>
+								<el-table :data="[[],[]]">
+									<template v-for="(column, index2) in field.content">
+										<el-table-column :label="column">
+											<template scope="scope">
+												<el-input :disabled="true"></el-input>
+											</template>
+										</el-table-column>
+									</template>
+									<el-table-column label="删除">
+										<template scope="scope">
+											<el-button type="danger" size="small" :disabled="true">删除</el-button> 
+										</template>
+									</el-table-column>
+								</el-table>
+								<el-button type="primary" size="small" :disabled="true">新增记录</el-button>	
+							</div>
+							<div slot="slotControl">
+								<template v-for="(item, index2) in field.content ">
+									<el-row>
+										<el-col :offset="1" :span="4">
+											列{{ index2 + 1 }}：
+										</el-col>
+										<el-col :span="15">
+											<el-input placeholder="请输入列标题" v-model="getFields[index].content[index2]"></el-input>
+										</el-col>
+										<el-col :offset="1" :span="1">
+											<el-button type="warning" size="small" @click="deleteQueOption({index1: index, index2: index2})">删除列</el-button>
+										</el-col>
+									</el-row>
+								</template>
+								<el-row>
+									<el-col :offset="1">
+										<el-button type="warning" size="small" @click="addQueOption(index)">添加列</el-button>
+									</el-col>
+								</el-row>
+							</div>
+						</que-edit-panel>						
+					</template>
 					<hr />
 				</template>
 			</div>
@@ -166,16 +210,9 @@
 					</el-col>
 					<el-col :span="19">
 						<el-select v-model="newQue.type" placeholder="请选择类别">
-							<el-option label="说明文字" :value="1"> </el-option>
-							<el-option label="数字" :value="2"> </el-option>
-							<el-option label="邮箱" :value="3"> </el-option>
-							<el-option label="手机" :value="4"> </el-option>
-							<el-option label="单行字符串" :value="5"> </el-option>
-							<el-option label="多行字符串" :value="6"> </el-option>
-							<el-option label="多选框" :value="7"> </el-option>
-							<el-option label="单选框" :value="8"> </el-option>
-							<el-option label="附件说明" :value="9"> </el-option>
-							<el-option label="上传附件" :value="10"> </el-option>
+							<template v-for="queType in _QUE_TYPE">
+								<el-option :label="_queTypeString(queType)" :value="queType"> </el-option>
+							</template>
 						</el-select>
 					</el-col>
 				</el-row>
@@ -240,7 +277,7 @@
 			},
 			_addQue: function() {
 				var _newQue = JSON.parse(JSON.stringify(this.newQue));
-				if (_newQue.type == this._QUE_TYPE.CHECKBOX || _newQue.type == this._QUE_TYPE.RATIO) {
+				if (_newQue.type == this._QUE_TYPE.CHECKBOX || _newQue.type == this._QUE_TYPE.RATIO || _newQue.type == this._QUE_TYPE.TABLE) {
 					_newQue.content = [];
 				}
 				this.addQue(_newQue);

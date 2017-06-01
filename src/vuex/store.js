@@ -46,6 +46,16 @@ const mutations = {
 	},
 	ADD_QUE(state, que) {
 		state.form.fields.splice(state.form.fields.length, 0, que);
+	},
+	ADD_FILL_OPTION(state, param) {
+		var l = [];
+		for (var i = 0; i < param.num; i++) {
+			l.push("");
+		}
+		state.fill[param.index].push(l);
+	},
+	DELETE_FIELD_OPTION(state, indexes) {
+		state.fill[indexes.index1].splice(indexes.index2, 1);
 	}
 }
 
