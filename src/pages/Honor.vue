@@ -266,6 +266,11 @@
 							required: true,
 							description: "上传附件（有限制、必选）",
 							content: null
+						},
+						{
+							type: 11,
+							description: "表格",
+							content: ["列1", "列2", "列3"]
 						}
 					],
 					template: ""
@@ -282,7 +287,8 @@
 					data8: "",
 					data9: [],
 					data10: ["A", "B"],
-					data11: "A"
+					data11: "A",
+					data15: [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
 				},
 
 				viewVisible: false,

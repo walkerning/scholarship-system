@@ -48,7 +48,7 @@
 		</el-col>
 
 		<!--编辑界面-->
-		<el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false">
+		<el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false" size="large">
 			<form-edit></form-edit>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="editFormVisible = false">取消</el-button>
@@ -57,7 +57,7 @@
 		</el-dialog>
 
 		<!--新增界面-->
-		<el-dialog title="编辑" v-model="addFormVisible" :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false">
+		<el-dialog title="编辑" v-model="addFormVisible" :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false" size="large">
 			<form-edit></form-edit>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="addFormVisible = false">取消</el-button>
@@ -66,7 +66,7 @@
 		</el-dialog>		
 
 		<!--预览界面-->
-		<el-dialog title="预览" v-model="previewFormVisible" :close-on-click-modal="false">
+		<el-dialog title="预览" v-model="previewFormVisible" :close-on-click-modal="false" size="large">
 			<form-view></form-view>
 		</el-dialog>
 
@@ -232,6 +232,11 @@
 								required: true,
 								description: "上传附件（有限制、必选）",
 								content: null
+							},
+							{
+								type: 11,
+								description: "表格",
+								content: ["列1", "列2", "列3"]
 							}
 						],
 						template: ""
@@ -299,7 +304,7 @@
 				var fill = {};
 				for (var i in this.getFields) {
 					var field = this.getFields[i];
-					if (field.type === this._QUE_TYPE.CHECKBOX) {
+					if (field.type === this._QUE_TYPE.CHECKBOX || field.type === this._QUE_TYPE.TABLE) {
 						fill["data" + i] = [];
 					} else {
 						fill["data" + i] = null;
