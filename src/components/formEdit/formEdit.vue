@@ -19,8 +19,9 @@
 					</el-col>
 					<el-col :span="19">
 						<el-select v-model="getForm.type" placeholder="请选择类别">
-							<el-option label="荣誉申请表" value="apply"> </el-option>
-							<el-option label="奖学金感谢信表" value="thanks"> </el-option>
+							<template v-for="type in _FORM_TYPE">
+								<el-option :label="_formTypeString(type)" :value="type"></el-option>
+							</template>
 						</el-select>
 					</el-col>
 				</el-row>
@@ -154,7 +155,7 @@
 						</que-edit-panel>							
 					</template>
 					<template v-else-if="field.type === _QUE_TYPE.TABLE"><!--表格-->
-						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="false" :disableDescription="false" :disableControl="false">
+						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="true" :disableDescription="false" :disableControl="false">
 							<div slot="slotPreivew">
 								<el-row>
 									<pre>{{ field.description }}</pre>
@@ -239,6 +240,7 @@
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../../common/js/queType"
+	import FormType from "../../common/js/formType"
 
 	export default {
 		props: {
@@ -250,6 +252,9 @@
 			]),
 			_QUE_TYPE: function() {
 				return QueType.QUE_TYPE;
+			},
+			_FORM_TYPE: function() {
+				return FormType.FORM_TYPE;
 			}
 		},
 		data() {
@@ -272,6 +277,9 @@
 				"addQueOption",
 				"addQue"
 			]),
+			_formTypeString: function(str) {
+				return FormType.formTypeString(str);
+			},
 			_queTypeString: function(str) {
 				return QueType.queTypeString(str);
 			},

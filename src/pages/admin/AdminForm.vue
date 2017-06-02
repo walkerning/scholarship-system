@@ -8,8 +8,10 @@
 				</el-form-item>
 				<el-form-item label="" prop="type">
 					<el-select v-model="filters.type" placeholder="类别">
-						<el-option label="荣誉申请" value="apply"></el-option>
-						<el-option label="感谢信" value="thanks"></el-option>
+						<el-option label="所有" value=""></el-option>
+						<template v-for="type in _FORM_TYPE">
+							<el-option :label="_formTypeString(type)" :value="type"></el-option>
+						</template>
 					</el-select>
 				</el-form-item>
 				<el-form-item>
@@ -74,9 +76,11 @@
 </template>
 
 <script>
+	import { apiGetFormList, apiUpdateForm, apiAddForm, apiDeleteForm } from "../../api/api"
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../../common/js/queType"
+	import FormType from "../../common/js/formType"
 
 	export default {
 		computed: {
@@ -87,6 +91,9 @@
 			]),
 			_QUE_TYPE: function() {
 				return QueType.QUE_TYPE;
+			},
+			_FORM_TYPE: function() {
+				return FormType.FORM_TYPE;
 			}
 		},
 		data() {
@@ -108,174 +115,19 @@
 				sels: [],//列表选中列
 
 				forms: [
-					{
-						id: "1",
-						name: "测试表单1",
-						type: "apply",
-						fields: [
-							{
-								type: 1,
-								max_len: -1,
-								min_len: -1,
-								required: false,
-								description: "说明文字",
-								content: null
-							},
-							{
-								type: 2,
-								max_len: 1267,
-								min_len: 1200,
-								required: false,
-								description: "数字（有限制、可选）",
-								content: null
-							},
-							{
-								type: 2,
-								max_len: -1,
-								min_len: 0,
-								required: true,
-								description: "数字（无限制、必选）",
-								content: null
-							},
-							{
-								type: 3,
-								max_len: -1,
-								min_len: 0,
-								required: true,
-								description: "邮箱（无限制、必选）",
-								content: null
-							},
-							{
-								type: 4,
-								max_len: -1,
-								min_len: 0,
-								required: true,
-								description: "手机（无限制、必选）",
-								content: null
-							},
-							{
-								type: 5,
-								max_len: -1,
-								min_len: 0,
-								required: true,
-								description: "单行字符串（无限制、必选）",
-								content: null
-							},
-							{
-								type: 5,
-								max_len: 100,
-								min_len: 1,
-								required: false,
-								description: "单行字符串（有限制、可选）",
-								content: null
-							},
-							{
-								type: 6,
-								max_len: -1,
-								min_len: 0,
-								required: true,
-								description: "多行字符串（无限制、必选）",
-								content: null
-							},
-							{
-								type: 6,
-								max_len: 100,
-								min_len: 1,
-								required: false,
-								description: "多行字符串（有限制、可选）",
-								content: null
-							},
-							{
-								type: 7,
-								max_len: 2,
-								min_len: 1,
-								required: false,
-								description: "多选框（有限制、可选）",
-								content: ["A", "B", "C"]
-							},
-							{
-								type: 7,
-								max_len: 2,
-								min_len: 1,
-								required: true,
-								description: "多选框（有限制、必选）",
-								content: ["A", "B", "C"]
-							},
-							{
-								type: 8,
-								max_len: -1,
-								min_len: -1,
-								required: false,
-								description: "单选框（可选）",
-								content: ["A", "B", "C"]
-							},
-							{
-								type: 9,
-								max_len: -1,
-								min_len: -1,
-								required: false,
-								description: "附件说明",
-								content: 1
-							},
-							{
-								type: 10,
-								max_len: -1,
-								min_len: -1,
-								required: false,
-								description: "上传附件（无限制、可选）",
-								content: null
-							},
-							{
-								type: 10,
-								max_len: -1,
-								min_len: 10000,
-								required: true,
-								description: "上传附件（有限制、必选）",
-								content: null
-							},
-							{
-								type: 11,
-								description: "表格",
-								content: ["列1", "列2", "列3"]
-							}
-						],
-						template: ""
-					},
-					{
-						id: 2,
-						name: "测试表单2",
-						type: "thanks",
-						fields: [
-							{
-								type: 1,
-								max_len: -1,
-								min_len: -1,
-								required: false,
-								description: "说明文字",
-								content: null
-							},
-							{
-								type: 2,
-								max_len: 1267,
-								min_len: 1200,
-								required: false,
-								description: "数字（有限制、可选）",
-								content: null
-							}
-						],
-						template: "<latex></latex>"
-					}
 				],
-				total: 2
+				total: 0
 			}
 		},
 		methods: {
+			_formTypeString: function(str) {
+				return FormType.formTypeString(str);
+			},
 			allSearch: function() {
-
+				this.getFormList();
 			},
 			allAdd: function() {
 				this.setForm({
-					id: -1,
 					name: "未命名表单",
 					type: "apply",
 					fields: [],
@@ -287,13 +139,50 @@
 				this.sels = sels;
 			},
 			allBatchRemove: function () {
-				
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					var tasks = [];
+					for (var i in this.sels) {
+						tasks.push(apiDeleteForm(this.sels[i].id));
+					}
+					Promise.all(tasks).then(reses => {
+						this.$notify({
+							title: "删除成功",
+							message: "批量删除表单成功",
+							type: "success"
+						});
+						this.getFormList();
+					}).catch(errors => {
+						this.$notify({
+							title: "删除失败",
+							message: "批量删除表单失败",
+							type: "error"
+						});
+						this.getFormList();
+					});
+				}).catch(() => {
+				});
 			},
 			allCurrentChange: function (val) {
 
 			},
 			singleDel: function (index, row) {
-
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					apiDeleteForm(row.id).then(res => {
+						this.$notify({
+							title: "删除成功",
+							message: "删除表单成功",
+							type: "success"
+						});
+						this.getFormList();
+					}).catch(error => {
+						this.$notify({
+							title: "删除失败",
+							message: "删除表单失败",
+							type: "error"
+						});	
+					});
+				}).catch(() => {
+				});
 			},
 			singleEdit: function (index, row) {
 				this.setForm(JSON.parse(JSON.stringify(row)));
@@ -314,18 +203,87 @@
 				this.previewFormVisible = true;
 			},
 			singleEditSubmit: function() {
-
+				var form = this.getForm;
+				var id = form.id;
+				apiUpdateForm(id, form).then(res => {
+					this.$notify({
+						title: "更新成功",
+						message: "更新表单信息成功",
+						type: "success"
+					});
+					this.editFormVisible = false;
+					this.getFormList();
+				}).catch(error => {
+					this.$notify({
+						title: "更新失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "更新失败",
+						message: "请检查网络连接",
+						type: "error"
+					});	
+				});
 			},
 			singleAddSubmit: function() {
-
+				var form = this.getForm;
+				apiAddForm(form).then(res => {
+					this.$notify({
+						title: "新增成功",
+						message: "新增表单成功",
+						type: "success"
+					});
+					this.addFormVisible = false;
+					this.getFormList();					
+				}).catch(error => {
+					this.$notify({
+						title: "新增失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "新增失败",
+						message: "请检查网络连接",
+						type: "error"
+					});	
+				});
 			},
 			typeFormatter: function (row, column) {
-				return row.type === "apply" ? "荣誉申请表" : "奖学金感谢信表";
+				return this._formTypeString(row.type);
+			},
+			getFormList: function () {
+				this.listLoading = true;
+				var params = {};
+				if (this.filters.name != "") {
+					params["name"] = this.filters.name;
+				}
+				if (this.filters.type != "") {
+					params["type"] = this.filters.type;
+				}
+				apiGetFormList(params).then(res => {
+					this.forms = res.data;
+					this.total = this.forms.length;
+					this.listLoading = false;
+					//console.log(this.forms);
+				}).catch(error => {
+					this.$notify({
+						title: "加载失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+					this.listLoading = false;
+				});
 			},
 			...mapActions([
 				"setForm",
 				"setFill"
 			])
+		},
+		mounted() {
+			this.getFormList();
 		}
 	}
 
