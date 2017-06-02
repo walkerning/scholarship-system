@@ -49,12 +49,12 @@
 			</el-pagination>
 		</el-col>
 
-		<el-dialog title="查看" v-model="viewVisible">
+		<el-dialog title="查看" v-model="viewVisible" size="large">
 			<form-view :disabled="true"></form-view>
 		</el-dialog>
 
 		<!--申请界面-->
-		<el-dialog title="申请" v-model="applyVisible" :close-on-click-modal="false">
+		<el-dialog title="申请" v-model="applyVisible" :close-on-click-modal="false" size="large">
 			<form-view></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="applyVisible = false">取消</el-button>

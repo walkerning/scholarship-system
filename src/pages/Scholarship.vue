@@ -29,12 +29,12 @@
 		</el-col>
 
 		<!--查看界面-->
-		<el-dialog title="查看" v-model="viewVisible">
+		<el-dialog title="查看" v-model="viewVisible" size="large">
 			<form-view :disabled="true"></form-view>
 		</el-dialog>
 
 		<!--填写界面-->
-		<el-dialog title="填写" v-model="fillVisible">
+		<el-dialog title="填写" v-model="fillVisible" size="large">
 			<form-view></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="fillVisible = false">取消</el-button>
