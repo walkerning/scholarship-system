@@ -3,10 +3,10 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
 			<el-form :inline="true" :model="filters">
-				<el-form-item>
-					<el-input v-model="filters.name" placeholder="表单名字"></el-input>
+				<el-form-item label="表单名字">
+					<el-input v-model="filters.name" placeholder=""></el-input>
 				</el-form-item>
-				<el-form-item label="" prop="type">
+				<el-form-item label="表单类别" prop="type">
 					<el-select v-model="filters.type" placeholder="类别">
 						<el-option label="所有" value=""></el-option>
 						<template v-for="type in _FORM_TYPE">

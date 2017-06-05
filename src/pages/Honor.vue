@@ -34,7 +34,18 @@
 			</el-table-column>
 			<el-table-column prop="year" label="年份" width="150" sortable>
 			</el-table-column>
-			<el-table-column prop="state" label="状态" :formatter="stateFormatter" width="150" sortable>
+			<el-table-column prop="state" label="状态" width="150" sortable>
+				<template scope="scope">
+					<template v-if="scope.row.state === _APPLY_STATUS.SUCCESS">
+						<el-tag type="success"> {{ _applyStatusString(scope.row.state) }} </el-tag>
+					</template>
+					<template v-else-if="scope.row.state === _APPLY_STATUS.FAIL">
+						<el-tag type="danger"> {{ _applyStatusString(scope.row.state) }} </el-tag>
+					</template>
+					<template v-else-if="scope.row.state === _APPLY_STATUS.APPLIED">
+						<el-tag type="gray"> {{ _applyStatusString(scope.row.state) }} </el-tag>
+					</template>
+				</template>
 			</el-table-column>
 			<el-table-column label="操作">
 				<template scope="scope">
@@ -70,6 +81,7 @@
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../common/js/queType"
+	import ApplyStatus from "../common/js/applyStatus"
 
 	export default {
 		computed: {
@@ -80,6 +92,9 @@
 			]),
 			_QUE_TYPE: function() {
 				return QueType.QUE_TYPE;
+			},
+			_APPLY_STATUS: function() {
+				return ApplyStatus.APPLY_STATUS;
 			}
 		},
 		data() {
@@ -304,7 +319,7 @@
 				this.sels = sels;
 			},
 			availableAllSelsChange: function(sels) {
-				this.availableAllSelsChange = sels;
+				this.availableSels = sels;
 			},
 			singleView: function (index, row) {
 				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
@@ -325,9 +340,6 @@
 				this.setFill(fill);
 				this.applyVisible = true;
 			},
-			stateFormatter: function (row, column) {
-				return row.state === "success" ? "已获得" : (row.state === "fail" ? "未获得" : "申请中");
-			},
 			timeFormatter: function (row, column) {
 				if (column.property === "end_time") {
 					return new Date(row.end_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
@@ -346,6 +358,9 @@
 			},
 			singleSave: function() {
 
+			},
+			_applyStatusString: function(str) {
+				return ApplyStatus.applyStatusString(str);
 			},
 			...mapActions([
 				"setForm",
