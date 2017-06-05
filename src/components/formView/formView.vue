@@ -69,7 +69,7 @@
 							</template>
 							<el-table-column label="删除">
 								<template scope="scope">
-									<el-button type="danger" size="small" @click="deleteFillOption({index1: 'data' + index, index2: scope.$index})" :disabled="disabled">删除</el-button> 
+									<el-button type="danger" size="small" @click="deleteFillOption({index1: 'data' + index, index2: scope.$index})" :disabled="disabled">删除记录</el-button> 
 								</template>
 							</el-table-column>
 						</el-table>
