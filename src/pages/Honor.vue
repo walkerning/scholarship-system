@@ -43,7 +43,7 @@
 						<el-tag type="danger"> {{ _applyStatusString(scope.row.state) }} </el-tag>
 					</template>
 					<template v-else-if="scope.row.state === _APPLY_STATUS.APPLIED">
-						<el-tag type="gray"> {{ _applyStatusString(scope.row.state) }} </el-tag>
+						<el-tag type="primary"> {{ _applyStatusString(scope.row.state) }} </el-tag>
 					</template>
 				</template>
 			</el-table-column>

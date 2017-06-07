@@ -113,23 +113,61 @@
 			</el-table-column>
 			<el-table-column prop="student_id" label="学号" width="120" sortable>
 			</el-table-column>
+			<el-table-column prop="numOfOwnHonor" label="获得荣誉个数" width="150" sortable>
+				<template scope="scope">
+					{{ countExistence(scope.row.states, _APPLY_STATUS.SUCCESS) }}
+				</template>
+			</el-table-column>
 			<template v-for="(honor, index) in rateHonors">
-				<el-table-column :prop="honor" :sort-method="sort(index)" :label="honor" width="160" sortable>
+				<el-table-column :prop="honor.year + ' ' + honor.name" :sort-method="sort(index)" :label="honor.year + ' ' + honor.name" width="200" sortable>
 					<template scope="scope">
-						<template v-if="scope.row.states[index] === _APPLY_STATUS.SUCCESS">
-							<el-tag type="success"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-							<el-tag> 得分：{{ scope.row.aveScore[index] }} </el-tag>
-						</template>
-						<template v-else-if="scope.row.states[index] === _APPLY_STATUS.FAIL">
-							<el-tag type="danger"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-							<el-tag> 得分：{{ scope.row.aveScore[index] }} </el-tag>
-						</template>
-						<template v-else-if="scope.row.states[index] === _APPLY_STATUS.APPLIED">
-							<el-tag type="gray"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-							<el-tag> 得分：{{ scope.row.aveScore[index] }} </el-tag>
+						<template v-if="scope.row.states[index] !== null">
+							<template v-if="scope.row.states[index] === _APPLY_STATUS.SUCCESS">
+								<el-tag type="success"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
+							</template>
+							<template v-else-if="scope.row.states[index] === _APPLY_STATUS.FAIL">
+								<el-tag type="danger"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
+							</template>
+							<template v-else-if="scope.row.states[index] === _APPLY_STATUS.APPLIED">
+								<el-tag type="primary"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
+							</template>
+							<el-tag type="gray"> 平均评分：{{ scope.row.aveScore[index] }} </el-tag>
+							<template v-if="scope.row.scores[index][_UID] === undefined">
+								<el-tag>您尚未给出评分</el-tag>
+							</template>
+							<template v-else>
+								<el-tag type="gray">您的评分：{{ calcSum(scope.row.scores[index][_UID]) }}</el-tag>
+							</template>
 						</template>
 					</template>
 				</el-table-column>
+			</template>
+
+			<template slot="append">
+				<tr>
+					<td colspan="5" style="text-align:center;">申请人数</td>
+					<template v-for="(honor, index) in rateHonors">
+						<td>{{ countApply(index) }}</td>
+					</template>					
+				</tr>
+				<tr>
+					<td colspan="5" style="text-align:center;">获得人数</td>
+					<template v-for="(honor, index) in rateHonors">
+						<td>{{ countGet(index) }}</td>
+					</template>					
+				</tr>
+				<tr>
+					<td colspan="5" style="text-align:center;">名额</td>
+					<template v-for="(honor, index) in rateHonors">
+						<td>{{ countQuota(index) }}</td>
+					</template>					
+				</tr>
+				<tr>
+					<td colspan="5" style="text-align:center;">操作</td>
+					<template v-for="(honor, index) in rateHonors">
+						<td></td>
+					</template>					
+				</tr>
 			</template>
 		</el-table>
 
@@ -152,6 +190,9 @@
 			},
 			_APPLY_STATUS: function() {
 				return ApplyStatus.APPLY_STATUS;
+			},
+			_UID: function() {
+				return sessionStorage.getItem('uid');
 			}
 		},
 		data() {
@@ -239,6 +280,8 @@
 					honors: []
 				},
 				rateHonors: [],
+				rateGroup: "",
+				rateType: "",
 				rateListLoading: false,
 				rates: [
 					{
@@ -250,7 +293,7 @@
 						states: ["applied", "success", "fail"],
 						scores: [
 							{
-								"1": [90, 80, 70, 60, 50],
+								"3": [90, 80, 70, 60, 50],
 								"2": [20, 30, 40, 50, 60]
 							},
 							{
@@ -278,7 +321,7 @@
 							},
 							null,
 							{
-								"1": [90, 80, 70, 60, 50],
+								"3": [90, 80, 70, 60, 50],
 								"2": [20, 30, 40, 50, 60]
 							}
 						],
@@ -290,7 +333,7 @@
 						class: "无392",
 						student_id: "2019012172",
 						fill_ids: [1, null, 3],
-						states: ["applied", null, "fail"],
+						states: ["applied", null, "success"],
 						scores: [
 							{
 								"1": [90, 80, 70, 60, 50],
@@ -338,15 +381,62 @@
 			singleHonorEditSubmit: function () {
 				this.honorEditForm.start_time = this.start_time_date.getTime() / 1000;
 				this.honorEditForm.end_time = this.end_time_date.getTime() / 1000;
-				console.log(this.honorEditForm.start_time);
 			},
 			rateSearch: function () {
-				this.rateHonors = ["学业优秀", "科技创新优秀", "社工优秀"];
+				this.rateHonors = this.honors;
+				this.rateGroup = this.rateFilters.group;
+				this.rateType = this.rateFilters.type;
+				//Vue.set(this.rates[0].aveScore, 0, this.rates[0].aveScore[0] + 100);
+				//this.rates[0].aveScore[0] += 100;
 			},
-			sort: function(index) {
+			sort: function (index) {
 				return function(a, b) {
 					return b.aveScore[index] === null || a.aveScore[index] >= b.aveScore[index];
 				}
+			},
+			countApply: function (index) {
+				var sum = 0;
+				for (var i in this.rates) {
+					if (this.rates[i].states[index] !== null) {
+						sum += 1;
+					}
+				}
+				return sum;
+			},
+			countGet: function (index) {
+				var sum = 0;
+				for (var i in this.rates) {
+					if (this.rates[i].states[index] === this._APPLY_STATUS.SUCCESS) {
+						sum += 1;
+					}
+				}
+				return sum;
+			},
+			countQuota: function (index) {
+				var quota = 0;
+				for (var i in this.rateHonors[index].group_quota) {				
+					if (this.rateHonors[index].group_quota[i].group === this.rateGroup && this.rateHonors[index].group_quota[i].type === this.rateType) {
+						quota = this.rateHonors[index].group_quota[i].quota;
+						break;
+					}
+				}
+				return quota;
+			},
+			countExistence: function (arr, obj) {
+				var ans = 0;
+				for (var i = 0; i < arr.length; i++) {
+					if (arr[i] == obj) {
+						ans += 1;
+					}
+				}
+				return ans;
+			},
+			calcSum: function (arr) {
+				var sum = 0;
+				for (var i in arr) {
+					sum += arr[i];
+				}
+				return sum;
 			},
 			_userTypeString: function (type) {
 				return UserType.userTypeString(type);
@@ -364,6 +454,12 @@
 					this.$notify({
 						title: "加载表单列表失败",
 						message: error.response.data.message,
+						type: "error"
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "加载表单列表失败",
+						message: "请检查网络连接",
 						type: "error"
 					});
 				});
