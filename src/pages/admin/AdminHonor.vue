@@ -122,15 +122,17 @@
 				<el-table-column :prop="honor.year + ' ' + honor.name" :sort-method="sort(index)" :label="honor.year + ' ' + honor.name" width="200" sortable>
 					<template scope="scope">
 						<template v-if="scope.row.states[index] !== null">
-							<template v-if="scope.row.states[index] === _APPLY_STATUS.SUCCESS">
-								<el-tag type="success"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-							</template>
-							<template v-else-if="scope.row.states[index] === _APPLY_STATUS.FAIL">
-								<el-tag type="danger"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-							</template>
-							<template v-else-if="scope.row.states[index] === _APPLY_STATUS.APPLIED">
-								<el-tag type="primary"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-							</template>
+							<a @click="singleChangeApplyStatus(scope.$index, index)" style="cursor: pointer;">
+								<template v-if="scope.row.states[index] === _APPLY_STATUS.SUCCESS">
+									<el-tag type="success"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
+								</template>
+								<template v-else-if="scope.row.states[index] === _APPLY_STATUS.FAIL">
+									<el-tag type="danger"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
+								</template>
+								<template v-else-if="scope.row.states[index] === _APPLY_STATUS.APPLIED">
+									<el-tag type="primary"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
+								</template>
+							</a>
 							<el-tag type="gray"> 平均评分：{{ scope.row.aveScore[index] }} </el-tag>
 							<template v-if="scope.row.scores[index][_UID] === undefined">
 								<el-tag>您尚未给出评分</el-tag>
@@ -382,12 +384,20 @@
 				this.honorEditForm.start_time = this.start_time_date.getTime() / 1000;
 				this.honorEditForm.end_time = this.end_time_date.getTime() / 1000;
 			},
+			singleChangeApplyStatus: function(row, index) {
+				console.log(row);
+				console.log(index);
+			},
+			updateTable: function () {
+				for (var i = 0; i < this.rates.length; i++) {
+					this.$set(this.rates, i, this.rates[i]);
+				}
+			},
 			rateSearch: function () {
 				this.rateHonors = this.honors;
 				this.rateGroup = this.rateFilters.group;
 				this.rateType = this.rateFilters.type;
-				//Vue.set(this.rates[0].aveScore, 0, this.rates[0].aveScore[0] + 100);
-				//this.rates[0].aveScore[0] += 100;
+				this.updateTable();
 			},
 			sort: function (index) {
 				return function(a, b) {
