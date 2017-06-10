@@ -10,15 +10,7 @@
 			</el-table-column>
 			<el-table-column prop="state" label="状态" width="150" sortable>
 				<template scope="scope">
-					<template v-if="scope.row.state === _APPLY_STATUS.SUCCESS">
-						<el-tag type="success"> {{ _applyStatusString(scope.row.state) }} </el-tag>
-					</template>
-					<template v-else-if="scope.row.state === _APPLY_STATUS.FAIL">
-						<el-tag type="danger"> {{ _applyStatusString(scope.row.state) }} </el-tag>
-					</template>
-					<template v-else-if="scope.row.state === _APPLY_STATUS.APPLIED">
-						<el-tag type="primary"> {{ _applyStatusString(scope.row.state) }} </el-tag>
-					</template>
+					<apply-status-tag :applyStatus="scope.row.state"></apply-status-tag>
 				</template>
 			</el-table-column>
 			<el-table-column label="操作">

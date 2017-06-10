@@ -29,7 +29,7 @@
 		</el-col>
 
 		<!--荣誉编辑界面-->
-		<el-dialog title="编辑" v-model="honorEditFormVisible" :close-on-click-modal="false">
+		<el-dialog title="编辑" v-model="honorEditFormVisible" :close-on-click-modal="false" size="large">
 			<el-form :model="honorEditForm" label-width="80px" ref="honorEditForm">
 				<el-form-item label="荣誉名" prop="name">
 					<el-input v-model="honorEditForm.name" auto-complete="off"></el-input>
@@ -46,17 +46,23 @@
 				<el-form-item label="各年级名额">
 					<template v-for="(group_quota, index) in honorEditForm.group_quota">
 						<el-row>
-							<el-col :span="5">年级：<el-input v-model="group_quota.group"></el-input></el-col>
-							<el-col :span="5">
+							<div style="width:150px;float:left;">
+								年级：<el-input v-model="group_quota.group"></el-input>
+							</div>
+							<div style="width:150px;float:left;">
 								类别：
 								<el-select v-model="group_quota.type">
 									<template v-for="userType in _USER_TYPE">
 										<el-option :label="_userTypeString(userType)" :value="userType"></el-option>
 									</template>
 								</el-select>
-							</el-col>
-							<el-col :span="7">名额：<el-col><el-input-number v-model="group_quota.quota":min="0"></el-input-number></el-col></el-col>
-							<el-col :span="6">操作：<br /><el-button type="danger" @click="honorEditForm.group_quota.splice(index, 1)">删除</el-button></el-col>
+							</div>
+							<div style="width:200px;float:left;">
+								名额：<br /> <el-input-number v-model="group_quota.quota":min="0"></el-input-number>
+							</div>
+							<div style="width:150px;float:left;">
+								操作：<br /><el-button type="danger" @click="honorEditForm.group_quota.splice(index, 1)">删除</el-button>
+							</div>
 						</el-row>
 					</template>
 					<el-row>
@@ -123,15 +129,7 @@
 					<template scope="scope">
 						<template v-if="scope.row.states[index] !== null">
 							<a @click="singleChangeApplyStatus(scope.$index, index)" style="cursor: pointer;">
-								<template v-if="scope.row.states[index] === _APPLY_STATUS.SUCCESS">
-									<el-tag type="success"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-								</template>
-								<template v-else-if="scope.row.states[index] === _APPLY_STATUS.FAIL">
-									<el-tag type="danger"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-								</template>
-								<template v-else-if="scope.row.states[index] === _APPLY_STATUS.APPLIED">
-									<el-tag type="primary"> {{ _applyStatusString(scope.row.states[index]) }} </el-tag>
-								</template>
+								<apply-status-tag :applyStatus="scope.row.states[index]"></apply-status-tag>
 							</a>
 							<el-tag type="gray"> 平均评分：{{ scope.row.aveScore[index] }} </el-tag>
 							<template v-if="scope.row.scores[index][_UID] === undefined">
@@ -149,34 +147,58 @@
 				<tr>
 					<td colspan="5" style="text-align:center;">申请人数</td>
 					<template v-for="(honor, index) in rateHonors">
-						<td>{{ countApply(index) }}</td>
+						<td style="text-align:center;">{{ countApply(index) }}</td>
 					</template>					
 				</tr>
 				<tr>
 					<td colspan="5" style="text-align:center;">获得人数</td>
 					<template v-for="(honor, index) in rateHonors">
-						<td>{{ countGet(index) }}</td>
+						<td style="text-align:center;">{{ countGet(index) }}</td>
 					</template>					
 				</tr>
 				<tr>
 					<td colspan="5" style="text-align:center;">名额</td>
 					<template v-for="(honor, index) in rateHonors">
-						<td>{{ countQuota(index) }}</td>
+						<td style="text-align:center;">{{ countQuota(index) }}</td>
 					</template>					
 				</tr>
 				<tr>
 					<td colspan="5" style="text-align:center;">操作</td>
 					<template v-for="(honor, index) in rateHonors">
-						<td></td>
+						<td style="text-align:center;"></td>
 					</template>					
 				</tr>
 			</template>
 		</el-table>
+		<!--设置获奖状态-->
+		<el-dialog :title="'修改【' + honorStateSettingUser.name + '】申请【' + honorStateSettingHonor.year + ' ' + honorStateSettingHonor.name + '】的申请信息'" v-model="honorStateSettingVisible" size="large">
+			<h1>申请状态</h1>
+			<el-row>
+				<el-radio-group v-model="honorStateSettingState">
+					<template v-for="applyStatus in _APPLY_STATUS">
+						<el-radio :label="applyStatus">
+							<apply-status-tag :applyStatus="applyStatus"></apply-status-tag>
+						</el-radio>
+					</template>
+				</el-radio-group>
+			</el-row>
+			<el-row>
+				<el-button type="primary" @click.native="singleChangeApplyStatusSubmit">修改申请状态</el-button>
+			</el-row>
+
+			<h1>申请表</h1>
+			<form-view></form-view>
+			<div slot="footer" class="dialog-footer">
+				<el-button type="primary" @click.native="singleApplyEditSubmit" :loading="applyEditLoading">修改申请表</el-button>
+			</div>
+		</el-dialog>
 
 	</section>
 </template>
 
 <script>
+	import { mapGetters } from "vuex"
+	import { mapActions } from "vuex"
 	import { apiGetFormList } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import FormType from "../../common/js/formType"
@@ -350,7 +372,161 @@
 						aveScore: [50, null, 900]
 					}
 				],
-				rateSels: []
+				rateSels: [],
+
+				honorStateSettingVisible: false,
+				honorStateSettingUser: {},
+				honorStateSettingHonor: {},
+				honorStateSettingState: "",
+				applyEditLoading: false,
+				testForm: {
+					id: "1",
+					name: "测试表单1",
+					type: "apply",
+					fields: [
+						{
+							type: 1,
+							max_len: -1,
+							min_len: -1,
+							required: false,
+							description: "说明文字",
+							content: null
+						},
+						{
+							type: 2,
+							max_len: 1267,
+							min_len: 1200,
+							required: false,
+							description: "数字（有限制、可选）",
+							content: null
+						},
+						{
+							type: 2,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "数字（无限制、必选）",
+							content: null
+						},
+						{
+							type: 3,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "邮箱（无限制、必选）",
+							content: null
+						},
+						{
+							type: 4,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "手机（无限制、必选）",
+							content: null
+						},
+						{
+							type: 5,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "单行字符串（无限制、必选）",
+							content: null
+						},
+						{
+							type: 5,
+							max_len: 100,
+							min_len: 1,
+							required: false,
+							description: "单行字符串（有限制、可选）",
+							content: null
+						},
+						{
+							type: 6,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "多行字符串（无限制、必选）",
+							content: null
+						},
+						{
+							type: 6,
+							max_len: 100,
+							min_len: 1,
+							required: false,
+							description: "多行字符串（有限制、可选）",
+							content: null
+						},
+						{
+							type: 7,
+							max_len: 2,
+							min_len: 1,
+							required: false,
+							description: "多选框（有限制、可选）",
+							content: ["A", "B", "C"]
+						},
+						{
+							type: 7,
+							max_len: 2,
+							min_len: 1,
+							required: true,
+							description: "多选框（有限制、必选）",
+							content: ["A", "B", "C"]
+						},
+						{
+							type: 8,
+							max_len: -1,
+							min_len: -1,
+							required: false,
+							description: "单选框（可选）",
+							content: ["A", "B", "C"]
+						},
+						{
+							type: 9,
+							max_len: -1,
+							min_len: -1,
+							required: false,
+							description: "附件说明",
+							content: 1
+						},
+						{
+							type: 10,
+							max_len: -1,
+							min_len: -1,
+							required: false,
+							description: "上传附件（无限制、可选）",
+							content: null
+						},
+						{
+							type: 10,
+							max_len: -1,
+							min_len: 10000,
+							required: true,
+							description: "上传附件（有限制、必选）",
+							content: null
+						},
+						{
+							type: 11,
+							description: "表格",
+							content: ["列1", "列2", "列3"]
+						}
+					],
+					template: ""
+				},
+				testFill: {
+					data0: "",
+					data1: "1200",
+					data2: "100",
+					data3: "linzinan1995@126.com",
+					data4: "18800182102",
+					data5: "test",
+					data6: "test2",
+					data7: "test\ntest",
+					data8: "",
+					data9: [],
+					data10: ["A", "B"],
+					data11: "A",
+					data15: [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
+				}
 
 			}
 		},
@@ -384,9 +560,21 @@
 				this.honorEditForm.start_time = this.start_time_date.getTime() / 1000;
 				this.honorEditForm.end_time = this.end_time_date.getTime() / 1000;
 			},
-			singleChangeApplyStatus: function(row, index) {
-				console.log(row);
-				console.log(index);
+			singleChangeApplyStatus: function (row, col) {
+				this.honorStateSettingUser = this.rates[row];
+				this.honorStateSettingHonor = this.rateHonors[col];
+				this.honorStateSettingState = this.rates[row].states[col];
+				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
+				this.setFill(JSON.parse(JSON.stringify(this.testFill)));
+				this.honorStateSettingVisible = true;
+			},
+			singleChangeApplyStatusSubmit: function () {
+				console.log(this.honorStateSettingUser);
+				console.log(this.honorStateSettingHonor);
+				console.log(this.honorStateSettingState);
+			},
+			singleApplyEditSubmit: function () {
+
 			},
 			updateTable: function () {
 				for (var i = 0; i < this.rates.length; i++) {
@@ -473,7 +661,11 @@
 						type: "error"
 					});
 				});
-			}
+			},
+			...mapActions([
+				"setForm",
+				"setFill"
+			])
 		},
 		mounted() {
 			this.getFormList();

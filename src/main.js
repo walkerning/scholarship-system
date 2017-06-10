@@ -10,6 +10,7 @@ import Vuex from 'vuex'
 import FormView from './components/formView'
 import FormEdit from './components/formEdit'
 import QueEditPanel from './components/queEditPanel'
+import ApplyStatusTag from './components/applyStatusTag'
 import './components/queEditPanel/queEditPanel.css'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -24,6 +25,7 @@ Vue.use(Vuex)
 Vue.use(QueEditPanel)
 Vue.use(FormEdit)
 Vue.use(FormView)
+Vue.use(ApplyStatusTag)
 
 NProgress.configure({ showSpinner: false });
 
