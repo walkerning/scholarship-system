@@ -2,16 +2,16 @@
 	<section>
 		<!--当前列表-->
 		<h1>可申请荣誉</h1>
-		<el-table :data="avaiableHonors" highlight-current-row v-loading="availableListLoading" @selection-change="availableAllSelsChange" style="width: 100%;">
+		<el-table :data="avaiableHonors" highlight-current-row v-loading="availableListLoading" @selection-change="availableAllSelsChange" style="width: 100%;" border>
 			<el-table-column type="index" width="60">
 			</el-table-column>
-			<el-table-column prop="name" label="荣誉名" width="220" sortable>
+			<el-table-column prop="name" label="荣誉名" width="200" sortable>
 			</el-table-column>
-			<el-table-column prop="year" label="年份" width="150" sortable>
+			<el-table-column prop="year" label="年份" width="100" sortable>
 			</el-table-column>
-			<el-table-column prop="start_time" label="申请开始时间" :formatter="timeFormatter" width="180" sortable>
+			<el-table-column prop="start_time" label="申请开始时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
-			<el-table-column prop="end_time" label="申请结束时间" :formatter="timeFormatter" width="180" sortable>
+			<el-table-column prop="end_time" label="申请结束时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
 			<el-table-column label="操作">
 				<template scope="scope">
@@ -27,17 +27,19 @@
 
 		<!--历史列表-->
 		<h1>申请历史</h1>
-		<el-table :data="honors" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;">
+		<el-table :data="honors" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;" border>
 			<el-table-column type="index" width="60">
 			</el-table-column>
-			<el-table-column prop="name" label="荣誉名" width="220" sortable>
+			<el-table-column prop="name" label="荣誉名" width="200" sortable>
 			</el-table-column>
-			<el-table-column prop="year" label="年份" width="150" sortable>
+			<el-table-column prop="year" label="年份" width="100" sortable>
 			</el-table-column>
-			<el-table-column prop="state" label="状态" width="150" sortable>
+			<el-table-column prop="state" label="状态" width="100" sortable>
 				<template scope="scope">
 					<apply-status-tag :applyStatus="scope.row.state"></apply-status-tag>
 				</template>
+			</el-table-column>
+			<el-table-column prop="apply_time" label="申请时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
 			<el-table-column label="操作">
 				<template scope="scope">
@@ -99,7 +101,8 @@
 						year: "2017",
 						form_id: 6,
 						state: "success",
-						fill_id: 10
+						fill_id: 10,
+						apply_time: 1489742695
 					},
 					{
 						id: 2,
@@ -107,7 +110,8 @@
 						year: "2018",
 						form_id: 6,
 						state: "fail",
-						fill_id: 11
+						fill_id: 11,
+						apply_time: 1489742695
 					},
 					{
 						id: 3,
@@ -115,7 +119,8 @@
 						year: "2017",
 						form_id: 7,
 						state: "applied",
-						fill_id: 12
+						fill_id: 12,
+						apply_time: 1489742695
 					}
 				],
 				total: 3,
@@ -335,8 +340,10 @@
 			timeFormatter: function (row, column) {
 				if (column.property === "end_time") {
 					return new Date(row.end_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
-				} else {
+				} else if (column.property === "start_time") {
 					return new Date(row.start_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
+				} else {
+					return new Date(row.apply_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				}
 			},
 			allCurrentChange: function (val) {

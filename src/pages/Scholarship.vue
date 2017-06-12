@@ -1,7 +1,7 @@
 <template>
 	<section>
 		<!--列表-->
-		<el-table :data="scholarships" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;">
+		<el-table :data="scholarships" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;" border>
 			<el-table-column type="index" width="60">
 			</el-table-column>
 			<el-table-column prop="name" label="奖学金名" width="220" sortable>

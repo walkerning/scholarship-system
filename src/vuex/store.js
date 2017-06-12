@@ -8,7 +8,8 @@ Vue.use(Vuex)
 // 应用初始状态
 const state = {
 	form: null,
-	fill: null
+	fill: null,
+	rate: null
 }
 
 // 定义所需的 mutations
@@ -56,6 +57,16 @@ const mutations = {
 	},
 	DELETE_FIELD_OPTION(state, indexes) {
 		state.fill[indexes.index1].splice(indexes.index2, 1);
+	},
+	SET_RATE(state, rate) {
+		state.rate = rate;
+	},
+	ADD_RATE(state, param) {
+		state.rate[param.key] = param.value;
+	},
+	DELETE_RATE(state, key) {
+		Vue.delete(state.rate, key);
+		console.log(state.rate);
 	}
 }
 

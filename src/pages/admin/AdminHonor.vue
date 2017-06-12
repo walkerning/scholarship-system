@@ -2,18 +2,18 @@
 	<section>
 		<h1>荣誉编辑</h1>
 		<!--列表-->
-		<el-table :data="honors" highlight-current-row v-loading="honorListLoading" @selection-change="allHonorSelsChange" style="width: 100%;">
+		<el-table :data="honors" highlight-current-row v-loading="honorListLoading" @selection-change="allHonorSelsChange" style="width: 100%;" border>
 			<el-table-column type="selection" width="55">
 			</el-table-column>
 			<el-table-column type="index" width="60">
 			</el-table-column>
-			<el-table-column prop="name" label="荣誉名" width="220" sortable>
+			<el-table-column prop="name" label="荣誉名" width="200" sortable>
 			</el-table-column>
-			<el-table-column prop="year" label="年份" width="150" sortable>
+			<el-table-column prop="year" label="年份" width="100" sortable>
 			</el-table-column>
-			<el-table-column prop="start_time" label="申请开始时间" :formatter="timeFormatter" width="180" sortable>
+			<el-table-column prop="start_time" label="申请开始时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
-			<el-table-column prop="end_time" label="申请结束时间" :formatter="timeFormatter" width="180" sortable>
+			<el-table-column prop="end_time" label="申请结束时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
 			<el-table-column label="操作">
 				<template scope="scope">
@@ -110,7 +110,7 @@
 		</el-col>
 
 		<!--列表-->
-		<el-table :data="rates" highlight-current-row v-loading="rateListLoading" @selection-change="allRateSelsChange" style="width: 100%;">
+		<el-table :data="rates" highlight-current-row v-loading="rateListLoading" @selection-change="allRateSelsChange" style="width: 100%;" border>
 			<el-table-column type="index" width="60">
 			</el-table-column>
 			<el-table-column prop="name" label="姓名" width="120" sortable>
@@ -131,13 +131,17 @@
 							<a @click="singleChangeApplyStatus(scope.$index, index)" style="cursor: pointer;">
 								<apply-status-tag :applyStatus="scope.row.states[index]"></apply-status-tag>
 							</a>
-							<el-tag type="gray"> 平均评分：{{ scope.row.aveScore[index] }} </el-tag>
-							<template v-if="scope.row.scores[index][_UID] === undefined">
-								<el-tag>您尚未给出评分</el-tag>
-							</template>
-							<template v-else>
-								<el-tag type="gray">您的评分：{{ calcSum(scope.row.scores[index][_UID]) }}</el-tag>
-							</template>
+							<a @click="singleRate(scope.$index, index)" style="cursor: pointer;">
+								<el-tag type="gray"> 平均评分：{{ scope.row.aveScore[index] }} </el-tag>
+							</a>
+							<a @click="singleRate(scope.$index, index)" style="cursor: pointer;">
+								<template v-if="scope.row.scores[index][_UID] === undefined">
+									<el-tag>您尚未给出评分</el-tag>
+								</template>
+								<template v-else>
+									<el-tag type="gray">您的评分：{{ calcSum(scope.row.scores[index][_UID]) }}</el-tag>
+								</template>
+							</a>
 						</template>
 					</template>
 				</el-table-column>
@@ -193,6 +197,11 @@
 			</div>
 		</el-dialog>
 
+		<!--打分表-->
+		<el-dialog :title="'为【' + honorRateUser.name + '】的申请【' + honorRateHonor.year + ' ' + honorRateHonor.name + '】评分'" v-model="honorRateVisible" size="large">
+			<form-rate></form-rate>
+		</el-dialog>
+
 	</section>
 </template>
 
@@ -203,6 +212,7 @@
 	import UserType from "../../common/js/userType"
 	import FormType from "../../common/js/formType"
 	import ApplyStatus from "../../common/js/applyStatus"
+	import QueType from "../../common/js/queType"
 
 	export default {
 		computed: {
@@ -214,6 +224,9 @@
 			},
 			_APPLY_STATUS: function() {
 				return ApplyStatus.APPLY_STATUS;
+			},
+			_QUE_TYPE: function() {
+				return QueType.QUE_TYPE;
 			},
 			_UID: function() {
 				return sessionStorage.getItem('uid');
@@ -317,16 +330,52 @@
 						states: ["applied", "success", "fail"],
 						scores: [
 							{
-								"3": [90, 80, 70, 60, 50],
-								"2": [20, 30, 40, 50, 60]
+								"3": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
 							},
 							{
-								"1": [90, 80, 70, 60, 50],
-								"2": [20, 30, 40, 50, 60]
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
 							},
 							{
-								"1": [90, 80, 70, 60, 50],
-								"2": [20, 30, 40, 50, 60]
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
 							}
 						],
 						aveScore: [100, 200, 300]
@@ -340,13 +389,37 @@
 						states: ["applied", null, "fail"],
 						scores: [
 							{
-								"1": [90, 80, 70, 60, 50],
-								"2": [20, 30, 40, 50, 60]
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
 							},
 							null,
 							{
-								"3": [90, 80, 70, 60, 50],
-								"2": [20, 30, 40, 50, 60]
+								"3": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
 							}
 						],
 						aveScore: [200, null, 500]
@@ -360,13 +433,37 @@
 						states: ["applied", null, "success"],
 						scores: [
 							{
-								"1": [90, 80, 70, 60, 50],
-								"2": [20, 30, 40, 50, 60]
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
 							},
 							null,
 							{
-								"1": [90, 80, 70, 60, 50],
-								"2": [20, 30, 40, 50, 60]
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
 							}
 						],
 						aveScore: [50, null, 900]
@@ -526,7 +623,11 @@
 					data10: ["A", "B"],
 					data11: "A",
 					data15: [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
-				}
+				},
+
+				honorRateVisible: false,
+				honorRateUser: {},
+				honorRateHonor: {}
 
 			}
 		},
@@ -538,10 +639,10 @@
 					return new Date(row.start_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				}
 			},
-			allHonorSelsChange: function(sels) {
+			allHonorSelsChange: function (sels) {
 				this.honorSels = sels;
 			},
-			allRateSelsChange: function(sels) {
+			allRateSelsChange: function (sels) {
 				this.rateSels = sels;
 			},
 			allHonorCurrentChange: function (val) {
@@ -575,6 +676,38 @@
 			},
 			singleApplyEditSubmit: function () {
 
+			},
+			singleRate: function (row, col) {
+				this.honorRateUser = this.rates[row];
+				this.honorRateHonor = this.rateHonors[col];
+				var tmpForm = JSON.parse(JSON.stringify(this.testForm));
+				tmpForm.fields = [];
+				var tmpFill = {};
+				var tmpRate = {};
+				for (var i in this.rates[row].scores[col]) {
+					tmpRate[i] = [];
+				}
+				for (var i = 0; i < this.testForm.fields.length; i++) {
+					if (this.testForm.fields[i].type === this._QUE_TYPE.STRING_SINGLE_LINE || this.testForm.fields[i].type === this._QUE_TYPE.STRING_MULTIPLE_LINE) {
+						tmpForm.fields.push(this.testForm.fields[i]);
+						tmpFill["data" + (tmpForm.fields.length - 1)] = this.testFill["data" + i];
+						for (var j in this.rates[row].scores[col]) {
+							tmpRate[j].push(this.rates[row].scores[col][j]["score" + i])
+						}
+					} else if (this.testForm.fields[i].type === this._QUE_TYPE.TABLE) {
+						for (var j = 0; j < this.testFill["data" + i].length; j++) {
+							tmpForm.fields.push(this.testForm.fields[i]);
+							tmpFill["data" + (tmpForm.fields.length - 1)] = [ this.testFill["data" + i][j] ];
+							for (var k in this.rates[row].scores[col]) {
+								tmpRate[k].push(this.rates[row].scores[col][k]["score" + i][j])
+							}							
+						}
+					}
+				}
+				this.setForm(tmpForm);
+				this.setFill(tmpFill);
+				this.setRate(tmpRate);
+				this.honorRateVisible = true;				
 			},
 			updateTable: function () {
 				for (var i = 0; i < this.rates.length; i++) {
@@ -632,7 +765,13 @@
 			calcSum: function (arr) {
 				var sum = 0;
 				for (var i in arr) {
-					sum += arr[i];
+					if (typeof arr[i] == 'number') {
+						sum += arr[i];
+					} else {
+						for (var j in arr[i]) {
+							sum += arr[i][j];
+						}
+					}
 				}
 				return sum;
 			},
@@ -664,7 +803,8 @@
 			},
 			...mapActions([
 				"setForm",
-				"setFill"
+				"setFill",
+				"setRate"
 			])
 		},
 		mounted() {
