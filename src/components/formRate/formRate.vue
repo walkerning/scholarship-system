@@ -68,21 +68,19 @@
 					</el-form>
 				</template>
 			</el-table-column>
-			<el-table-column label="评分">
-				<template v-for="(value, key, index) in getRate">
-					<el-table-column :label="key === _UID? ('评分人' + (index + 1) + '(您)') : ('评分人' + (index + 1))">
-						<template scope="scope">
-							<el-input v-model="value[scope.$index]" :disabled="key !== _UID"></el-input>
-						</template>
-					</el-table-column>
-				</template>
-			</el-table-column>
+			<template v-for="(value, key, index) in getRate">
+				<el-table-column :label="key === _UID? ('评分人' + (index + 1) + '(您)') : ('评分人' + (index + 1))">
+					<template scope="scope">
+						<el-input v-model="value[scope.$index]" :disabled="key !== _UID"></el-input>
+					</template>
+				</el-table-column>
+			</template>
 		</el-table>
 		<template v-if="getRate[_UID] !== undefined">
 			<el-button type="danger" @click.native="deleteRate(_UID)">删除您的评分</el-button>
 		</template>
 		<template v-else>
-			<el-button type="primary" @click.native="">添加您的评分</el-button>
+			<el-button type="primary" @click.native="addRateLocal">添加您的评分</el-button>
 		</template>
 	</section>
 </template>
@@ -121,12 +119,20 @@
 			allRateTableChange: function (sels) {
 				this.rateTableSels = sels;
 			},
+			addRateLocal: function () {
+				var rate = [];
+				for (var i = 0; i < this.getFields.length; i++) {
+					rate.push(0);
+				}
+				this.addRate({ key: this._UID, value: rate });
+			},
 			...mapActions([
 				"setFill",
 				"addFillOption",
 				"deleteFillOption",
 				"setRate",
 				"addRate",
+				"setForm",
 				"deleteRate"
 			])
 		}

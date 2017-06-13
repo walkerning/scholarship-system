@@ -78,6 +78,7 @@
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="honorEditFormVisible = false">取消</el-button>
 				<el-button type="primary" @click.native="singleHonorEditSubmit" :loading="honorEditLoading">提交</el-button>
 			</div>
 		</el-dialog>
@@ -104,7 +105,7 @@
 					</el-select>
 				</el-form-item>
 				<el-form-item>
-					<el-button type="primary" v-on:click="rateSearch">查询</el-button>
+					<el-button type="primary" @click="rateSearch">查询</el-button>
 				</el-form-item>
 			</el-form>
 		</el-col>
@@ -169,7 +170,9 @@
 				<tr>
 					<td colspan="5" style="text-align:center;">操作</td>
 					<template v-for="(honor, index) in rateHonors">
-						<td style="text-align:center;"></td>
+					<td style="text-align:center;">
+						<el-button size="small" @click="singleAssignHonor(index)">按名额授予得分最高的同学</el-button>
+					</td>
 					</template>					
 				</tr>
 			</template>
@@ -192,16 +195,23 @@
 
 			<h1>申请表</h1>
 			<form-view></form-view>
-			<div slot="footer" class="dialog-footer">
+			<br />
+			<el-row>
 				<el-button type="primary" @click.native="singleApplyEditSubmit" :loading="applyEditLoading">修改申请表</el-button>
+			</el-row>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="honorStateSettingVisible = false">取消</el-button>
 			</div>
 		</el-dialog>
 
 		<!--打分表-->
 		<el-dialog :title="'为【' + honorRateUser.name + '】的申请【' + honorRateHonor.year + ' ' + honorRateHonor.name + '】评分'" v-model="honorRateVisible" size="large">
 			<form-rate></form-rate>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="honorRateVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="singleRateSubmit" :loading="honorRateLoading">提交</el-button>
+			</div>
 		</el-dialog>
-
 	</section>
 </template>
 
@@ -627,7 +637,8 @@
 
 				honorRateVisible: false,
 				honorRateUser: {},
-				honorRateHonor: {}
+				honorRateHonor: {},
+				honorRateLoading: false
 
 			}
 		},
@@ -696,7 +707,7 @@
 						}
 					} else if (this.testForm.fields[i].type === this._QUE_TYPE.TABLE) {
 						for (var j = 0; j < this.testFill["data" + i].length; j++) {
-							tmpForm.fields.push(this.testForm.fields[i]);
+							tmpForm.fields.push(JSON.parse(JSON.stringify(this.testForm.fields[i])));
 							tmpFill["data" + (tmpForm.fields.length - 1)] = [ this.testFill["data" + i][j] ];
 							for (var k in this.rates[row].scores[col]) {
 								tmpRate[k].push(this.rates[row].scores[col][k]["score" + i][j])
@@ -707,7 +718,13 @@
 				this.setForm(tmpForm);
 				this.setFill(tmpFill);
 				this.setRate(tmpRate);
-				this.honorRateVisible = true;				
+				this.honorRateVisible = true;			
+			},
+			singleRateSubmit: function () {
+
+			},
+			singleAssignHonor: function (index) {
+				console.log(index);
 			},
 			updateTable: function () {
 				for (var i = 0; i < this.rates.length; i++) {

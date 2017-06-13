@@ -62,11 +62,10 @@ const mutations = {
 		state.rate = rate;
 	},
 	ADD_RATE(state, param) {
-		state.rate[param.key] = param.value;
+		Vue.set(state.rate, param.key, param.value);
 	},
 	DELETE_RATE(state, key) {
 		Vue.delete(state.rate, key);
-		console.log(state.rate);
 	}
 }
 
