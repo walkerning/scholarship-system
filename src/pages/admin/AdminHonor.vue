@@ -18,6 +18,7 @@
 			<el-table-column label="操作">
 				<template scope="scope">
 					<el-button size="small" @click="singleHonorEdit(scope.$index, scope.row)">编辑</el-button>
+					<el-button type="danger" size="small" @click="singleHonorDel(scope.$index, scope.row)">删除</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -114,13 +115,13 @@
 		<el-table :data="rates" highlight-current-row v-loading="rateListLoading" @selection-change="allRateSelsChange" style="width: 100%;" border>
 			<el-table-column type="index" width="60">
 			</el-table-column>
-			<el-table-column prop="name" label="姓名" width="120" sortable>
+			<el-table-column prop="name" label="姓名" width="90" sortable>
 			</el-table-column>
-			<el-table-column prop="class" label="班级" width="120" sortable>
+			<el-table-column prop="class" label="班级" width="90" sortable>
 			</el-table-column>
 			<el-table-column prop="student_id" label="学号" width="120" sortable>
 			</el-table-column>
-			<el-table-column prop="numOfOwnHonor" label="获得荣誉个数" width="150" sortable>
+			<el-table-column prop="numOfOwnHonor" label="已获荣誉数" width="90" sortable>
 				<template scope="scope">
 					{{ countExistence(scope.row.states, _APPLY_STATUS.SUCCESS) }}
 				</template>
@@ -177,6 +178,7 @@
 				</tr>
 			</template>
 		</el-table>
+		
 		<!--设置获奖状态-->
 		<el-dialog :title="'修改【' + honorStateSettingUser.name + '】申请【' + honorStateSettingHonor.year + ' ' + honorStateSettingHonor.name + '】的申请信息'" v-model="honorStateSettingVisible" size="large">
 			<h1>申请状态</h1>
@@ -251,8 +253,8 @@
 						name: "学业优秀奖",
 						year: "2018",
 						form_id: 6,
-						start_time: 1489742695,
-						end_time: 1489743000,
+						start_time: "2017-09-01T10:54:24.738793",
+						end_time: "2017-09-28T10:54:24.738793",
 						group_quota: [
 							{
 								group: "2015",
@@ -272,8 +274,8 @@
 						name: "科技创新优秀奖",
 						year: "2018",
 						form_id: 6,
-						start_time: 1489742695,
-						end_time: 1489743000,
+						start_time: "2017-09-01T10:54:24.738793",
+						end_time: "2017-09-28T10:54:24.738793",
 						group_quota: [
 							{
 								group: "2015",
@@ -293,8 +295,8 @@
 						name: "社会工作优秀奖",
 						year: "2018",
 						form_id: 7,
-						start_time: 1489742695,
-						end_time: 1489743000,
+						start_time: "2017-09-01T10:54:24.738793",
+						end_time: "2017-09-28T10:54:24.738793",
 						group_quota: [
 							{
 								group: "2015",
@@ -645,9 +647,9 @@
 		methods: {
 			timeFormatter: function (row, column) {
 				if (column.property === "end_time") {
-					return new Date(row.end_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
+					return new Date(row.end_time).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				} else {
-					return new Date(row.start_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
+					return new Date(row.start_time).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				}
 			},
 			allHonorSelsChange: function (sels) {
@@ -661,16 +663,19 @@
 			},
 			singleHonorEdit: function (index, row) {
 				this.honorEditForm = JSON.parse(JSON.stringify(row));
-				this.start_time_date = new Date(row.start_time * 1000);
-				this.end_time_date = new Date(row.end_time * 1000);
+				this.start_time_date = new Date(row.start_time);
+				this.end_time_date = new Date(row.end_time);
 				this.honorEditFormVisible = true;
+			},
+			singleHonorDel: function (index, row) {
 			},
 			allHonorBatchRemove: function () {
 
 			},
 			singleHonorEditSubmit: function () {
-				this.honorEditForm.start_time = this.start_time_date.getTime() / 1000;
-				this.honorEditForm.end_time = this.end_time_date.getTime() / 1000;
+				this.honorEditForm.start_time = this.start_time_date.toISOString();
+				console.log(this.honorEditForm.start_time);
+				this.honorEditForm.end_time = this.end_time_date.toISOString();
 			},
 			singleChangeApplyStatus: function (row, col) {
 				this.honorStateSettingUser = this.rates[row];
@@ -799,7 +804,6 @@
 				return ApplyStatus.applyStatusString(str);
 			},
 			getFormList: function () {
-				this.listLoading = true;
 				var params = {};
 				params["type"] = this._FORM_TYPE.APPLY;
 				apiGetFormList(params).then(res => {

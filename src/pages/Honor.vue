@@ -102,7 +102,7 @@
 						form_id: 6,
 						state: "success",
 						fill_id: 10,
-						apply_time: 1489742695
+						apply_time: "2017-09-28T10:54:24.738793"
 					},
 					{
 						id: 2,
@@ -111,7 +111,7 @@
 						form_id: 6,
 						state: "fail",
 						fill_id: 11,
-						apply_time: 1489742695
+						apply_time: "2017-09-28T10:54:24.738793"
 					},
 					{
 						id: 3,
@@ -120,7 +120,7 @@
 						form_id: 7,
 						state: "applied",
 						fill_id: 12,
-						apply_time: 1489742695
+						apply_time: "2017-09-28T10:54:24.738793"
 					}
 				],
 				total: 3,
@@ -132,24 +132,24 @@
 						name: "学业优秀奖",
 						year: "2018",
 						form_id: 6,
-						start_time: 1489742695,
-						end_time: 1489743000
+						start_time: "2017-09-01T10:54:24.738793",
+						end_time: "2017-09-28T10:54:24.738793"
 					},
 					{
 						id: 5,
 						name: "科技创新优秀奖",
 						year: "2018",
 						form_id: 6,
-						start_time: 1489742695,
-						end_time: 1489743000
+						start_time: "2017-09-01T10:54:24.738793",
+						end_time: "2017-09-28T10:54:24.738793"
 					},
 					{
 						id: 6,
 						name: "社会工作优秀奖",
 						year: "2018",
 						form_id: 7,
-						start_time: 1489742695,
-						end_time: 1489743000
+						start_time: "2017-09-01T10:54:24.738793",
+						end_time: "2017-09-28T10:54:24.738793"
 					}
 				],
 				availableTotal: 3,
@@ -339,11 +339,11 @@
 			},
 			timeFormatter: function (row, column) {
 				if (column.property === "end_time") {
-					return new Date(row.end_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
+					return new Date(row.end_time).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				} else if (column.property === "start_time") {
-					return new Date(row.start_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
+					return new Date(row.start_time).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				} else {
-					return new Date(row.apply_time * 1000).toLocaleString().replace(/:\d{1,2}$/,' '); 
+					return new Date(row.apply_time).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				}
 			},
 			allCurrentChange: function (val) {
