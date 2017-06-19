@@ -123,25 +123,25 @@
 			</el-table-column>
 			<el-table-column prop="numOfOwnHonor" label="已获荣誉数" width="90" sortable>
 				<template scope="scope">
-					{{ countExistence(scope.row.states, _APPLY_STATUS.SUCCESS) }}
+					{{ countExistence(scope.row.honor_states, _APPLY_STATUS.SUCCESS) }}
 				</template>
 			</el-table-column>
 			<template v-for="(honor, index) in rateHonors">
 				<el-table-column :prop="honor.year + ' ' + honor.name" :sort-method="sort(index)" :label="honor.year + ' ' + honor.name" width="200" sortable>
 					<template scope="scope">
-						<template v-if="scope.row.states[index] !== null">
+						<template v-if="scope.row.honor_states[index] !== null">
 							<a @click="singleChangeApplyStatus(scope.$index, index)" style="cursor: pointer;">
-								<apply-status-tag :applyStatus="scope.row.states[index]"></apply-status-tag>
+								<apply-status-tag :applyStatus="scope.row.honor_states[index]"></apply-status-tag>
 							</a>
 							<a @click="singleRate(scope.$index, index)" style="cursor: pointer;">
-								<el-tag type="gray"> 平均评分：{{ scope.row.aveScore[index] }} </el-tag>
+								<el-tag type="gray"> 平均评分：{{ scope.row.honor_aveScore[index] }} </el-tag>
 							</a>
 							<a @click="singleRate(scope.$index, index)" style="cursor: pointer;">
-								<template v-if="scope.row.scores[index][_UID] === undefined">
+								<template v-if="scope.row.honor_scores[index][_UID] === undefined">
 									<el-tag>您尚未给出评分</el-tag>
 								</template>
 								<template v-else>
-									<el-tag type="gray">您的评分：{{ calcSum(scope.row.scores[index][_UID]) }}</el-tag>
+									<el-tag type="gray">您的评分：{{ calcSum(scope.row.honor_scores[index][_UID]) }}</el-tag>
 								</template>
 							</a>
 						</template>
@@ -178,7 +178,7 @@
 				</tr>
 			</template>
 		</el-table>
-		
+
 		<!--设置获奖状态-->
 		<el-dialog :title="'修改【' + honorStateSettingUser.name + '】申请【' + honorStateSettingHonor.year + ' ' + honorStateSettingHonor.name + '】的申请信息'" v-model="honorStateSettingVisible" size="large">
 			<h1>申请状态</h1>
@@ -338,9 +338,9 @@
 						name: "林梓楠",
 						class: "无37",
 						student_id: "2013011217",
-						fill_ids: [1, 2, 3],
-						states: ["applied", "success", "fail"],
-						scores: [
+						honor_fill_ids: [1, 2, 3],
+						honor_states: ["applied", "success", "fail"],
+						honor_scores: [
 							{
 								"3": {
 									score5: 70,
@@ -390,16 +390,16 @@
 								}
 							}
 						],
-						aveScore: [100, 200, 300]
+						honor_aveScore: [100, 200, 300]
 					},
 					{
 						id: 2,
 						name: "宁雪妃",
 						class: "无39",
 						student_id: "2019011217",
-						fill_ids: [1, null, 3],
-						states: ["applied", null, "fail"],
-						scores: [
+						honor_fill_ids: [1, null, 3],
+						honor_states: ["applied", null, "fail"],
+						honor_scores: [
 							{
 								"1": {
 									score5: 70,
@@ -434,16 +434,16 @@
 								}
 							}
 						],
-						aveScore: [200, null, 500]
+						honor_aveScore: [200, null, 500]
 					},
 					{
 						id: 3,
 						name: "宁雪妃2",
 						class: "无392",
 						student_id: "2019012172",
-						fill_ids: [1, null, 3],
-						states: ["applied", null, "success"],
-						scores: [
+						honor_fill_ids: [1, null, 3],
+						honor_states: ["applied", null, "success"],
+						honor_scores: [
 							{
 								"1": {
 									score5: 70,
@@ -478,7 +478,7 @@
 								}
 							}
 						],
-						aveScore: [50, null, 900]
+						honor_aveScore: [50, null, 900]
 					}
 				],
 				rateSels: [],
@@ -680,7 +680,7 @@
 			singleChangeApplyStatus: function (row, col) {
 				this.honorStateSettingUser = this.rates[row];
 				this.honorStateSettingHonor = this.rateHonors[col];
-				this.honorStateSettingState = this.rates[row].states[col];
+				this.honorStateSettingState = this.rates[row].honor_states[col];
 				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
 				this.setFill(JSON.parse(JSON.stringify(this.testFill)));
 				this.honorStateSettingVisible = true;
@@ -700,22 +700,22 @@
 				tmpForm.fields = [];
 				var tmpFill = {};
 				var tmpRate = {};
-				for (var i in this.rates[row].scores[col]) {
+				for (var i in this.rates[row].honor_scores[col]) {
 					tmpRate[i] = [];
 				}
 				for (var i = 0; i < this.testForm.fields.length; i++) {
 					if (this.testForm.fields[i].type === this._QUE_TYPE.STRING_SINGLE_LINE || this.testForm.fields[i].type === this._QUE_TYPE.STRING_MULTIPLE_LINE) {
 						tmpForm.fields.push(this.testForm.fields[i]);
 						tmpFill["data" + (tmpForm.fields.length - 1)] = this.testFill["data" + i];
-						for (var j in this.rates[row].scores[col]) {
-							tmpRate[j].push(this.rates[row].scores[col][j]["score" + i])
+						for (var j in this.rates[row].honor_scores[col]) {
+							tmpRate[j].push(this.rates[row].honor_scores[col][j]["score" + i])
 						}
 					} else if (this.testForm.fields[i].type === this._QUE_TYPE.TABLE) {
 						for (var j = 0; j < this.testFill["data" + i].length; j++) {
 							tmpForm.fields.push(JSON.parse(JSON.stringify(this.testForm.fields[i])));
 							tmpFill["data" + (tmpForm.fields.length - 1)] = [ this.testFill["data" + i][j] ];
-							for (var k in this.rates[row].scores[col]) {
-								tmpRate[k].push(this.rates[row].scores[col][k]["score" + i][j])
+							for (var k in this.rates[row].honor_scores[col]) {
+								tmpRate[k].push(this.rates[row].honor_scores[col][k]["score" + i][j])
 							}							
 						}
 					}
@@ -744,13 +744,13 @@
 			},
 			sort: function (index) {
 				return function(a, b) {
-					return b.aveScore[index] === null || a.aveScore[index] >= b.aveScore[index];
+					return b.honor_aveScore[index] === null || a.honor_aveScore[index] >= b.honor_aveScore[index];
 				}
 			},
 			countApply: function (index) {
 				var sum = 0;
 				for (var i in this.rates) {
-					if (this.rates[i].states[index] !== null) {
+					if (this.rates[i].honor_states[index] !== null) {
 						sum += 1;
 					}
 				}
@@ -759,7 +759,7 @@
 			countGet: function (index) {
 				var sum = 0;
 				for (var i in this.rates) {
-					if (this.rates[i].states[index] === this._APPLY_STATUS.SUCCESS) {
+					if (this.rates[i].honor_states[index] === this._APPLY_STATUS.SUCCESS) {
 						sum += 1;
 					}
 				}
