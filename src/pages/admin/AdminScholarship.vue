@@ -162,14 +162,17 @@
 			</el-table-column>
 			<el-table-column prop="numOfOwnHonor" label="已获荣誉数" width="90" sortable>
 				<template scope="scope">
-					{{ countExistence(scope.row.states, _APPLY_STATUS.SUCCESS) }}
+					{{ countExistence(scope.row.honor_states, _APPLY_STATUS.SUCCESS) }}
 				</template>
+			</el-table-column>
+			</el-table-column>
+			<el-table-column prop="scholarship_money" label="已获奖学金额度" width="90" sortable>
 			</el-table-column>
 			<template v-for="(honor, index) in allocHonors">
 				<el-table-column :prop="honor.year + ' ' + honor.name":label="honor.year + ' ' + honor.name" width="90">
 					<template scope="scope">
-						<template v-if="scope.row.states[index] !== null">
-							<apply-status-tag :applyStatus="scope.row.states[index]"></apply-status-tag>
+						<template v-if="scope.row.honor_states[index] !== null">
+							<apply-status-tag :applyStatus="scope.row.honor_states[index]"></apply-status-tag>
 						</template>
 					</template>
 				</el-table-column>
@@ -326,6 +329,7 @@
 					scholarships: []
 				},
 				allocHonors: [],
+				allocScholarships: [],
 				allocGroup: "",
 				allocType: "",
 				allocListLoading: false,
@@ -335,9 +339,9 @@
 						name: "林梓楠",
 						class: "无37",
 						student_id: "2013011217",
-						fill_ids: [1, 2, 3],
-						states: ["applied", "success", "fail"],
-						scores: [
+						honor_fill_ids: [1, 2, 3],
+						honor_states: ["applied", "success", "fail"],
+						honor_scores: [
 							{
 								"3": {
 									score5: 70,
@@ -387,16 +391,17 @@
 								}
 							}
 						],
-						aveScore: [100, 200, 300]
+						honor_aveScore: [100, 200, 300],
+						scholarship_money: 10000
 					},
 					{
 						id: 2,
 						name: "宁雪妃",
 						class: "无39",
 						student_id: "2019011217",
-						fill_ids: [1, null, 3],
-						states: ["applied", null, "fail"],
-						scores: [
+						honor_fill_ids: [1, null, 3],
+						honor_states: ["applied", null, "fail"],
+						honor_scores: [
 							{
 								"1": {
 									score5: 70,
@@ -431,16 +436,17 @@
 								}
 							}
 						],
-						aveScore: [200, null, 500]
+						honor_aveScore: [200, null, 500],
+						scholarship_money: 20000
 					},
 					{
 						id: 3,
 						name: "宁雪妃2",
 						class: "无392",
 						student_id: "2019012172",
-						fill_ids: [1, null, 3],
-						states: ["applied", null, "success"],
-						scores: [
+						honor_fill_ids: [1, null, 3],
+						honor_states: ["applied", null, "success"],
+						honor_scores: [
 							{
 								"1": {
 									score5: 70,
@@ -475,7 +481,8 @@
 								}
 							}
 						],
-						aveScore: [50, null, 900]
+						honor_aveScore: [50, null, 900],
+						scholarship_money: 30000
 					}
 				],
 				allocSels: []
@@ -505,6 +512,7 @@
 			},
 			allocSearch: function () {
 				this.allocHonors = this.honors;
+				this.allocScholarships = this.scholarships;
 				this.allocGroup = this.allocFilters.group;
 				this.allocType = this.allocFilters.type;
 				this.updateTable();
