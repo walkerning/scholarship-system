@@ -166,7 +166,37 @@
 				</template>
 			</el-table-column>
 			</el-table-column>
-			<el-table-column prop="scholarship_money" label="已获奖学金额度" width="90" sortable>
+			<el-table-column prop="scholarship_money_sum" label="已获奖学金额度" width="90" sortable>
+			</el-table-column>
+			<el-table-column type="expand">
+				<template scope="scope">
+					<h4>分配的奖学金</h4>
+					<ul>
+						<template v-for="(scholarship, index) in allocScholarships">
+							<template v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
+								<el-row :gutter="20">
+									<el-col :span="5">
+										{{scholarship.year}} {{scholarship.name}}
+									</el-col>
+									<el-col :span="5">
+										<template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
+											<el-input-number v-model="scholarship.money" size="small" :disabled="true"></el-input-number>
+										</template>
+										<template v-else-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+											<el-input-number v-model="scope.row.scholarship_money[index]" size="small"></el-input-number>
+										</template>
+									</el-col>
+									<el-col :span="2">
+										<el-button size="mini" type="primary" @click="singleScholarshipAllocSubmit(scope.$index, index)">提交</el-button>
+									</el-col>
+									<el-col :span="2">
+										<el-button size="mini" type="danger" @click="singleScholarshipAllocDelete(scope.$index, index)">删除</el-button>
+									</el-col>
+								</el-row>
+							</template>
+						</template>
+					</ul>
+				</template>
 			</el-table-column>
 			<template v-for="(honor, index) in allocHonors">
 				<el-table-column :prop="honor.year + ' ' + honor.name":label="honor.year + ' ' + honor.name" width="90">
@@ -392,7 +422,9 @@
 							}
 						],
 						honor_aveScore: [100, 200, 300],
-						scholarship_money: 10000
+						scholarship_money_sum: 10000,
+						scholarship_states: ["success", "success"],
+						scholarship_money: [1000, 4000]
 					},
 					{
 						id: 2,
@@ -437,7 +469,9 @@
 							}
 						],
 						honor_aveScore: [200, null, 500],
-						scholarship_money: 20000
+						scholarship_money_sum: 20000,
+						scholarship_states: ["success", null],
+						scholarship_money: [null, null]
 					},
 					{
 						id: 3,
@@ -482,7 +516,9 @@
 							}
 						],
 						honor_aveScore: [50, null, 900],
-						scholarship_money: 30000
+						scholarship_money_sum: 30000,
+						scholarship_states: [null, "success"],
+						scholarship_money: [null, 3000]
 					}
 				],
 				allocSels: []
@@ -519,6 +555,12 @@
 			},
 			allAllocSelsChange: function (sels) {
 				this.allocSels = sels;
+			},
+			singleScholarshipAllocDelete: function (row, col) {
+
+			},
+			singleScholarshipAllocSubmit: function (row, col) {
+
 			},
 			countExistence: function (arr, obj) {
 				var ans = 0;
