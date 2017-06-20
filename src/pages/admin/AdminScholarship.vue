@@ -150,8 +150,8 @@
 			</el-form>
 		</el-col>
 
-		<!--列表-->
-		<el-table :data="alloc" highlight-current-row v-loading="allocListLoading" @selection-change="allAllocSelsChange" style="width: 100%;" border>
+		<!--学生分配列表-->
+		<el-table :data="alloc" highlight-current-row v-loading="allocListLoading" @selection-change="allAllocSelsChange" style="width: 100%;" border max-height="1000">
 			<el-table-column type="index" width="60">
 			</el-table-column>
 			<el-table-column prop="name" label="姓名" width="90" sortable>
@@ -170,32 +170,55 @@
 			</el-table-column>
 			<el-table-column type="expand">
 				<template scope="scope">
-					<h4>分配的奖学金</h4>
-					<ul>
-						<template v-for="(scholarship, index) in allocScholarships">
-							<template v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
-								<el-row :gutter="20">
-									<el-col :span="5">
-										{{scholarship.year}} {{scholarship.name}}
+					<h4>分配的奖学金及金额</h4>
+					<template v-for="(scholarship, index) in allocScholarships">
+						<template v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
+							<el-row :gutter="20">
+								<el-col :span="7" :offset="1">
+									{{scholarship.year}} {{scholarship.name}}
+								</el-col>
+								<el-col :span="5">
+									<template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
+										<el-input-number v-model="scholarship.money" size="small" :disabled="true"></el-input-number>
+									</template>
+									<template v-else-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+										<el-input-number v-model="scope.row.scholarship_money[index]" size="small"></el-input-number>
+									</template>
+								</el-col>
+								<template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+									<el-col :span="3">
+										<el-button size="small" type="primary" @click="singleScholarshipAllocSubmit(scope.$index, index)">修改金额</el-button>
 									</el-col>
-									<el-col :span="5">
-										<template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
-											<el-input-number v-model="scholarship.money" size="small" :disabled="true"></el-input-number>
-										</template>
-										<template v-else-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
-											<el-input-number v-model="scope.row.scholarship_money[index]" size="small"></el-input-number>
-										</template>
-									</el-col>
-									<el-col :span="2">
-										<el-button size="mini" type="primary" @click="singleScholarshipAllocSubmit(scope.$index, index)">提交</el-button>
-									</el-col>
-									<el-col :span="2">
-										<el-button size="mini" type="danger" @click="singleScholarshipAllocDelete(scope.$index, index)">删除</el-button>
-									</el-col>
-								</el-row>
-							</template>
+								</template>
+								<el-col :span="3">
+									<el-button size="small" type="danger" @click="singleScholarshipAllocDelete(scope.$index, index)">删除</el-button>
+								</el-col>
+							</el-row>
 						</template>
-					</ul>
+					</template>
+					<el-row :gutter="20">
+						<el-col :span="7" :offset="1">
+							<el-select v-model="scope.row.scholarship_add" placeholder="新增奖学金">
+								<template v-for="(scholarship, index) in allocScholarships">
+									<el-option :key="index" :value="index" :label="scholarship.year + ' ' + scholarship.name">
+									</el-option>
+								</template>
+							</el-select>
+						</el-col>
+						<template v-if="scope.row.scholarship_add !== null">
+							<el-col :span="5">
+								<template v-if="allocScholarships[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
+									<el-input-number v-model="allocScholarships[scope.row.scholarship_add].money" size="small" :disabled="true"></el-input-number>
+								</template>
+								<template v-else-if="allocScholarships[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+									<el-input-number v-model="scope.row.scholarship_money_add" size="small"></el-input-number>
+								</template>
+							</el-col>
+							<el-col :span="3">
+								<el-button size="small" type="primary" @click="singleScholarshipAddSubmit(scope.$index)">添加</el-button>
+							</el-col>
+						</template>
+					</el-row>
 				</template>
 			</el-table-column>
 			<template v-for="(honor, index) in allocHonors">
@@ -207,6 +230,39 @@
 					</template>
 				</el-table-column>
 			</template>
+		</el-table>
+
+		<br />
+		<!--奖学金分配列表-->
+		<el-table :data="allocScholarships" highlight-current-row v-loading="allocScholarshipListLoading" @selection-change="allAllocScholarshipSelsChange" style="width: 100%;" border max-height="1000">
+			<el-table-column type="index" width="60">
+			</el-table-column>
+			<el-table-column prop="name" label="奖学金名" width="200" sortable>
+			</el-table-column>
+			<el-table-column prop="year" label="年份" width="100" sortable>
+			</el-table-column>
+			<el-table-column label="可分配总金额/名额">
+				<template scope="scope">
+					{{ findQuota(scope.row.group_quota, allocGroup, allocType) }}
+				</template>
+			</el-table-column>
+			<el-table-column label="已分配总金额/名额">
+				<template scope="scope">
+					{{ findQuota(scope.row.group_alloc_quota, allocGroup, allocType) }}
+				</template>
+			</el-table-column>
+		</el-table>
+
+		<h1>感谢信查看</h1>
+		<el-table :data="alloc" highlight-current-row v-loading="thanksListLoading" @selection-change="allThanksSelsChange" style="width: 100%;" border max-height="1000">
+			<el-table-column type="index" width="60">
+			</el-table-column>
+			<el-table-column prop="name" label="姓名" width="90" sortable>
+			</el-table-column>
+			<el-table-column prop="class" label="班级" width="90" sortable>
+			</el-table-column>
+			<el-table-column prop="student_id" label="学号" width="120" sortable>
+			</el-table-column>
 		</el-table>
 	</section>
 </template>
@@ -255,6 +311,18 @@
 								quota: 4
 							}
 						],
+						group_alloc_quota: [
+							{
+								group: "2015",
+								type: "undergraduate",
+								quota: 10
+							},
+							{
+								group: "2016",
+								type: "undergraduate",
+								quota: 2
+							}
+						],
 						money: 8000
 					},
 					{
@@ -273,6 +341,18 @@
 								group: "2016",
 								type: "undergraduate",
 								quota: 40000
+							}
+						],
+						group_alloc_quota: [
+							{
+								group: "2015",
+								type: "undergraduate",
+								quota: 10000
+							},
+							{
+								group: "2016",
+								type: "undergraduate",
+								quota: 20000
 							}
 						],
 						money: null
@@ -424,7 +504,10 @@
 						honor_aveScore: [100, 200, 300],
 						scholarship_money_sum: 10000,
 						scholarship_states: ["success", "success"],
-						scholarship_money: [1000, 4000]
+						scholarship_money: [1000, 4000],
+						scholarship_add: null,
+						scholarship_money_add: 0,
+						scholarship_fill_ids: [1, null]
 					},
 					{
 						id: 2,
@@ -471,7 +554,10 @@
 						honor_aveScore: [200, null, 500],
 						scholarship_money_sum: 20000,
 						scholarship_states: ["success", null],
-						scholarship_money: [null, null]
+						scholarship_money: [null, null],
+						scholarship_add: null,
+						scholarship_money_add: 0,
+						scholarship_fill_ids: [1, null]
 					},
 					{
 						id: 3,
@@ -518,10 +604,168 @@
 						honor_aveScore: [50, null, 900],
 						scholarship_money_sum: 30000,
 						scholarship_states: [null, "success"],
-						scholarship_money: [null, 3000]
+						scholarship_money: [null, 3000],
+						scholarship_add: null,
+						scholarship_money_add: 0,
+						scholarship_fill_ids: [null, null]
 					}
 				],
-				allocSels: []
+				allocSels: [],
+
+				allocScholarshipListLoading: false,
+				allocScholarshipSels: [],
+
+				thanksListLoading: false,
+				thanksSels: [],
+
+				testForm: {
+					id: "1",
+					name: "测试表单1",
+					type: "apply",
+					fields: [
+						{
+							type: 1,
+							max_len: -1,
+							min_len: -1,
+							required: false,
+							description: "说明文字",
+							content: null
+						},
+						{
+							type: 2,
+							max_len: 1267,
+							min_len: 1200,
+							required: false,
+							description: "数字（有限制、可选）",
+							content: null
+						},
+						{
+							type: 2,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "数字（无限制、必选）",
+							content: null
+						},
+						{
+							type: 3,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "邮箱（无限制、必选）",
+							content: null
+						},
+						{
+							type: 4,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "手机（无限制、必选）",
+							content: null
+						},
+						{
+							type: 5,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "单行字符串（无限制、必选）",
+							content: null
+						},
+						{
+							type: 5,
+							max_len: 100,
+							min_len: 1,
+							required: false,
+							description: "单行字符串（有限制、可选）",
+							content: null
+						},
+						{
+							type: 6,
+							max_len: -1,
+							min_len: 0,
+							required: true,
+							description: "多行字符串（无限制、必选）",
+							content: null
+						},
+						{
+							type: 6,
+							max_len: 100,
+							min_len: 1,
+							required: false,
+							description: "多行字符串（有限制、可选）",
+							content: null
+						},
+						{
+							type: 7,
+							max_len: 2,
+							min_len: 1,
+							required: false,
+							description: "多选框（有限制、可选）",
+							content: ["A", "B", "C"]
+						},
+						{
+							type: 7,
+							max_len: 2,
+							min_len: 1,
+							required: true,
+							description: "多选框（有限制、必选）",
+							content: ["A", "B", "C"]
+						},
+						{
+							type: 8,
+							max_len: -1,
+							min_len: -1,
+							required: false,
+							description: "单选框（可选）",
+							content: ["A", "B", "C"]
+						},
+						{
+							type: 9,
+							max_len: -1,
+							min_len: -1,
+							required: false,
+							description: "附件说明",
+							content: 1
+						},
+						{
+							type: 10,
+							max_len: -1,
+							min_len: -1,
+							required: false,
+							description: "上传附件（无限制、可选）",
+							content: null
+						},
+						{
+							type: 10,
+							max_len: -1,
+							min_len: 10000,
+							required: true,
+							description: "上传附件（有限制、必选）",
+							content: null
+						},
+						{
+							type: 11,
+							description: "表格",
+							content: ["列1", "列2", "列3"]
+						}
+					],
+					template: ""
+				},
+				testFill: {
+					data0: "",
+					data1: "1200",
+					data2: "100",
+					data3: "linzinan1995@126.com",
+					data4: "18800182102",
+					data5: "test",
+					data6: "test2",
+					data7: "test\ntest",
+					data8: "",
+					data9: [],
+					data10: ["A", "B"],
+					data11: "A",
+					data15: [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
+				}
 			}
 		},
 		methods: {
@@ -561,6 +805,23 @@
 			},
 			singleScholarshipAllocSubmit: function (row, col) {
 
+			},
+			singleScholarshipAddSubmit: function (row) {
+
+			},
+			allAllocScholarshipSelsChange: function (sels) {
+				this.allocScholarshipSels = sels;
+			},
+			allThanksSelsChange: function (sels) {
+				this.thanksSels = sels;
+			},
+			findQuota: function (quota_list, group, type) {
+				for (var i = 0; i < quota_list.length; i++) {
+					if (quota_list[i].group === group && quota_list[i].type === type) {
+						return quota_list[i].quota;
+					}
+				}
+				return 0;
 			},
 			countExistence: function (arr, obj) {
 				var ans = 0;
