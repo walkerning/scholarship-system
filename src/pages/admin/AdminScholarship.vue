@@ -222,7 +222,7 @@
 				</template>
 			</el-table-column>
 			<template v-for="(honor, index) in allocHonors">
-				<el-table-column :prop="honor.year + ' ' + honor.name":label="honor.year + ' ' + honor.name" width="90">
+				<el-table-column :prop="honor.year + ' ' + honor.name" :label="honor.year + ' ' + honor.name" width="90">
 					<template scope="scope">
 						<template v-if="scope.row.honor_states[index] !== null">
 							<apply-status-tag :applyStatus="scope.row.honor_states[index]"></apply-status-tag>
@@ -254,7 +254,33 @@
 		</el-table>
 
 		<h1>感谢信查看</h1>
-		<el-table :data="alloc" highlight-current-row v-loading="thanksListLoading" @selection-change="allThanksSelsChange" style="width: 100%;" border max-height="1000">
+		<!--工具条-->
+		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+			<el-form :inline="true" :model="thanksFilters">
+				<el-form-item label="学生年级">
+					<el-input v-model="thanksFilters.group" placeholder=""></el-input>
+				</el-form-item>
+				<el-form-item label="学生类别" prop="type">
+					<el-select v-model="thanksFilters.type">
+						<template v-for="userType in _USER_TYPE">
+							<el-option :label="_userTypeString(userType)" :value="userType"></el-option>
+						</template>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="奖学金">
+					<el-select v-model="thanksFilters.scholarships" :multiple="true">
+						<template v-for="scholarship in scholarships">
+							<el-option :label="scholarship.year + ' ' + scholarship.name" :value="scholarship.id"></el-option>
+						</template>
+					</el-select>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="thanksSearch">查询</el-button>
+				</el-form-item>
+			</el-form>
+		</el-col>
+		<!--感谢信列表-->
+		<el-table :data="thanks" highlight-current-row v-loading="thanksListLoading" @selection-change="allThanksSelsChange" style="width: 100%;" border max-height="1000">
 			<el-table-column type="index" width="60">
 			</el-table-column>
 			<el-table-column prop="name" label="姓名" width="90" sortable>
@@ -263,11 +289,34 @@
 			</el-table-column>
 			<el-table-column prop="student_id" label="学号" width="120" sortable>
 			</el-table-column>
+			<template v-for="(scholarship, index) in thanksScholarships">
+				<el-table-column :prop="scholarship.year + ' ' + scholarship.name" :label="scholarship.year + ' ' + scholarship.name" width="125">
+					<template scope="scope">
+						<template v-if="scope.row.scholarship_states[index] === _APPLY_STATUS.SUCCESS">
+							<template v-if="scope.row.scholarship_fill_ids[index] === null">
+								未填写感谢信
+							</template>
+							<template v-else>
+								<el-button size="small" @click="singleThanksView(scope.$index, index)">查看感谢信</el-button>
+							</template>
+						</template>
+					</template>
+				</el-table-column>				
+			</template>
 		</el-table>
+		<!--感谢信查看界面-->
+		<el-dialog title="查看" v-model="thanksViewVisible" size="large">
+			<form-view></form-view>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="thanksViewVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="singleThanksSubmit" :loading="thanksViewLoading">提交</el-button>
+			</div>
+		</el-dialog>
 	</section>
 </template>
 
 <script>
+	import { mapActions } from "vuex"
 	import { apiGetFormList } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import FormType from "../../common/js/formType"
@@ -765,7 +814,185 @@
 					data10: ["A", "B"],
 					data11: "A",
 					data15: [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
-				}
+				},
+
+				thanksFilters: {
+					group: "",
+					type: "",
+					scholarships: []
+				},
+				thanks: [
+					{
+						id: 1,
+						name: "林梓楠",
+						class: "无37",
+						student_id: "2013011217",
+						honor_fill_ids: [1, 2, 3],
+						honor_states: ["applied", "success", "fail"],
+						honor_scores: [
+							{
+								"3": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
+							},
+							{
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
+							},
+							{
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
+							}
+						],
+						honor_aveScore: [100, 200, 300],
+						scholarship_money_sum: 10000,
+						scholarship_states: ["success", "success"],
+						scholarship_money: [1000, 4000],
+						scholarship_add: null,
+						scholarship_money_add: 0,
+						scholarship_fill_ids: [1, null]
+					},
+					{
+						id: 2,
+						name: "宁雪妃",
+						class: "无39",
+						student_id: "2019011217",
+						honor_fill_ids: [1, null, 3],
+						honor_states: ["applied", null, "fail"],
+						honor_scores: [
+							{
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
+							},
+							null,
+							{
+								"3": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
+							}
+						],
+						honor_aveScore: [200, null, 500],
+						scholarship_money_sum: 20000,
+						scholarship_states: ["success", null],
+						scholarship_money: [null, null],
+						scholarship_add: null,
+						scholarship_money_add: 0,
+						scholarship_fill_ids: [1, null]
+					},
+					{
+						id: 3,
+						name: "宁雪妃2",
+						class: "无392",
+						student_id: "2019012172",
+						honor_fill_ids: [1, null, 3],
+						honor_states: ["applied", null, "success"],
+						honor_scores: [
+							{
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
+							},
+							null,
+							{
+								"1": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								},
+								"2": {
+									score5: 70,
+									score6: 80,
+									score7: 90,
+									score8: 100,
+									score15: [10, 20, 30]
+								}
+							}
+						],
+						honor_aveScore: [50, null, 900],
+						scholarship_money_sum: 30000,
+						scholarship_states: [null, "success"],
+						scholarship_money: [null, 3000],
+						scholarship_add: null,
+						scholarship_money_add: 0,
+						scholarship_fill_ids: [null, null]
+					}
+				],
+				thanksScholarships: [],
+				thanksGroup: "",
+				thanksType: "",
+				thanksViewVisible: false,
+				thanksViewLoading: false
 			}
 		},
 		methods: {
@@ -815,6 +1042,17 @@
 			allThanksSelsChange: function (sels) {
 				this.thanksSels = sels;
 			},
+			singleThanksView: function (row, col) {
+				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
+				this.setFill(JSON.parse(JSON.stringify(this.testFill)));
+				this.thanksViewVisible = true;
+			},
+			thanksSearch: function () {
+				this.thanksScholarships = this.scholarships;
+			},
+			singleThanksSubmit: function () {
+
+			},
 			findQuota: function (quota_list, group, type) {
 				for (var i = 0; i < quota_list.length; i++) {
 					if (quota_list[i].group === group && quota_list[i].type === type) {
@@ -856,7 +1094,11 @@
 						type: "error"
 					});
 				});
-			}
+			},
+			...mapActions([
+				"setForm",
+				"setFill"
+			])
 		},
 		mounted() {
 			this.getFormList();
