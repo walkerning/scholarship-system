@@ -14,7 +14,8 @@
 					<span class="el-dropdown-link userinfo-inner">{{sysUserName}}</span>
 					<el-dropdown-menu slot="dropdown">
 						<el-dropdown-item @click.native="userinfo">用户信息</el-dropdown-item>
-						<el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
+						<el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
+						<el-dropdown-item divided @click.native="aboutVisible=true">关于</el-dropdown-item>
 					</el-dropdown-menu>
 				</el-dropdown>
 			</el-col>
@@ -67,6 +68,19 @@
 				</div>
 			</section>
 		</el-col>
+		<el-dialog title="清华电子奖学金系统" size="small" v-model="aboutVisible">
+			<b>奖学金、荣誉申请问题请联系辅导员，系统bug请联系开发者</b>
+			<hr />
+			<b>开发者</b>
+			<ul>
+				<li><a style="color:green;" href="mailto:linzinan1995@126.com">林梓楠 清华大学电子系2013级本科生 </a></li>
+				<li><a style="color:green;" href="mailto:foxdoraame@gmail.com">宁雪妃 清华大学电子系2016级研究生 </a></li>
+				<li><a style="color:green;" href="mailto:huangzc13@mails.tsinghua.edu.cn">黄志超 清华大学电子系2013级本科生 </a></li>
+				<li><a style="color:green;" href="mailto:huangzc13@975114697@qq.com">许璀杰 清华大学电子系2016级本科生 </a></li>
+			</ul>
+			<hr />
+			Powered by <a href="https://github.com/taylorchen709/vue-admin" target="_blank">vue-admin</a>, <a href="https://cn.vuejs.org/" target="_blank">Vue.js</a> and <a href="http://element.eleme.io/#/zh-CN" target="_blank">Element UI</a>.
+		</el-dialog>
 	</el-row>
 </template>
 
@@ -77,7 +91,8 @@
 			return {
 				sysName: "清华电子奖学金系统",
 				collapsed:  false,
-				sysUserName: ""
+				sysUserName: "",
+				aboutVisible: false
 			}
 		},
 		methods: {
