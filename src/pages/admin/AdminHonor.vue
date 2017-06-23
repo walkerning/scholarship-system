@@ -1,6 +1,23 @@
 <template>
 	<section>
 		<h1>荣誉编辑</h1>
+		<!--工具条-->
+		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+			<el-form :inline="true" :model="honorFilters">
+				<el-form-item>
+					<el-input v-model="honorFilters.name" placeholder="荣誉名"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-input v-model="honorFilters.year" placeholder="年份"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" v-on:click="allHonorSearch">查询</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="allHonorAdd">新增</el-button>
+				</el-form-item>
+			</el-form>
+		</el-col>
 		<!--列表-->
 		<el-table :data="honors" highlight-current-row v-loading="honorListLoading" @selection-change="allHonorSelsChange" style="width: 100%;" border>
 			<el-table-column type="selection" width="55">
@@ -19,6 +36,8 @@
 				<template scope="scope">
 					<el-button size="small" @click="singleHonorEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="singleHonorDel(scope.$index, scope.row)">删除</el-button>
+					<el-button type="primary" size="small" @click="singleHonorFinal(scope.$index, scope.row)">最终提交</el-button>
+					<el-button size="small" @click="singleHonorCopy(scope.$index, scope.row)">从该荣誉创建</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -81,6 +100,61 @@
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="honorEditFormVisible = false">取消</el-button>
 				<el-button type="primary" @click.native="singleHonorEditSubmit" :loading="honorEditLoading">提交</el-button>
+			</div>
+		</el-dialog>
+
+		<!--荣誉新增界面-->
+		<el-dialog title="新增" v-model="honorAddFormVisible" :close-on-click-modal="false" size="large">
+			<el-form :model="honorAddForm" label-width="80px" ref="honorAddForm">
+				<el-form-item label="荣誉名" prop="name">
+					<el-input v-model="honorAddForm.name" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="年份" prop="year">
+					<el-input v-model="honorAddForm.year" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="申请开始时间" prop="start_time_date">
+					<el-date-picker	v-model="start_time_date" type="datetime" placeholder="选择日期时间"></el-date-picker>
+				</el-form-item>
+				<el-form-item label="申请结束时间" prop="end_time_date">
+					<el-date-picker	v-model="end_time_date" type="datetime" placeholder="选择日期时间"></el-date-picker>
+				</el-form-item>
+				<el-form-item label="各年级名额">
+					<template v-for="(group_quota, index) in honorAddForm.group_quota">
+						<el-row>
+							<div style="width:150px;float:left;">
+								年级：<el-input v-model="group_quota.group"></el-input>
+							</div>
+							<div style="width:150px;float:left;">
+								类别：
+								<el-select v-model="group_quota.type">
+									<template v-for="userType in _USER_TYPE">
+										<el-option :label="_userTypeString(userType)" :value="userType"></el-option>
+									</template>
+								</el-select>
+							</div>
+							<div style="width:200px;float:left;">
+								名额：<br /> <el-input-number v-model="group_quota.quota":min="0"></el-input-number>
+							</div>
+							<div style="width:150px;float:left;">
+								操作：<br /><el-button type="danger" @click="honorAddForm.group_quota.splice(index, 1)">删除</el-button>
+							</div>
+						</el-row>
+					</template>
+					<el-row>
+						<el-button type="primary" @click="honorAddForm.group_quota.push({group: '2017', type: 'undergraduate', quota: 1})">添加</el-button>
+					</el-row>
+				</el-form-item>
+				<el-form-item label="申请填写表单">
+					<el-select v-model="honorAddForm.form_id">
+						<template v-for="form in forms">
+							<el-option :label="form.name" :value="form.id"></el-option>
+						</template>
+					</el-select>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="honorAddFormVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="singleHonorAddSubmit" :loading="honorAddLoading">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -246,6 +320,10 @@
 		},
 		data() {
 			return {
+				honorFilters: {
+					name: "",
+					year: ""
+				},
 				honorListLoading: false,
 				honors: [
 					{
@@ -320,6 +398,17 @@
 				honorEditLoading: false,
 				start_time_date: '',
 				end_time_date: '',
+
+				honorAddFormVisible: false,
+				honorAddLoading: false,
+				honorAddForm: {
+					name: "",
+					year: "",
+					start_time: "",
+					end_time: "",
+					group_quota: [],
+					form_id: null
+				},
 
 				forms: [],
 
@@ -652,6 +741,14 @@
 					return new Date(row.start_time).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				}
 			},
+			allHonorSearch: function () {
+
+			},
+			allHonorAdd: function () {
+				this.start_time_date = new Date();
+				this.end_time_date = new　Date();
+				this.honorAddFormVisible = true;
+			},
 			allHonorSelsChange: function (sels) {
 				this.honorSels = sels;
 			},
@@ -668,6 +765,20 @@
 				this.honorEditFormVisible = true;
 			},
 			singleHonorDel: function (index, row) {
+			},
+			singleHonorFinal: function (index, row) {
+				this.$confirm("提交后，荣誉信息、荣誉分配情况无法修改。确定提交？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					apiDeleteUser(row.id).then(res => {
+					}).catch(error => {
+					});
+				}).catch(() => {
+				});
+			},
+			singleHonorCopy: function (index, row) {
+				this.honorAddForm = JSON.parse(JSON.stringify(row));
+				this.start_time_date = new Date(row.start_time);
+				this.end_time_date = new Date(row.end_time);
+				this.honorAddFormVisible = true;
 			},
 			allHonorBatchRemove: function () {
 
@@ -691,6 +802,9 @@
 				console.log(this.honorStateSettingState);
 			},
 			singleApplyEditSubmit: function () {
+
+			},
+			singleHonorAddSubmit: function () {
 
 			},
 			singleRate: function (row, col) {

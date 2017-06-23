@@ -1,6 +1,23 @@
 <template>
 	<section>
 		<h1>奖学金编辑</h1>
+		<!--工具条-->
+		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+			<el-form :inline="true" :model="scholarshipFilters">
+				<el-form-item>
+					<el-input v-model="scholarshipFilters.name" placeholder="奖学金名"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-input v-model="scholarshipFilters.year" placeholder="年份"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" v-on:click="allScholarshipSearch">查询</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="allScholarshipAdd">新增</el-button>
+				</el-form-item>
+			</el-form>
+		</el-col>
 		<!--列表-->
 		<el-table :data="scholarships" highlight-current-row v-loading="scholarshipListLoading" @selection-change="allScholarshipSelsChange" style="width: 100%;" border>
 			<el-table-column type="selection" width="55">
@@ -15,6 +32,8 @@
 				<template scope="scope">
 					<el-button size="small" @click="singleScholarshipEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="singleSchoarshipDel(scope.$index, scope.row)">删除</el-button>
+					<el-button type="primary" size="small" @click="singleScholarshipFinal(scope.$index, scope.row)">最终提交</el-button>
+					<el-button size="small" @click="singleScholarshipCopy(scope.$index, scope.row)">从该奖学金创建</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -112,6 +131,96 @@
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="scholarshipEditFormVisible = false">取消</el-button>
 				<el-button type="primary" @click.native="singleScholarshipEditSubmit" :loading="scholarshipEditLoading">提交</el-button>
+			</div>
+		</el-dialog>
+
+		<!--奖学金新增界面-->
+		<el-dialog title="新增" v-model="scholarshipAddFormVisible" :close-on-click-modal="false" size="large">
+			<el-form :model="scholarshipAddForm" label-width="80px" ref="scholarshipAddForm">
+				<el-form-item label="奖学金名" prop="name">
+					<el-input v-model="scholarshipAddForm.name" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="年份" prop="year">
+					<el-input v-model="scholarshipAddForm.year" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="感谢信表单">
+					<el-select v-model="scholarshipAddForm.form_id">
+						<template v-for="form in forms">
+							<el-option :label="form.name" :value="form.id"></el-option>
+						</template>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="分配方式">
+					<el-select v-model="scholarshipAddForm.alloc">
+						<template v-for="type in _SCHOLARSHIP_ALLOC_TYPE">
+							<el-option :label="_scholarshipAllocTypeString(type)" :value="type"></el-option>
+						</template>
+					</el-select>
+				</el-form-item>
+				<template v-if="scholarshipAddForm.alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
+					<el-form-item label="每人金额（元）">
+						<el-input-number v-model="scholarshipAddForm.money" :min="0"></el-input-number>
+					</el-form-item>
+					<el-form-item label="各年级名额">
+						<template v-for="(group_quota, index) in scholarshipAddForm.group_quota">
+							<el-row>
+								<div style="width:150px;float:left;">
+									年级：<el-input v-model="group_quota.group"></el-input>
+								</div>
+								<div style="width:150px;float:left;">
+									类别：
+									<el-select v-model="group_quota.type">
+										<template v-for="userType in _USER_TYPE">
+											<el-option :label="_userTypeString(userType)" :value="userType"></el-option>
+										</template>
+									</el-select>
+								</div>
+								<div style="width:200px;float:left;">
+									名额：<br /> <el-input-number v-model="group_quota.quota":min="0"></el-input-number>
+								</div>
+								<div style="width:150px;float:left;">
+									操作：<br /><el-button type="danger" @click="scholarshipAddForm.group_quota.splice(index, 1)">删除</el-button>
+								</div>
+							</el-row>
+						</template>
+						<el-row>
+							<el-button type="primary" @click="scholarshipAddForm.group_quota.push({group: '2017', type: 'undergraduate', quota: 1})">添加</el-button>
+						</el-row>
+					</el-form-item>
+				</template>
+				<template v-else-if="scholarshipAddForm.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+					<el-form-item label="各年级总金额（元）">
+						<template v-for="(group_quota, index) in scholarshipAddForm.group_quota">
+							<el-row>
+								<div style="width:150px;float:left;">
+									年级：<el-input v-model="group_quota.group"></el-input>
+								</div>
+								<div style="width:150px;float:left;">
+									类别：
+									<el-select v-model="group_quota.type">
+										<template v-for="userType in _USER_TYPE">
+											<el-option :label="_userTypeString(userType)" :value="userType"></el-option>
+										</template>
+									</el-select>
+								</div>
+								<div style="width:200px;float:left;">
+									总金额：<br /> <el-input-number v-model="group_quota.quota":min="0"></el-input-number>
+								</div>
+								<div style="width:150px;float:left;">
+									操作：<br /><el-button type="danger" @click="scholarshipAddForm.group_quota.splice(index, 1)">删除</el-button>
+								</div>
+							</el-row>
+						</template>
+						<el-row>
+							<el-button type="primary" @click="scholarshipAddForm.group_quota.push({group: '2017', type: 'undergraduate', quota: 1})">添加</el-button>
+						</el-row>
+					</el-form-item>
+				</template>
+
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="scholarshipAddFormVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="singleScholarshipAddSubmit" :loading="scholarshipAddLoading">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -215,7 +324,7 @@
 								</template>
 							</el-col>
 							<el-col :span="3">
-								<el-button size="small" type="primary" @click="singleScholarshipAddSubmit(scope.$index)">添加</el-button>
+								<el-button size="small" type="primary" @click="singleScholarshipAllocAddSubmit(scope.$index)">添加</el-button>
 							</el-col>
 						</template>
 					</el-row>
@@ -340,6 +449,10 @@
 		},
 		data() {
 			return {
+				scholarshipFilters: {
+					name: "",
+					year: ""
+				},
 				scholarshipListLoading: false,
 				scholarships: [
 					{
@@ -414,6 +527,16 @@
 				scholarshipEditFormVisible: false,
 				scholarshipEditLoading: false,
 				forms: [],
+
+				scholarshipAddForm: {
+					name: "",
+					year: "",
+					form_id: null,
+					alloc: "",
+					group_quota: []
+				},
+				scholarshipAddFormVisible: false,
+				scholarshipAddLoading: false,
 
 				honors: [
 					{
@@ -996,6 +1119,12 @@
 			}
 		},
 		methods: {
+			allScholarshipSearch: function () {
+
+			},
+			allScholarshipAdd: function () {
+				this.scholarshipAddFormVisible = true;
+			},	
 			allScholarshipSelsChange: function (sels) {
 				this.scholarshipSels = sels;
 			},	
@@ -1003,8 +1132,26 @@
 				this.scholarshipEditForm = JSON.parse(JSON.stringify(row));
 				this.scholarshipEditFormVisible = true;
 			},
+			singleScholarshipEditSubmit: function () {
+
+			},
+			singleScholarshipAddSubmit: function () {
+
+			},
+			singleScholarshipCopy: function(index, row) {
+				this.scholarshipAddForm = JSON.parse(JSON.stringify(row));
+				this.scholarshipAddFormVisible = true;
+			},
 			singleSchoarshipDel: function (index, row) {
 
+			},
+			singleScholarshipFinal: function (index, row) {
+				this.$confirm("提交后，奖学金信息、奖学金分配情况无法修改。确定提交？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					apiDeleteUser(row.id).then(res => {
+					}).catch(error => {
+					});
+				}).catch(() => {
+				});
 			},
 			allScholarshipBatchRemove: function () {
 
@@ -1033,7 +1180,7 @@
 			singleScholarshipAllocSubmit: function (row, col) {
 
 			},
-			singleScholarshipAddSubmit: function (row) {
+			singleScholarshipAllocAddSubmit: function (row) {
 
 			},
 			allAllocScholarshipSelsChange: function (sels) {
