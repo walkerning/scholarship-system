@@ -1,4 +1,5 @@
 <template>
+	
 	<section>
 		<!--工具条-->
 		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
@@ -160,7 +161,8 @@
 				<h4> 导入新用户 </h4>
 				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[姓名]、[学号]、[班级]、[年级]、[类别（本科生or研究生）]、[电话]、[邮箱]
 				<el-form-item label="" prop="userFile">
-				<el-input type="file" v-model="importForm.userFile" auto-complete="off"></el-input>
+					<!-- <el-input type="file" v-model="importForm.userFile" auto-complete="off"></el-input> -->
+					<input type="file" id="importFormUserFile" />  				
 				</el-form-item>
 				<el-button type="primary" @click.native="allImportUser" :loading="importLoading">上传</el-button>
 			</el-form>
@@ -169,17 +171,33 @@
 				<h4> 导入成绩 </h4>
 				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[学号]、[GPA]、[班级排名]、[年级排名]
 				<el-form-item label="" prop="scoreFile">
-				<el-input type="file" v-model="importForm.scoreFile" auto-complete="off"></el-input>
+					<!-- <el-input type="file" v-model="importForm.scoreFile" auto-complete="off"></el-input> -->
+					<input type="file" id="importFormScoreFile" />
 				</el-form-item>
 				<el-button type="primary" @click.native="allImportScore" :loading="importLoading">上传</el-button>
 			</el-form>
 		</el-dialog>
 
+		<!--导入反馈界面-->
+		<el-dialog title="导入反馈" v-model="importFormFeedbackVisible" :close-on-click-modal="false">
+			<el-table :data="importFormFeedback" strip style="width: 100%;">
+				<el-table-column type="index" width="60"> </el-table-column>
+				<el-table-column prop="name" label="姓名" width="120"> </el-table-column>
+				<el-table-column prop="student_id" label="学号" width="150" sortable> </el-table-column>
+				<el-table-column prop="class" label="班级" width="100" sortable> </el-table-column>
+				<el-table-column prop="group" label="年级" width="120" sortable> </el-table-column>
+				<el-table-column prop="type" label="类别" width="120" :formatter="typeFormatter" sortable> </el-table-column>
+				<el-table-column prop="status" label="导入状态" sortable> </el-table-column>
+			</el-table>
+		</el-dialog>
+
+
+
 	</section>
 </template>
 
 <script>
-	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroups, apiAddGroup, apiDeleteUser, apiResetPassword } from "../../api/api"
+	import { apiGetUserList, apiUpdateUser, apiAddUser, apiFindUser, apiGetGroups, apiAddGroup, apiDeleteUser, apiResetPassword } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import PermissionType from "../../common/js/permissionType"
 	export default {
@@ -249,9 +267,11 @@
 
 				importFormVisible: false,
 				importLoading: false,
+				importFormFeedbackVisible: false,
 
 				sels: [],//列表选中列
-
+				
+				importFormFeedback: [],
 				users: [],
 				total: 1,
 
@@ -362,10 +382,131 @@
 				this.importFormVisible = true;
 			},
 			allImportUser: function () {
-
-			},
+				var reader, workbook, file, sheet, row, that;
+				that = this;
+				file = document.getElementById("importFormUserFile").files[0];
+				reader = new FileReader;				
+				reader.readAsDataURL(file);				
+				reader.onload = function(e)
+				{
+					workbook = new wijmo.xlsx.Workbook();
+					workbook.load(reader.result);				
+					sheet = workbook._sheets[0];	
+					that.importFormFeedback = [];
+					for (let i=0, il=sheet._rows.length; i<il; i++)
+					{
+						row = sheet._rows[i];
+						if (row == undefined) break;
+						if (row._cells == undefined) break;
+						console.log("i= " + i);
+						(function(row_) {			
+							that.getGroupId(row_._cells[3].value+'').then(group_id => {
+								var params = {
+									name: row_._cells[0].value,
+									student_id: row_._cells[1].value+'',
+									class: row_._cells[2].value,
+									group_id: group_id,
+									group:row_._cells[3].value,
+									type: row_._cells[4].value,
+									phone: row_._cells[5].value+'',
+									email: row_._cells[6].value
+								};
+								console.log(params);
+								apiAddUser(params).then(res => {
+									params.status = "导入成功";
+									that.getUserList();
+									that.importFormFeedback.push(params);
+								}).catch(error => {
+									console.log(error);
+									params.status = "导入失败，" + error.response.data.message;
+									that.importFormFeedback.push(params);
+								}).catch(error => {
+									params.status = "导入失败，请检查网络"; 
+									that.importFormFeedback.push(params);
+								});	
+							}).catch(error => {
+								console.log(error);
+								params.status = "导入失败，获取group_id失败";
+								that.importFormFeedback.push(params);
+							});;
+						})(row);
+					}
+					that.importFormFeedbackVisible = true;
+				};
+			},			
 			allImportScore: function () {
+				var reader, workbook, file, sheet, row, that;
+				that = this;
+				file = document.getElementById("importFormScoreFile").files[0];
+				reader = new FileReader;				
+				reader.readAsDataURL(file);				
+				reader.onload = function(e)
+				{
+					workbook = new wijmo.xlsx.Workbook();
+					workbook.load(reader.result);				
+					sheet = workbook._sheets[0];	
+					that.importFormFeedback = [];
+					for (let i=0, il=sheet._rows.length; i<il; i++)
+					{
+						//console.log(i + ' ' + il);
+						row = sheet._rows[i];
+						if (row == undefined) break;
+						if (row._cells == undefined) break;
+						(function(row_) {			
+							var str = "";
+							for (let k=0, kl=row_._cells.length; k<kl; k++)
+								str += row_._cells[k].value+"  ";
+							console.log(str);
+							apiFindUser(row_._cells[0].value).then(res => {
+								var user = res.data[0];
+								console.log("user: " + user);
+								if (user == undefined) {
+									user.student_id = row_._cells[0].value;
+									user.status = "导入失败，该学生不存在";
+									that.importFormFeedback.push(user);
+								}else {
+									var params = {
+										id: user.id,
+										name: user.name,
+										student_id: user.student_id,
+										class: user.class,
+										group_id: user.group_id,
+										type: user.type,
+										phone: user.phone,
+										email: user.email
+									};
+									var uid = user.id;
+									params.gpa = row_.cells[1].value;
+									params.class_rank = row_._cells[2].value;
+									params.year_rank = row_._cells[3].value;
+									console.log("uid: ", uid);
+									console.log("importScore update: ", params);
 
+									apiUpdateUser(uid, params).then(res => {
+										user.status = "导入成功";
+										this.getUserList();
+										that.importFormFeedback.push(user);
+									}).catch(error => {
+										user.status = "导入失败";
+										console.log("failed in apiUpdateUser: " + error);
+										that.importFormFeedback.push(user);
+									}).catch(error => {
+										user.status = "导入失败，请检查网络连接";
+										that.importFormFeedback.push(user);
+									});	
+								}
+							}).catch(error => {
+								var user = {
+									student_id: row_._cells[0].value,
+									status: "导入失败"
+								};
+								console.log("failed in apiFindUser: " + error);
+								that.importFormFeedback.push(user);
+							});
+						})(row);
+					}
+					that.importFormFeedbackVisible = true;
+				};
 			},
 			allBatchRemove: function () {
 				
@@ -393,6 +534,7 @@
 				});
 			},
 			singleEdit: function (index, row) {
+				//console.log(this.users[6].id);
 				this.editForm = JSON.parse(JSON.stringify(row));
 				if (this.editForm.hasOwnProperty("gpa")) {
 					this.editForm.gpa = this.editForm.gpa.toString();
@@ -421,6 +563,7 @@
 							description: group_name
 						};
 						start = apiAddGroup(params).then(res => {
+							console.log(res);
 							return res.data.id;
 						})
 					}
@@ -472,6 +615,7 @@
 								});	
 							});
 						}).catch(error => {
+							console.log(error);
 							this.$notify({
 								title: "更新失败",
 								message: "获取组id失败",
@@ -571,7 +715,6 @@
 				apiGetUserList(params).then(res => {
 					this.users = res.data;
 					this.listLoading = false;
-					//console.log(this.users);
 				}).catch(error => {
 					this.$notify({
 						title: "加载失败",
