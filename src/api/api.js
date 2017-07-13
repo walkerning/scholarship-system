@@ -22,6 +22,8 @@ export const apiRequestLogin = params => { return axios.post(`${base}/auth`, par
 
 export const apiGetUser = id => { return getWithToken(`${base}/api/v1/users/${id}`, {}) };
 
+export const apiFindUser = student_id => { return getWithToken(`${base}/api/v1/users?student_id=${student_id}`, {}) };
+
 export const apiGetUserList = params => { return getWithToken(`${base}/api/v1/users`, params) };
 
 export const apiAddUser = params => { return postWithToken(`${base}/api/v1/users`, params) };
