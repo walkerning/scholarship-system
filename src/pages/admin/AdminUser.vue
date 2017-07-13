@@ -484,7 +484,7 @@
 
 									apiUpdateUser(uid, params).then(res => {
 										user.status = "导入成功";
-										this.getUserList();
+										that.getUserList();
 										that.importFormFeedback.push(user);
 									}).catch(error => {
 										user.status = "导入失败";
