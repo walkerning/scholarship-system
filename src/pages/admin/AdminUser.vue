@@ -29,7 +29,7 @@
 		</el-col>
 
 		<!--列表-->
-		<el-table :data="users" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;">
+		<el-table :data="users" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;" border>
 			<el-table-column type="selection" width="55">
 			</el-table-column>
 			<el-table-column type="index" width="60">
@@ -273,7 +273,7 @@
 				
 				importFormFeedback: [],
 				users: [],
-				total: 1,
+				total: 0,
 
 				importForm: {
 					userFile: "",
@@ -509,7 +509,28 @@
 				};
 			},
 			allBatchRemove: function () {
-				
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					var tasks = [];
+					for (var i in this.sels) {
+						tasks.push(apiDeleteUser(this.sels[i].id));
+					}
+					Promise.all(tasks).then(reses => {
+						this.$notify({
+							title: "删除成功",
+							message: "批量删除用户成功",
+							type: "success"
+						});
+						this.getFormList();
+					}).catch(errors => {
+						this.$notify({
+							title: "删除失败",
+							message: "批量删除用户失败",
+							type: "error"
+						});
+						this.getUserList();
+					});
+				}).catch(() => {
+				});
 			},
 			allSelsChange: function (sels) {
 				this.sels = sels;
@@ -518,19 +539,22 @@
 
 			},
 			singleDel: function (index, row) {
-				apiDeleteUser(row.id).then(res => {
-					this.$notify({
-						title: "删除成功",
-						message: "删除用户成功",
-						type: "success"
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					apiDeleteUser(row.id).then(res => {
+						this.$notify({
+							title: "删除成功",
+							message: "删除用户成功",
+							type: "success"
+						});
+						this.getUserList();
+					}).catch(error => {
+						this.$notify({
+							title: "删除失败",
+							message: "删除用户失败",
+							type: "error"
+						});	
 					});
-					this.getUserList();
-				}).catch(error => {
-					this.$notify({
-						title: "删除失败",
-						message: "删除用户失败",
-						type: "error"
-					});	
+				}).catch(() => {
 				});
 			},
 			singleEdit: function (index, row) {
@@ -715,6 +739,7 @@
 				apiGetUserList(params).then(res => {
 					this.users = res.data;
 					this.listLoading = false;
+					this.total = this.users.length;
 				}).catch(error => {
 					this.$notify({
 						title: "加载失败",

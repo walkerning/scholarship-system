@@ -1,4 +1,3 @@
-//test
 export const getFields = state => {
 	//console.log(state.form);
 	if (state.form == null) {
@@ -12,4 +11,7 @@ export const getForm = state => {
 }
 export const getFill = state => {
 	return state.fill;
+}
+export const getRate = state => {
+	return state.rate;
 }

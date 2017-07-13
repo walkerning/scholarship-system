@@ -29,3 +29,23 @@ export const setFill = ({commit}, fill) => {
 export const addQue = ({commit}, que) => {
 	commit("ADD_QUE", que);
 }
+
+export const addFillOption = ({commit}, param) => {
+	commit("ADD_FILL_OPTION", param);
+}
+
+export const deleteFillOption = ({commit}, indexes) => {
+	commit("DELETE_FIELD_OPTION", indexes);
+}
+
+export const setRate = ({commit}, rate) => {
+	commit("SET_RATE", rate);
+}
+
+export const addRate = ({commit}, param) => {
+	commit("ADD_RATE", param);
+}
+
+export const deleteRate = ({commit}, key) => {
+	commit("DELETE_RATE", key);
+}

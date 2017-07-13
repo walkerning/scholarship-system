@@ -55,6 +55,26 @@
 							</el-radio-group>
 						</el-form-item>							
 					</template>
+					<template v-else-if="field.type === _QUE_TYPE.TABLE"><!--表格-->
+						<el-row>
+							<pre>{{ field.description }}</pre>
+						</el-row>
+						<el-table :data="getFill['data' + index]">
+							<template v-for="(column, index2) in field.content">
+								<el-table-column :label="column">
+									<template scope="scope">
+										<el-input v-model="scope.row[index2]" :disabled="disabled"></el-input>
+									</template>
+								</el-table-column>
+							</template>
+							<el-table-column label="删除">
+								<template scope="scope">
+									<el-button type="danger" size="small" @click="deleteFillOption({index1: 'data' + index, index2: scope.$index})" :disabled="disabled">删除记录</el-button> 
+								</template>
+							</el-table-column>
+						</el-table>
+						<el-button type="primary" size="small" @click.native="addFillOption({index: 'data' + index, num: field.content.length})" :disabled="disabled">新增记录</el-button>
+					</template>
 				</template>
 			</div>
 			<div v-if="getForm.template !== null && getForm.template != ''">
@@ -213,7 +233,9 @@
 		},
 		methods: {
 			...mapActions([
-				"setFill"
+				"setFill",
+				"addFillOption",
+				"deleteFillOption"
 			]),
 			print: function() {
 				console.log("print");

@@ -1,14 +1,17 @@
 <template>
 	<section>
 		<!--列表-->
-		<el-table :data="scholarships" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;">
+		<el-table :data="scholarships" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;" border>
 			<el-table-column type="index" width="60">
 			</el-table-column>
 			<el-table-column prop="name" label="奖学金名" width="220" sortable>
 			</el-table-column>
 			<el-table-column prop="year" label="年份" width="150" sortable>
 			</el-table-column>
-			<el-table-column prop="state" label="状态" :formatter="stateFormatter" width="150" sortable>
+			<el-table-column prop="state" label="状态" width="150" sortable>
+				<template scope="scope">
+					<apply-status-tag :applyStatus="scope.row.state"></apply-status-tag>
+				</template>
 			</el-table-column>
 			<el-table-column label="操作">
 				<template scope="scope">
@@ -29,12 +32,12 @@
 		</el-col>
 
 		<!--查看界面-->
-		<el-dialog title="查看" v-model="viewVisible">
+		<el-dialog title="查看" v-model="viewVisible" size="large">
 			<form-view :disabled="true"></form-view>
 		</el-dialog>
 
 		<!--填写界面-->
-		<el-dialog title="填写" v-model="fillVisible">
+		<el-dialog title="填写" v-model="fillVisible" size="large">
 			<form-view></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="fillVisible = false">取消</el-button>
@@ -50,6 +53,7 @@
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../common/js/queType"
+	import ApplyStatus from "../common/js/applyStatus"
 
 	export default {
 		computed: {
@@ -60,6 +64,9 @@
 			]),
 			_QUE_TYPE: function() {
 				return QueType.QUE_TYPE;
+			},
+			_APPLY_STATUS: function() {
+				return ApplyStatus.APPLY_STATUS;
 			}
 		},
 		data() {
@@ -274,9 +281,6 @@
 				this.setFill(JSON.parse(JSON.stringify(this.testFill)));
 				this.viewVisible = true;
 			},
-			stateFormatter: function (row, column) {
-				return row.state === "success" ? "已获得" : "未获得";
-			},
 			allCurrentChange: function (val) {
 
 			},
@@ -285,6 +289,9 @@
 			},
 			singleFillSave: function() {
 
+			},
+			_applyStatusString: function(str) {
+				return ApplyStatus.applyStatusString(str);
 			},
 			...mapActions([
 				"setForm",

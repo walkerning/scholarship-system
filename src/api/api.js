@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 let base = 'http://foxfi.eva6.nics.cc:8080';
+//let base = 'http://localhost:3000';
 
 const getWithToken = (url, params) => {
 	return axios.get(url, { params: params, headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
@@ -30,13 +31,21 @@ export const apiAddUser = params => { return postWithToken(`${base}/api/v1/users
 
 export const apiUpdateUser = (id, params) => { return putWithToken(`${base}/api/v1/users/${id}`, params) };
 
-export const apiDeleteUser = (id) => { return deleteWithToken(`${base}/api/v1/users/${id}`) };
+export const apiDeleteUser = id => { return deleteWithToken(`${base}/api/v1/users/${id}`) };
 
-export const apiResetPassword = (id) => { return putWithToken(`${base}/api/v1/users/${id}/newPassword`, {}) };
+export const apiResetPassword = id => { return putWithToken(`${base}/api/v1/users/${id}/newPassword`, {}) };
 
 export const apiGetGroups = () => { return getWithToken(`${base}/api/v1/groups`, {}) };
 
-export const apiAddGroup = (params) => { return postWithToken(`${base}/api/v1/groups`, params) };
+export const apiAddGroup = params => { return postWithToken(`${base}/api/v1/groups`, params) };
+
+export const apiGetFormList = params => { return getWithToken(`${base}/api/v1/forms`, params) }
+
+export const apiUpdateForm = (id, params) => { return putWithToken(`${base}/api/v1/forms/${id}`, params) }
+
+export const apiAddForm = params => { return postWithToken(`${base}/api/v1/forms`, params) }
+
+export const apiDeleteForm = id => { return deleteWithToken(`${base}/api/v1/forms/${id}`) }
 
 export const apiLogout = () => {
 	sessionStorage.removeItem("token");

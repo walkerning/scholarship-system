@@ -9,7 +9,8 @@ export default {
 		CHECKBOX: 7,
 		RATIO: 8,
 		ATTACHMENT: 9,
-		UPLOAD: 10
+		UPLOAD: 10,
+		TABLE: 11
 	},
 	queTypeString: function(type) {
 		if (type === this.QUE_TYPE.ILLUSTRATION) {
@@ -32,6 +33,8 @@ export default {
 			return "附件说明";
 		} else if (type === this.QUE_TYPE.UPLOAD) {
 			return "上传附件";
+		} else if (type === this.QUE_TYPE.TABLE) {
+			return "表格";
 		} else {
 			return "";
 		}
