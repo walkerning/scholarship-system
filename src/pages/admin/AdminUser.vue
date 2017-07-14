@@ -159,7 +159,7 @@
 		<el-dialog title="导入" v-model="importFormVisible" :close-on-click-modal="false">
 			<el-form :model="importForm" label-width="20px" ref="importForm">
 				<h4> 导入新用户 </h4>
-				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[姓名]、[学号]、[班级]、[年级]、[类别（本科生or研究生）]、[电话]、[邮箱]
+				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[姓名]、[学号]、[班级]、[年级]、[类别（undergraduate or graduate）]、[电话]、[邮箱]
 				<el-form-item label="" prop="userFile">
 					<!-- <el-input type="file" v-model="importForm.userFile" auto-complete="off"></el-input> -->
 					<input type="file" id="importFormUserFile" />  				
@@ -179,7 +179,7 @@
 		</el-dialog>
 
 		<!--导入反馈界面-->
-		<el-dialog title="导入反馈" v-model="importFormFeedbackVisible" :close-on-click-modal="false">
+		<el-dialog title="导入反馈" v-model="importFormFeedbackVisible" :close-on-click-modal="false" size="large">
 			<el-table :data="importFormFeedback" strip style="width: 100%;">
 				<el-table-column type="index" width="60"> </el-table-column>
 				<el-table-column prop="name" label="姓名" width="120"> </el-table-column>
@@ -399,18 +399,18 @@
 						if (row == undefined) break;
 						if (row._cells == undefined) break;
 						console.log("i= " + i);
-						(function(row_) {			
+						(function(row_) {
+							var params = {
+								name: row_._cells[0].value,
+								student_id: row_._cells[1].value+'',
+								class: row_._cells[2].value,
+								group: row_._cells[3].value,
+								type: row_._cells[4].value,
+								phone: row_._cells[5].value+'',
+								email: row_._cells[6].value
+							};		
 							that.getGroupId(row_._cells[3].value+'').then(group_id => {
-								var params = {
-									name: row_._cells[0].value,
-									student_id: row_._cells[1].value+'',
-									class: row_._cells[2].value,
-									group_id: group_id,
-									group:row_._cells[3].value,
-									type: row_._cells[4].value,
-									phone: row_._cells[5].value+'',
-									email: row_._cells[6].value
-								};
+								params.group_id = group_id;
 								console.log(params);
 								apiAddUser(params).then(res => {
 									params.status = "导入成功";
@@ -609,13 +609,13 @@
 								email: this.editForm.email
 							};
 							if (this.editForm.gpa && this.editForm.gpa !== "") {
-								params.gpa = this.editForm.gpa;
+								params.gpa = parseFloat(this.editForm.gpa);
 							}
 							if (this.editForm.class_rank && this.editForm.class_rank !== "") {
-								params.class_rank = this.editForm.class_rank;
+								params.class_rank = parseInt(this.editForm.class_rank);
 							}
 							if (this.editForm.year_rank && this.editForm.year_rank != "") {
-								params.year_rank = this.editForm.year_rank;
+								params.year_rank = parseInt(this.editForm.year_rank);
 							}
 							apiUpdateUser(uid, params).then(res => {
 								this.$notify({
@@ -679,13 +679,13 @@
 								email: this.addForm.email
 							};
 							if (this.addForm.gpa && this.addForm.gpa !== "") {
-								params.gpa = this.addForm.gpa;
+								params.gpa = parseFloat(this.addForm.gpa);
 							}
 							if (this.addForm.class_rank && this.addForm.class_rank !== "") {
-								params.class_rank = this.addForm.class_rank;
+								params.class_rank = parseInt(this.addForm.class_rank);
 							}
 							if (this.addForm.year_rank && this.addForm.year_rank != "") {
-								params.year_rank = this.addForm.year_rank;
+								params.year_rank = parseInt(this.addForm.year_rank);
 							}
 							apiAddUser(params).then(res => {
 								this.$notify({
