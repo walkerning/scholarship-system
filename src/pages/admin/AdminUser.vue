@@ -398,7 +398,7 @@
 						row = sheet._rows[i];
 						if (row == undefined) break;
 						if (row._cells == undefined) break;
-						console.log("i= " + i);
+						//console.log("i= " + i);
 						(function(row_) {
 							var params = {
 								name: row_._cells[0].value,
@@ -409,15 +409,15 @@
 								phone: row_._cells[5].value+'',
 								email: row_._cells[6].value
 							};		
-							that.getGroupId(row_._cells[3].value+'').then(group_id => {
+							that.getGroupId(row_._cells[3].value+'', row_._cells[4].value+'').then(group_id => {
 								params.group_id = group_id;
-								console.log(params);
+								//console.log(params);
 								apiAddUser(params).then(res => {
 									params.status = "导入成功";
 									that.getUserList();
 									that.importFormFeedback.push(params);
 								}).catch(error => {
-									console.log(error);
+									//console.log(error);
 									params.status = "导入失败，" + error.response.data.message;
 									that.importFormFeedback.push(params);
 								}).catch(error => {
@@ -425,12 +425,13 @@
 									that.importFormFeedback.push(params);
 								});	
 							}).catch(error => {
-								console.log(error);
+								//console.log(error.response);
 								params.status = "导入失败，获取group_id失败";
 								that.importFormFeedback.push(params);
 							});;
 						})(row);
 					}
+					that.importFormVisible = false;
 					that.importFormFeedbackVisible = true;
 				};
 			},			
@@ -456,10 +457,10 @@
 							var str = "";
 							for (let k=0, kl=row_._cells.length; k<kl; k++)
 								str += row_._cells[k].value+"  ";
-							console.log(str);
+							//console.log(str);
 							apiFindUser(row_._cells[0].value).then(res => {
 								var user = res.data[0];
-								console.log("user: " + user);
+								//console.log("user: " + user);
 								if (user == undefined) {
 									user.student_id = row_._cells[0].value;
 									user.status = "导入失败，该学生不存在";
@@ -479,8 +480,8 @@
 									params.gpa = row_.cells[1].value;
 									params.class_rank = row_._cells[2].value;
 									params.year_rank = row_._cells[3].value;
-									console.log("uid: ", uid);
-									console.log("importScore update: ", params);
+									//console.log("uid: ", uid);
+									//console.log("importScore update: ", params);
 
 									apiUpdateUser(uid, params).then(res => {
 										user.status = "导入成功";
@@ -488,7 +489,7 @@
 										that.importFormFeedback.push(user);
 									}).catch(error => {
 										user.status = "导入失败";
-										console.log("failed in apiUpdateUser: " + error);
+										//console.log("failed in apiUpdateUser: " + error);
 										that.importFormFeedback.push(user);
 									}).catch(error => {
 										user.status = "导入失败，请检查网络连接";
@@ -498,13 +499,14 @@
 							}).catch(error => {
 								var user = {
 									student_id: row_._cells[0].value,
-									status: "导入失败"
+									status: "导入失败，该学生不存在"
 								};
-								console.log("failed in apiFindUser: " + error);
+								//console.log("failed in apiFindUser: " + error);
 								that.importFormFeedback.push(user);
 							});
 						})(row);
 					}
+					that.importFormVisible = false;
 					that.importFormFeedbackVisible = true;
 				};
 			},
@@ -571,12 +573,13 @@
 				}
 				this.editFormVisible = true;
 			},
-			getGroupId: function(group_name) {
+			getGroupId: function(group_name, group_type) {
 				return apiGetGroups().then(res => {
+					//console.log(res);
 					var start = null;
 					var groups = res.data;
 					for (var i = 0; i < groups.length; i++) {
-						if (groups[i].name == group_name) {
+						if (groups[i].name === group_name && groups[i].type === group_type) {
 							start = Promise.resolve(groups[i].id);
 							break;
 						}
@@ -584,10 +587,12 @@
 					if (start == null) {
 						var params = {
 							name: group_name,
-							description: group_name
+							type: group_type,
+							description: group_name + "级" + this._userTypeString(group_type)
 						};
+						//console.log(params);
 						start = apiAddGroup(params).then(res => {
-							console.log(res);
+							//console.log(res);
 							return res.data.id;
 						})
 					}
@@ -597,7 +602,7 @@
 			singleEditSubmit: function () {
 				this.$refs.editForm.validate((valid) => {
 					if (valid) {
-						this.getGroupId(this.editForm.group).then(group_id => {
+						this.getGroupId(this.editForm.group, this.editForm.type).then(group_id => {
 							var uid = this.editForm.id;
 							var params = {
 								name: this.editForm.name,
@@ -639,7 +644,7 @@
 								});	
 							});
 						}).catch(error => {
-							console.log(error);
+							//console.log(error);
 							this.$notify({
 								title: "更新失败",
 								message: "获取组id失败",
@@ -668,7 +673,7 @@
 			singleAddSubmit: function () {
 				this.$refs.addForm.validate((valid) => {
 					if (valid) {
-						this.getGroupId(this.addForm.group).then(group_id => {
+						this.getGroupId(this.addForm.group, this.addForm.type).then(group_id => {
 							var params = {
 								name: this.addForm.name,
 								student_id: this.addForm.student_id,
