@@ -198,7 +198,7 @@
 
 <script>
 	import _ from "lodash"
-	import { apiGetUserList, apiUpdateUser, apiAddUser, apiFindUser, apiGetGroups, apiAddGroup, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser } from "../../api/api"
+	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroups, apiAddGroup, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import PermissionType from "../../common/js/permissionType"
 	export default {
@@ -461,7 +461,7 @@
 							for (let k=0, kl=row_._cells.length; k<kl; k++)
 								str += row_._cells[k].value+"  ";
 							//console.log(str);
-							apiFindUser(row_._cells[0].value).then(res => {
+							apiGetUserList({student_id: row_._cells[0].value}).then(res => {
 								var user = res.data[0];
 								//console.log("user: " + user);
 								if (user == undefined) {
@@ -525,7 +525,7 @@
 							message: "批量删除用户成功",
 							type: "success"
 						});
-						this.getFormList();
+						this.getUserList();
 					}).catch(error => {
 						this.$notify({
 							title: "删除失败",
