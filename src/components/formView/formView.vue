@@ -77,7 +77,7 @@
 					</template>
 				</template>
 			</div>
-			<div v-if="getForm.template !== null && getForm.template != ''">
+			<div v-if="getForm.template !== null && getForm.template !== '' && getForm.template !== undefined">
 				<el-row type="flex" justify="center">
 					<el-button type="warning" @click.native="print">打印</el-button>
 				</el-row>
