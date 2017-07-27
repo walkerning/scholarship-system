@@ -197,7 +197,8 @@
 </template>
 
 <script>
-	import { apiGetUserList, apiUpdateUser, apiAddUser, apiFindUser, apiGetGroups, apiAddGroup, apiDeleteUser, apiResetPassword } from "../../api/api"
+	import _ from "lodash"
+	import { apiGetUserList, apiUpdateUser, apiAddUser, apiFindUser, apiGetGroups, apiAddGroup, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import PermissionType from "../../common/js/permissionType"
 	export default {
@@ -335,8 +336,10 @@
 					email: "",
 					gap: null,
 					class_rank: null,
-					year_rank: null
+					year_rank: null,
+					permissions: []
 				},
+				editFormOldPermission: [],
 				editFormRules: {
 					name: [ 
 						{ required: true, message: "请输入姓名", trigger: "change"}
@@ -523,7 +526,7 @@
 							type: "success"
 						});
 						this.getFormList();
-					}).catch(errors => {
+					}).catch(error => {
 						this.$notify({
 							title: "删除失败",
 							message: "批量删除用户失败",
@@ -571,6 +574,7 @@
 				if (this.editForm.hasOwnProperty("year_rank")) {
 					this.editForm.year_rank = this.editForm.year_rank.toString();
 				}
+				this.editFormOldPermission = row.permissions;
 				this.editFormVisible = true;
 			},
 			getGroupId: function(group_name, group_type) {
@@ -622,7 +626,19 @@
 							if (this.editForm.year_rank && this.editForm.year_rank != "") {
 								params.year_rank = parseInt(this.editForm.year_rank);
 							}
-							apiUpdateUser(uid, params).then(res => {
+							var tasks = []
+							tasks.push(apiUpdateUser(uid, params));
+							for (var i in this.editFormOldPermission) {
+								if (_.indexOf(this.editForm.permissions, this.editFormOldPermission[i]) == -1) {
+									tasks.push(apiDeletePermissionUser(this.editFormOldPermission[i], uid));
+								}
+							}
+							for (var i in this.editForm.permissions) {
+								if (_.indexOf(this.editFormOldPermission, this.editForm.permissions[i]) == -1) {
+									tasks.push(apiAddPermissionUser(this.editForm.permissions[i], uid));
+								}
+							}
+							Promise.all(tasks).then(reses => {
 								this.$notify({
 									title: "更新成功",
 									message: "更新用户信息成功",
@@ -631,6 +647,7 @@
 								this.editFormVisible = false;
 								this.getUserList();
 							}).catch(error => {
+								console.log(error);
 								this.$notify({
 									title: "更新失败",
 									message: error.response.data.message,
@@ -644,7 +661,7 @@
 								});	
 							});
 						}).catch(error => {
-							//console.log(error);
+							console.log(error);
 							this.$notify({
 								title: "更新失败",
 								message: "获取组id失败",

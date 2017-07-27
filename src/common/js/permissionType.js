@@ -6,7 +6,8 @@ export default {
 		FORM: "form",
 		SCHOLAR: "scholar",
 		HONOR: "honor",
-		EXPORT: "export"
+		EXPORT: "export",
+		PERMISSION: "permission"
 	},
 	permissionTypeString: function(type) {
 		if (type === this.PERMISSION_TYPE.LOGIN) {
@@ -23,6 +24,8 @@ export default {
 			return "荣誉管理";
 		} else if (type === this.PERMISSION_TYPE.EXPORT) {
 			return "学校奖助系统对接";
+		} else if (type === this.PERMISSION_TYPE.PERMISSION){
+			return "权限管理";
 		} else {
 			return "";
 		}
