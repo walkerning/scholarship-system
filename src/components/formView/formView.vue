@@ -74,6 +74,7 @@
 							</el-table-column>
 						</el-table>
 						<el-button type="primary" size="small" @click.native="addFillOption({index: 'data' + index, num: field.content.length})" :disabled="disabled">新增记录</el-button>
+						<hr />
 					</template>
 				</template>
 			</div>
