@@ -33,7 +33,7 @@ export const apiDeleteUser = id => { return deleteWithToken(`${base}/api/v1/user
 
 export const apiResetPassword = id => { return putWithToken(`${base}/api/v1/users/${id}/newPassword`, {}) };
 
-export const apiGetGroups = () => { return getWithToken(`${base}/api/v1/groups`, {}) };
+export const apiGetGroup = () => { return getWithToken(`${base}/api/v1/groups`, {}) };
 
 export const apiAddGroup = params => { return postWithToken(`${base}/api/v1/groups`, params) };
 

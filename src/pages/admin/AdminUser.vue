@@ -198,7 +198,7 @@
 
 <script>
 	import _ from "lodash"
-	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroups, apiAddGroup, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser } from "../../api/api"
+	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroup, apiAddGroup, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import PermissionType from "../../common/js/permissionType"
 	export default {
@@ -578,7 +578,7 @@
 				this.editFormVisible = true;
 			},
 			getGroupId: function(group_name, group_type) {
-				return apiGetGroups().then(res => {
+				return apiGetGroup().then(res => {
 					//console.log(res);
 					var start = null;
 					var groups = res.data;
