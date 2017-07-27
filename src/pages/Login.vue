@@ -1,8 +1,8 @@
 <template>
 	<el-form :model="loginForm" :rules="rules" ref="loginForm" label-position="left" label-width="0px" class="demo-ruleForm login-container">
-		<h3 class="title">系统登录</h3>
+		<h3 class="title">清华电子奖学金系统</h3>
 		<el-form-item prop="student_id">
-			<el-input type="text" v-model="loginForm.student_id" auto-complete="off" placeholder="学号"></el-input>
+			<el-input type="text" v-model="loginForm.student_id" auto-complete="off" placeholder="学号或工作证号"></el-input>
 		</el-form-item>
 		<el-form-item prop="password">
 			<el-input type="password" v-model="loginForm.password" auto-complete="off" placeholder="密码"></el-input>
@@ -26,7 +26,7 @@
 				},
 				rules: {
 					student_id: [
-						{ required: true, message: '请输入学号', trigger: 'blur' },
+						{ required: true, message: '请输入学号或工作证号', trigger: 'blur' },
 					],
 					password: [
 						{ required: true, message: '请输入密码', trigger: 'blur' },
