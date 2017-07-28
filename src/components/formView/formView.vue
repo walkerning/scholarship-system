@@ -63,7 +63,7 @@
 							<template v-for="(column, index2) in field.content">
 								<el-table-column :label="column">
 									<template scope="scope">
-										<el-input v-model="scope.row[index2]" :disabled="disabled"></el-input>
+										<el-input type="textarea" autosize v-model="scope.row[index2]" :disabled="disabled"></el-input>
 									</template>
 								</el-table-column>
 							</template>

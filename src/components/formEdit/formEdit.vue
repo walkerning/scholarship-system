@@ -44,7 +44,7 @@
 						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="false" :disableDescription="false" minLenString="最小值" maxLenString="最大值">
 							<div slot="slotPreivew">
 								<el-form-item :label="field.description" :required="field.required">
-									<el-input :placeholder="'数字' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '~' + String(field.max_len) + ')' : '')" :disabled="true"></el-input>
+									<el-input :placeholder="'数字' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '~' + String(field.max_len) + ')' : '')" :disabled="true" value=""></el-input>
 								</el-form-item>
 							</div>
 						</que-edit-panel>
@@ -53,7 +53,7 @@
 						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="false" :disableDescription="false">
 							<div slot="slotPreivew">
 								<el-form-item :label="field.description" :required="field.required">
-									<el-input placeholder="邮箱" :disabled="true"></el-input>
+									<el-input placeholder="邮箱" :disabled="true" value=""></el-input>
 								</el-form-item>			
 							</div>	
 						</que-edit-panel>		
@@ -62,7 +62,7 @@
 						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="false" :disableDescription="false">
 							<div slot="slotPreivew">
 								<el-form-item :label="field.description" :required="field.required">
-									<el-input placeholder="手机" :disabled="true"></el-input>
+									<el-input placeholder="手机" :disabled="true" value=""></el-input>
 								</el-form-item>		
 							</div>
 						</que-edit-panel>							
@@ -71,7 +71,7 @@
 						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="false" :disableDescription="false" minLenString="最短长度" maxLenString="最长长度">
 							<div slot="slotPreivew">
 								<el-form-item :label="field.description" :required="field.required">
-									<el-input :placeholder="'单行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')" :disabled="true"></el-input>
+									<el-input :placeholder="'单行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')" :disabled="true"></el-input value="">
 								</el-form-item>
 							</div>
 						</que-edit-panel>
@@ -80,7 +80,7 @@
 						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="false" :disableDescription="false" minLenString="最短长度" maxLenString="最长长度">
 							<div slot="slotPreivew">
 								<el-form-item :label="field.description" :required="field.required">
-									<el-input type="textarea" autosize :placeholder="'多行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')" :disabled="true"></el-input>
+									<el-input type="textarea" autosize :placeholder="'多行字符串' + (field.min_len <= field.max_len ? '(' + String(field.min_len) + '字符~' + String(field.max_len) + '字符)' : '')" :disabled="true" value=""></el-input>
 								</el-form-item>
 							</div>
 						</que-edit-panel>							
@@ -164,7 +164,7 @@
 									<template v-for="(column, index2) in field.content">
 										<el-table-column :label="column">
 											<template scope="scope">
-												<el-input :disabled="true"></el-input>
+												<el-input type="textarea" autosize :disabled="true"></el-input>
 											</template>
 										</el-table-column>
 									</template>

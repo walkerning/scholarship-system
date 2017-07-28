@@ -59,7 +59,7 @@
 								<template v-for="(column, index2) in field.row.content">
 									<el-table-column :label="column">
 										<template scope="scope">
-											<el-input v-model="scope.row[index2]" :readonly="readonly"></el-input>
+											<el-input type="textarea" autosize v-model="scope.row[index2]" :readonly="readonly"></el-input>
 										</template>
 									</el-table-column>
 								</template>
