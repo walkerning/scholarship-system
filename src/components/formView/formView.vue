@@ -5,7 +5,7 @@
 				<template v-for="(field, index) in getFields">
 					<template v-if="field.type === _QUE_TYPE.ILLUSTRATION"> <!--说明文字-->
 						<el-row>
-							<pre>{{ field.description }}</pre>
+							<pre style="white-space: pre-wrap;word-wrap: break-word;">{{ field.description }}</pre>
 						</el-row>
 						<hr />
 					</template>
@@ -57,7 +57,7 @@
 					</template>
 					<template v-else-if="field.type === _QUE_TYPE.TABLE"><!--表格-->
 						<el-row>
-							<pre>{{ field.description }}</pre>
+							<pre style="white-space: pre-wrap;word-wrap: break-word;">{{ field.description }}</pre>
 						</el-row>
 						<el-table :data="getFill['data' + index]">
 							<template v-for="(column, index2) in field.content">

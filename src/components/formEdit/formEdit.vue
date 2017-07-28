@@ -36,7 +36,7 @@
 					<template v-if="field.type === _QUE_TYPE.ILLUSTRATION"> <!--说明文字-->
 						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="true" :disableDescription="false">
 							<div slot="slotPreivew">
-								<pre>{{field.description}}</pre>
+								<pre style="white-space: pre-wrap;word-wrap: break-word;">{{field.description}}</pre>
 							</div>
 						</que-edit-panel>
 					</template>
@@ -158,7 +158,7 @@
 						<que-edit-panel :index="index" :disableMoveUp="index === 0" :disableMoveDown="index === getFields.length - 1" :disableDelete="false" :disableRequired="true" :disableDescription="false" :disableControl="false">
 							<div slot="slotPreivew">
 								<el-row>
-									<pre>{{ field.description }}</pre>
+									<pre style="white-space: pre-wrap;word-wrap: break-word;">{{ field.description }}</pre>
 								</el-row>
 								<el-table :data="[[],[]]">
 									<template v-for="(column, index2) in field.content">
