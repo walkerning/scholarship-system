@@ -64,6 +64,8 @@ export const apiUpdateHonor = (id, params) => { return putWithToken(`${base}/api
 
 export const apiDeleteHonor = id => { return deleteWithToken(`${base}/api/v1/honors/${id}`) };
 
+export const apiGetUserHonor = (id, params) => { return getWithToken(`${base}/api/v1/users/${id}/honors`, params) };
+
 export const apiGetGroupId = (group_name, group_type) => {
 	return apiGetGroup().then(res => {
 		//console.log(res);

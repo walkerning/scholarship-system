@@ -738,11 +738,18 @@
 					this.total = this.users.length;
 				}).catch(error => {
 					this.$notify({
-						title: "加载失败",
+						title: "加载用户列表失败",
 						message: error.response.data.message,
 						type: "error"
 					});
 					this.listLoading = false;
+				}).catch(error => {
+					this.$notify({
+						title: "加载用户列表失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+					this.listLoading = false;					
 				});
 			},
 			_userTypeString: function(type) {

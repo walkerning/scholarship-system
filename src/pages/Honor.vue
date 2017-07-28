@@ -2,7 +2,7 @@
 	<section>
 		<!--当前列表-->
 		<h1>可申请荣誉</h1>
-		<el-table :data="avaiableHonors" highlight-current-row v-loading="availableListLoading" @selection-change="availableAllSelsChange" style="width: 100%;" border>
+		<el-table :data="availableHonors" highlight-current-row v-loading="availableListLoading" @selection-change="availableAllSelsChange" style="width: 100%;" border>
 			<el-table-column type="index" width="60">
 			</el-table-column>
 			<el-table-column prop="name" label="荣誉名" width="200" sortable>
@@ -72,6 +72,7 @@
 </template>
 
 <script>
+	import { apiGetUser, apiGetHonorList, apiGetGroupId, apiGetUserHonor } from "../api/api"
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../common/js/queType"
@@ -126,7 +127,7 @@
 				total: 3,
 
 				availableListLoading: false,
-				avaiableHonors: [
+				availableHonors: [
 					{
 						id: 4,
 						name: "学业优秀奖",
@@ -358,13 +359,60 @@
 			singleSave: function() {
 
 			},
-			_applyStatusString: function(str) {
+			_applyStatusString: function (str) {
 				return ApplyStatus.applyStatusString(str);
+			},
+			getAvailableHonorList: function () {
+				this.availableListLoading = true;
+				this.availableHonors = []
+				var uid = sessionStorage.getItem("uid");
+				apiGetUser(uid).then(res => {
+					var group = res.data.group;
+					var type = res.data.type;
+					apiGetGroupId(group, type).then(id => {
+						var params = {
+							group_id: id,
+							available: 1
+						};
+						apiGetHonorList(params).then(res => {
+							var tHonors = res.data;
+							var tasks = []
+							for (var i in tHonors) {
+								tasks.push(apiGetUserHonor(uid, {honor_ids: tHonors.id}));
+							}
+							Promise.all(tasks).then(reses => {
+								for (var j in tHonors) {
+									if (reses[j].data.length == 0) {
+										this.availableHonors.push(tHonors[j]);
+									}
+								}
+								this.availableListLoading = false;
+							});
+						});
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "加载可申请荣誉列表失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+					this.availableListLoading = false;
+				}).catch(error => {
+					this.$notify({
+						title: "加载可申请荣誉列表失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+					this.availableListLoading = false;
+				});
 			},
 			...mapActions([
 				"setForm",
 				"setFill"
 			])
+		},
+		mounted() {
+			this.getAvailableHonorList();
 		}
 	}
 

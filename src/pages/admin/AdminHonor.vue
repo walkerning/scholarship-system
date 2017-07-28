@@ -779,7 +779,7 @@
 							quota: this.honorEditForm.group_quota[i].quota
 						});
 					}
-					apiAddHonor(params).then(res => {
+					apiUpdateHonor(this.honorEditForm.id, params).then(res => {
 						this.$notify({
 							title: "更新成功",
 							message: "更新荣誉信息成功",
