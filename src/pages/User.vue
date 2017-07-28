@@ -3,7 +3,7 @@
 		<el-form-item label="姓名">
 			<el-input v-model="form.name" :readonly="true"></el-input>
 		</el-form-item>
-		<el-form-item label="学号">
+		<el-form-item label="学号或工作证号">
 			<el-input v-model="form.student_id" :readonly="true"></el-input>
 		</el-form-item>
 		<el-form-item label="班级">

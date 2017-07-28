@@ -26,13 +26,13 @@
 			</el-table-column>
 			<el-table-column prop="name" label="荣誉名" width="200" sortable>
 			</el-table-column>
-			<el-table-column prop="year" label="年份" width="100" sortable>
+			<el-table-column prop="year" label="年份" width="90" sortable>
 			</el-table-column>
 			<el-table-column prop="start_time" label="申请开始时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
 			<el-table-column prop="end_time" label="申请结束时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
-			<el-table-column label="操作">
+			<el-table-column label="操作" width="350" >
 				<template scope="scope">
 					<el-button size="small" @click="singleHonorEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="singleHonorDel(scope.$index, scope.row)">删除</el-button>
@@ -294,7 +294,7 @@
 <script>
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
-	import { apiGetFormList } from "../../api/api"
+	import { apiGetFormList, apiGetHonorList, apiUpdateHonor, apiAddHonor, apiGetGroupId, apiDeleteHonor } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import FormType from "../../common/js/formType"
 	import ApplyStatus from "../../common/js/applyStatus"
@@ -325,72 +325,8 @@
 					year: ""
 				},
 				honorListLoading: false,
-				honors: [
-					{
-						id: 4,
-						name: "学业优秀奖",
-						year: "2018",
-						form_id: 6,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793",
-						group_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 10
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 4
-							}
-						],
-						form_id: 4
-					},
-					{
-						id: 5,
-						name: "科技创新优秀奖",
-						year: "2018",
-						form_id: 6,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793",
-						group_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 10
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 4
-							}
-						],
-						form_id: 4
-					},
-					{
-						id: 6,
-						name: "社会工作优秀奖",
-						year: "2018",
-						form_id: 7,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793",
-						group_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 10
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 4
-							}
-						],
-						form_id: 4
-					}
-				],
-				honorTotal: 3,
+				honors: [],
+				honorTotal: 0,
 				honorSels: [],
 
 				honorEditForm: {},
@@ -742,7 +678,7 @@
 				}
 			},
 			allHonorSearch: function () {
-
+				this.getHonorList();
 			},
 			allHonorAdd: function () {
 				this.start_time_date = new Date();
@@ -765,6 +701,23 @@
 				this.honorEditFormVisible = true;
 			},
 			singleHonorDel: function (index, row) {
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					apiDeleteHonor(row.id).then(res => {
+						this.$notify({
+							title: "删除成功",
+							message: "删除荣誉成功",
+							type: "success"
+						});
+						this.getHonorList();
+					}).catch(error => {
+						this.$notify({
+							title: "删除失败",
+							message: "删除荣誉失败",
+							type: "error"
+						});	
+					});
+				}).catch(() => {
+				});
 			},
 			singleHonorFinal: function (index, row) {
 				this.$confirm("提交后，荣誉信息、荣誉分配情况无法修改。确定提交？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
@@ -781,12 +734,80 @@
 				this.honorAddFormVisible = true;
 			},
 			allHonorBatchRemove: function () {
-
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					var tasks = [];
+					for (var i in this.honorSels) {
+						tasks.push(apiDeleteHonor(this.honorSels[i].id));
+					}
+					Promise.all(tasks).then(reses => {
+						this.$notify({
+							title: "删除成功",
+							message: "批量删除荣誉成功",
+							type: "success"
+						});
+						this.getHonorList();
+					}).catch(error => {
+						this.$notify({
+							title: "删除失败",
+							message: "批量删除荣誉失败",
+							type: "error"
+						});
+						this.getHonorList();
+					});
+				}).catch(() => {
+				});
 			},
 			singleHonorEditSubmit: function () {
 				this.honorEditForm.start_time = this.start_time_date.toISOString();
-				console.log(this.honorEditForm.start_time);
 				this.honorEditForm.end_time = this.end_time_date.toISOString();
+				var params = {
+					name: this.honorEditForm.name,
+					year: this.honorEditForm.year,
+					start_time: this.honorEditForm.start_time,
+					end_time: this.honorEditForm.end_time,
+					form_id: this.honorEditForm.form_id,
+					group_quota: []
+				};
+				var tasks = [];
+				for (var i in this.honorEditForm.group_quota) {
+					tasks.push(apiGetGroupId(this.honorEditForm.group_quota[i].group, this.honorEditForm.group_quota[i].type));
+				}
+				Promise.all(tasks).then(reses => {
+					for (var i in this.honorEditForm.group_quota) {
+						params.group_quota.push({
+							group_id: reses[i],
+							quota: this.honorEditForm.group_quota[i].quota
+						});
+					}
+					apiAddHonor(params).then(res => {
+						this.$notify({
+							title: "更新成功",
+							message: "更新荣誉信息成功",
+							type: "success"
+						});
+						this.honorEditFormVisible = false;
+						this.getHonorList();
+					}).catch(error => {
+						//console.log(error);
+						this.$notify({
+							title: "更新失败",
+							message: error.response.data.message,
+							type: "error"
+						});
+					}).catch(error => {
+						this.$notify({
+							title: "更新失败",
+							message: "请检查网络连接",
+							type: "error"
+						});
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "更新失败",
+						message: "获取组id失败",
+						type: "error"
+					});	
+				});
 			},
 			singleChangeApplyStatus: function (row, col) {
 				this.honorStateSettingUser = this.rates[row];
@@ -805,7 +826,56 @@
 
 			},
 			singleHonorAddSubmit: function () {
-
+				this.honorAddForm.start_time = this.start_time_date.toISOString();
+				this.honorAddForm.end_time = this.end_time_date.toISOString();
+				var params = {
+					name: this.honorAddForm.name,
+					year: this.honorAddForm.year,
+					start_time: this.honorAddForm.start_time,
+					end_time: this.honorAddForm.end_time,
+					form_id: this.honorAddForm.form_id,
+					group_quota: []
+				};
+				var tasks = [];
+				for (var i in this.honorAddForm.group_quota) {
+					tasks.push(apiGetGroupId(this.honorAddForm.group_quota[i].group, this.honorAddForm.group_quota[i].type));
+				}
+				Promise.all(tasks).then(reses => {
+					for (var i in this.honorAddForm.group_quota) {
+						params.group_quota.push({
+							group_id: reses[i],
+							quota: this.honorAddForm.group_quota[i].quota
+						});
+					}
+					apiAddHonor(params).then(res => {
+						this.$notify({
+							title: "新增成功",
+							message: "新增荣誉信息成功",
+							type: "success"
+						});
+						this.honorAddFormVisible = false;
+						this.getHonorList();
+					}).catch(error => {
+						//console.log(error);
+						this.$notify({
+							title: "新增失败",
+							message: error.response.data.message,
+							type: "error"
+						});
+					}).catch(error => {
+						this.$notify({
+							title: "新增失败",
+							message: "请检查网络连接",
+							type: "error"
+						});
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "新增失败",
+						message: "获取组id失败",
+						type: "error"
+					});	
+				});
 			},
 			singleRate: function (row, col) {
 				this.honorRateUser = this.rates[row];
@@ -936,6 +1006,28 @@
 					});
 				});
 			},
+			getHonorList: function () {
+				this.honorListLoading = true;
+				var params = {};
+				if (this.honorFilters.name != "") {
+					params["name"] = this.honorFilters.name;
+				}
+				if (this.honorFilters.year != "") {
+					params["year"] = this.honorFilters.year;
+				}
+				apiGetHonorList(params).then(res => {
+					this.honors = res.data;
+					this.honorListLoading = false;
+					this.honorTotal = this.honors.length;
+				}).catch(error => {
+					this.$notify({
+						title: "加载失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+					this.honorListLoading = false;
+				});
+			},
 			...mapActions([
 				"setForm",
 				"setFill",
@@ -944,6 +1036,7 @@
 		},
 		mounted() {
 			this.getFormList();
+			this.getHonorList();
 		}
 	}
 

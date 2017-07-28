@@ -1,4 +1,5 @@
 import axios from 'axios';
+import UserType from "../common/js/userType"
 
 //let base = 'http://foxfi.eva6.nics.cc:8080';
 let base = 'http://localhost:3000';
@@ -53,13 +54,50 @@ export const apiAddPermissionUser = (permissionName, userId) => { return postWit
 
 export const apiDeletePermissionUser = (permissionName, userId) => { return deleteWithToken(`${base}/api/v1/permissions/${permissionName}/users/${userId}`) };
 
+export const apiGetHonorList = params => { return getWithToken(`${base}/api/v1/honors`, params) };
+
+export const apiGetHonor = id => { return getWithToken(`${base}/api/v1/honors/${id}`) };
+
+export const apiAddHonor = params => { return postWithToken(`${base}/api/v1/honors`, params) };
+
+export const apiUpdateHonor = (id, params) => { return putWithToken(`${base}/api/v1/honors/${id}`, params) };
+
+export const apiDeleteHonor = id => { return deleteWithToken(`${base}/api/v1/honors/${id}`) };
+
+export const apiGetGroupId = (group_name, group_type) => {
+	return apiGetGroup().then(res => {
+		//console.log(res);
+		var start = null;
+		var groups = res.data;
+		for (var i = 0; i < groups.length; i++) {
+			if (groups[i].name === group_name && groups[i].type === group_type) {
+				start = Promise.resolve(groups[i].id);
+				break;
+			}
+		}
+		if (start == null) {
+			var params = {
+				name: group_name,
+				type: group_type,
+				description: group_name + "级" + UserType.userTypeString(group_type)
+			};
+			//console.log(params);
+			start = apiAddGroup(params).then(res => {
+				//console.log(res);
+				return res.data.id;
+			})
+		}
+		return start;
+	})
+};
+
 export const apiLogout = () => {
 	sessionStorage.removeItem("token");
 	sessionStorage.removeItem("uid");
 	sessionStorage.removeItem("userName");
-}
+};
 
 export const apiLogin = (data) => {
 	sessionStorage.setItem("token", data.token);
 	sessionStorage.setItem("uid", data.id);
-}
+};

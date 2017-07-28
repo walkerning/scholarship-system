@@ -11,7 +11,7 @@
 					<el-input v-model="filters.group" placeholder="年级"></el-input>
 				</el-form-item>
 				<el-form-item>
-					<el-input v-model="filters.student_id" placeholder="学号"></el-input>
+					<el-input v-model="filters.student_id" placeholder="学号或工作证号"></el-input>
 				</el-form-item>
 				<el-form-item>
 					<el-checkbox v-model="filters.admin">管理员</el-checkbox>
@@ -36,7 +36,7 @@
 			</el-table-column>
 			<el-table-column prop="name" label="姓名" width="120" sortable>
 			</el-table-column>
-			<el-table-column prop="student_id" label="学号" width="150" sortable>
+			<el-table-column prop="student_id" label="学号或工作证号" width="160" sortable>
 			</el-table-column>
 			<el-table-column prop="class" label="班级" width="100" sortable>
 			</el-table-column>
@@ -44,7 +44,7 @@
 			</el-table-column>
 			<el-table-column prop="type" label="类别" width="120" :formatter="typeFormatter" sortable>
 			</el-table-column>
-			<el-table-column label="操作">
+			<el-table-column label="操作" width="140">
 				<template scope="scope">
 					<el-button size="small" @click="singleEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="singleDel(scope.$index, scope.row)">删除</el-button>
@@ -65,7 +65,7 @@
 				<el-form-item label="姓名" prop="name">
 					<el-input v-model="editForm.name" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="学号" prop="student_id">
+				<el-form-item label="学号或工作证号" prop="student_id">
 					<el-input v-model="editForm.student_id" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="班级" prop="class">
@@ -117,7 +117,7 @@
 				<el-form-item label="姓名" prop="name">
 					<el-input v-model="addForm.name" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="学号" prop="student_id">
+				<el-form-item label="学号或工作证号" prop="student_id">
 					<el-input v-model="addForm.student_id" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="班级" prop="class">
@@ -198,7 +198,7 @@
 
 <script>
 	import _ from "lodash"
-	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroup, apiAddGroup, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser } from "../../api/api"
+	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroupId, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import PermissionType from "../../common/js/permissionType"
 	export default {
@@ -298,7 +298,7 @@
 						{ required: true, message: "请输入姓名", trigger: "change"}
 					],
 					student_id: [ 
-						{ required: true, message: "请输入学号", trigger: "change"}
+						{ required: true, message: "请输入学号或工作证号", trigger: "change"}
 					],
 					class: [ 
 						{ required: true, message: "请输入班级", trigger: "change"}
@@ -345,7 +345,7 @@
 						{ required: true, message: "请输入姓名", trigger: "change"}
 					],
 					student_id: [ 
-						{ required: true, message: "请输入学号", trigger: "change"}
+						{ required: true, message: "请输入学号或工作证号", trigger: "change"}
 					],
 					class: [ 
 						{ required: true, message: "请输入班级", trigger: "change"}
@@ -412,7 +412,7 @@
 								phone: row_._cells[5].value+'',
 								email: row_._cells[6].value
 							};		
-							that.getGroupId(row_._cells[3].value+'', row_._cells[4].value+'').then(group_id => {
+							apiGetGroupId(row_._cells[3].value+'', row_._cells[4].value+'').then(group_id => {
 								params.group_id = group_id;
 								//console.log(params);
 								apiAddUser(params).then(res => {
@@ -577,36 +577,10 @@
 				this.editFormOldPermission = row.permissions;
 				this.editFormVisible = true;
 			},
-			getGroupId: function(group_name, group_type) {
-				return apiGetGroup().then(res => {
-					//console.log(res);
-					var start = null;
-					var groups = res.data;
-					for (var i = 0; i < groups.length; i++) {
-						if (groups[i].name === group_name && groups[i].type === group_type) {
-							start = Promise.resolve(groups[i].id);
-							break;
-						}
-					}
-					if (start == null) {
-						var params = {
-							name: group_name,
-							type: group_type,
-							description: group_name + "级" + this._userTypeString(group_type)
-						};
-						//console.log(params);
-						start = apiAddGroup(params).then(res => {
-							//console.log(res);
-							return res.data.id;
-						})
-					}
-					return start;
-				})
-			},
 			singleEditSubmit: function () {
 				this.$refs.editForm.validate((valid) => {
 					if (valid) {
-						this.getGroupId(this.editForm.group, this.editForm.type).then(group_id => {
+						apiGetGroupId(this.editForm.group, this.editForm.type).then(group_id => {
 							var uid = this.editForm.id;
 							var params = {
 								name: this.editForm.name,
@@ -647,7 +621,7 @@
 								this.editFormVisible = false;
 								this.getUserList();
 							}).catch(error => {
-								console.log(error);
+								//console.log(error);
 								this.$notify({
 									title: "更新失败",
 									message: error.response.data.message,
@@ -661,7 +635,7 @@
 								});	
 							});
 						}).catch(error => {
-							console.log(error);
+							//console.log(error);
 							this.$notify({
 								title: "更新失败",
 								message: "获取组id失败",
@@ -690,7 +664,7 @@
 			singleAddSubmit: function () {
 				this.$refs.addForm.validate((valid) => {
 					if (valid) {
-						this.getGroupId(this.addForm.group, this.addForm.type).then(group_id => {
+						apiGetGroupId(this.addForm.group, this.addForm.type).then(group_id => {
 							var params = {
 								name: this.addForm.name,
 								student_id: this.addForm.student_id,
