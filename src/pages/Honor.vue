@@ -60,7 +60,7 @@
 
 		<!--申请界面-->
 		<el-dialog title="申请" v-model="applyVisible" :close-on-click-modal="false" size="large">
-			<form-view></form-view>
+			<form-view ref="form"></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="applyVisible = false">取消</el-button>
 				<el-button @click.native="singleSave">暂存</el-button>
@@ -72,7 +72,8 @@
 </template>
 
 <script>
-	import { apiGetUser, apiGetHonorList, apiGetGroupId, apiGetUserHonor } from "../api/api"
+	import _ from "lodash"
+	import { apiGetUser, apiGetHonorList, apiGetGroupId, apiGetUserHonor, apiGetHonor, apiGetForm, apiApplyUserHonor, apiUpdateUserHonor } from "../api/api"
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../common/js/queType"
@@ -127,33 +128,10 @@
 				total: 3,
 
 				availableListLoading: false,
-				availableHonors: [
-					{
-						id: 4,
-						name: "学业优秀奖",
-						year: "2018",
-						form_id: 6,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793"
-					},
-					{
-						id: 5,
-						name: "科技创新优秀奖",
-						year: "2018",
-						form_id: 6,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793"
-					},
-					{
-						id: 6,
-						name: "社会工作优秀奖",
-						year: "2018",
-						form_id: 7,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793"
-					}
-				],
-				availableTotal: 3,
+				availableHonors: [],
+				availableTotal: 0,
+
+				isSave: false,
 
 				testForm: {
 					id: "1",
@@ -320,23 +298,61 @@
 				this.availableSels = sels;
 			},
 			singleView: function (index, row) {
-				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
-				this.setFill(JSON.parse(JSON.stringify(this.testFill)));
-				this.viewVisible = true;
+				apiGetForm(row.form_id).then(res => {
+					this.setForm(res.data);
+					this.setFill(JSON.parse(row.fill));
+					this.viewVisible = true;
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉申请表单失败",
+						message: error.response.data.message,
+						type: "error"
+					});					
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉申请表单失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+				});
 			},
 			singleApply: function (index, row) {
-				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
-				var fill = {};
-				for (var i in this.getFields) {
-					var field = this.getFields[i];
-					if (field.type === this._QUE_TYPE.CHECKBOX) {
-						fill["data" + i] = [];
-					} else {
-						fill["data" + i] = null;
-					}
-				}
-				this.setFill(fill);
-				this.applyVisible = true;
+				var uid = sessionStorage.getItem("uid");
+				apiGetForm(row.form_id).then(res => {
+					res.data.honor_id = row.id;
+					this.setForm(res.data);
+					return apiGetUserHonor(uid, {honor_id: row.id}).then(res => {
+						var fill = {};
+						if (res.data.length != 0 && res.data[0].state === this._APPLY_STATUS.TEMP) {
+							fill = JSON.parse(res.data[0].fill);
+							this.isSave = true;
+						} else {
+							for (var i in this.getFields) {
+								var field = this.getFields[i];
+								if (field.type === this._QUE_TYPE.CHECKBOX || field.type === this._QUE_TYPE.TABLE) {
+									fill["data" + i] = [];
+								} else {
+									fill["data" + i] = "";
+								}
+							}
+							this.isSave = false;							
+						}
+						this.setFill(fill);
+						this.applyVisible = true;
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉申请表单失败",
+						message: error.response.data.message,
+						type: "error"
+					});					
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉申请表单失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+				});
 			},
 			timeFormatter: function (row, column) {
 				if (column.property === "end_time") {
@@ -354,38 +370,159 @@
 
 			},
 			singleApplySubmit: function () {
+				this.$refs.form.validate((valid) => {
+					if (valid) {
+						var start = null;
+						if (this.isSave) {
+							start = Promise.resolve(null);
+						} else {
+							start = this.doApply();
+						}
+						start.then(() => {
+							return this.doUpdate(false).then(() => {
+								this.$notify({
+									title: "提交成功",
+									message: "提交荣誉申请表成功",
+									type: "success"
+								});
+								this.applyVisible = false;
+								this.getHistoryHonorList();
+								this.getAvailableHonorList();
+							});
+						}).catch(error => {
+							this.$notify({
+								title: "提交失败",
+								message: error.response.data.message,
+								type: "error"
+							});		
+							this.applyVisible = false;
+						}).catch(error => {
+							this.$notify({
+								title: "提交失败",
+								message: "请检查网络连接",
+								type: "error"
+							});		
+							this.applyVisible = false;
+						});
+					}
+				});
+			},
+			singleSave: function () {
+				var start = null;
+				if (this.isSave) {
+					start = this.doUpdate(true);
+				} else {
+					start = this.doApply();
+				}
+				start.then(() => {
+					this.$notify({
+						title: "暂存成功",
+						message: "暂存荣誉申请表成功",
+						type: "success"
+					});
+					this.applyVisible = false;
+				}).catch(error => {
+					this.$notify({
+						title: "暂存失败",
+						message: error.response.data.message,
+						type: "error"
+					});		
+					this.applyVisible = false;
+				}).catch(error => {
+					this.$notify({
+						title: "暂存失败",
+						message: "请检查网络连接",
+						type: "error"
+					});		
+					this.applyVisible = false;
+				});
+			},
+			doApply: function () {
+				var uid = sessionStorage.getItem("uid");
+				var params = {
+					honor_id: this.getForm.honor_id,
+					fill: this.getFill
+				}
+				return apiApplyUserHonor(uid, params);
 
 			},
-			singleSave: function() {
-
+			doUpdate: function (bSave) {
+				var uid = sessionStorage.getItem("uid");
+				var honor_id = this.getForm.honor_id;
+				var params = {
+					fill: this.getFill,
+					state: bSave? this._APPLY_STATUS.TEMP : this._APPLY_STATUS.APPLIED
+				}
+				return apiUpdateUserHonor(uid, honor_id, params);
 			},
 			_applyStatusString: function (str) {
 				return ApplyStatus.applyStatusString(str);
 			},
+			getHistoryHonorList: function () {
+				this.listLoading = true;
+				this.honors = []
+				this.total = 0;
+				var uid = sessionStorage.getItem("uid");
+				apiGetUserHonor(uid, {}).then(res => {
+					var userHonorStates = res.data;
+					var tasks = [];
+					var tUserHonorStates = [];
+					for (var i in userHonorStates) {
+						if (userHonorStates[i].state != this._APPLY_STATUS.TEMP) {
+							tasks.push(apiGetHonor(userHonorStates[i].honor_id));
+							tUserHonorStates.push(userHonorStates[i])
+						}
+					}
+					return Promise.all(tasks).then(reses => {
+						for (var i in tUserHonorStates) {
+							this.honors.push(_.extend(tUserHonorStates[i], _.pick(reses[i].data, ["form_id", "name", "year"])));
+						}
+						this.total = this.honors.length;
+						this.listLoading = false;
+					});
+
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉申请历史列表失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+					this.listLoading = false;
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉申请历史列表失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+					this.listLoading = false;
+				});
+			},
 			getAvailableHonorList: function () {
 				this.availableListLoading = true;
 				this.availableHonors = []
+				this.availableTotal = 0;
 				var uid = sessionStorage.getItem("uid");
 				apiGetUser(uid).then(res => {
 					var group = res.data.group;
 					var type = res.data.type;
-					apiGetGroupId(group, type).then(id => {
+					return apiGetGroupId(group, type).then(id => {
 						var params = {
 							group_id: id,
 							available: 1
 						};
-						apiGetHonorList(params).then(res => {
+						return apiGetHonorList(params).then(res => {
 							var tHonors = res.data;
 							var tasks = []
 							for (var i in tHonors) {
 								tasks.push(apiGetUserHonor(uid, {honor_ids: tHonors.id}));
 							}
-							Promise.all(tasks).then(reses => {
+							return Promise.all(tasks).then(reses => {
 								for (var j in tHonors) {
-									if (reses[j].data.length == 0) {
+									if (reses[j].data.length == 0 || reses[j].data[0].state === this._APPLY_STATUS.TEMP) {
 										this.availableHonors.push(tHonors[j]);
 									}
 								}
+								this.availableTotal = this.availableHonors.length;
 								this.availableListLoading = false;
 							});
 						});
@@ -413,6 +550,7 @@
 		},
 		mounted() {
 			this.getAvailableHonorList();
+			this.getHistoryHonorList();
 		}
 	}
 

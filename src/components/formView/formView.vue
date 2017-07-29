@@ -1,6 +1,6 @@
 <template>
 	<section>
-		<el-form :model="getFill" label-width="250px" :rules="formRules" ref="getForm">
+		<el-form :model="getFill" label-width="250px" :rules="formRules" ref="form">
 			<div>
 				<template v-for="(field, index) in getFields">
 					<template v-if="field.type === _QUE_TYPE.ILLUSTRATION"> <!--说明文字-->
@@ -240,6 +240,9 @@
 			]),
 			print: function() {
 				console.log("print");
+			},
+			validate: function(callback) {
+				this.$refs.form.validate(callback);
 			}
 		}
 	}

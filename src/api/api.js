@@ -40,6 +40,8 @@ export const apiAddGroup = params => { return postWithToken(`${base}/api/v1/grou
 
 export const apiGetFormList = params => { return getWithToken(`${base}/api/v1/forms`, params) };
 
+export const apiGetForm = id => { return getWithToken(`${base}/api/v1/forms/${id}`) };
+
 export const apiUpdateForm = (id, params) => { return putWithToken(`${base}/api/v1/forms/${id}`, params) };
 
 export const apiAddForm = params => { return postWithToken(`${base}/api/v1/forms`, params) };
@@ -65,6 +67,10 @@ export const apiUpdateHonor = (id, params) => { return putWithToken(`${base}/api
 export const apiDeleteHonor = id => { return deleteWithToken(`${base}/api/v1/honors/${id}`) };
 
 export const apiGetUserHonor = (id, params) => { return getWithToken(`${base}/api/v1/users/${id}/honors`, params) };
+
+export const apiApplyUserHonor = (id, params) => { return postWithToken(`${base}/api/v1/users/${id}/honors`, params) };
+
+export const apiUpdateUserHonor = (id, honorId, params) => { return putWithToken(`${base}/api/v1/users/${id}/honors/${honorId}`, params) };
 
 export const apiGetGroupId = (group_name, group_type) => {
 	return apiGetGroup().then(res => {
