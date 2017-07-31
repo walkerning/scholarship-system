@@ -71,7 +71,7 @@
 			<template v-for="(value, key, index) in getRate">
 				<el-table-column :label="key === _UID? ('评分人' + (index + 1) + '(您)') : ('评分人' + (index + 1))">
 					<template scope="scope">
-						<el-input v-model="value[scope.$index]" :disabled="key !== _UID"></el-input>
+						<el-input-number v-model="value[scope.$index]" :disabled="key !== _UID"></el-input-number>
 					</template>
 				</el-table-column>
 			</template>

@@ -96,191 +96,14 @@
 		data() {
 			return {
 				listLoading: false,
-				honors: [
-					{
-						id: 1,
-						name: "学业优秀奖",
-						year: "2017",
-						form_id: 6,
-						state: "success",
-						fill_id: 10,
-						apply_time: "2017-09-28T10:54:24.738793"
-					},
-					{
-						id: 2,
-						name: "科技创新优秀奖",
-						year: "2018",
-						form_id: 6,
-						state: "fail",
-						fill_id: 11,
-						apply_time: "2017-09-28T10:54:24.738793"
-					},
-					{
-						id: 3,
-						name: "社会工作优秀奖",
-						year: "2017",
-						form_id: 7,
-						state: "applied",
-						fill_id: 12,
-						apply_time: "2017-09-28T10:54:24.738793"
-					}
-				],
-				total: 3,
+				honors: [],
+				total: 0,
 
 				availableListLoading: false,
 				availableHonors: [],
 				availableTotal: 0,
 
 				isSave: false,
-
-				testForm: {
-					id: "1",
-					name: "测试表单1",
-					type: "apply",
-					fields: [
-						{
-							type: 1,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "说明文字",
-							content: null
-						},
-						{
-							type: 2,
-							max_len: 1267,
-							min_len: 1200,
-							required: false,
-							description: "数字（有限制、可选）",
-							content: null
-						},
-						{
-							type: 2,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "数字（无限制、必选）",
-							content: null
-						},
-						{
-							type: 3,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "邮箱（无限制、必选）",
-							content: null
-						},
-						{
-							type: 4,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "手机（无限制、必选）",
-							content: null
-						},
-						{
-							type: 5,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "单行字符串（无限制、必选）",
-							content: null
-						},
-						{
-							type: 5,
-							max_len: 100,
-							min_len: 1,
-							required: false,
-							description: "单行字符串（有限制、可选）",
-							content: null
-						},
-						{
-							type: 6,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "多行字符串（无限制、必选）",
-							content: null
-						},
-						{
-							type: 6,
-							max_len: 100,
-							min_len: 1,
-							required: false,
-							description: "多行字符串（有限制、可选）",
-							content: null
-						},
-						{
-							type: 7,
-							max_len: 2,
-							min_len: 1,
-							required: false,
-							description: "多选框（有限制、可选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 7,
-							max_len: 2,
-							min_len: 1,
-							required: true,
-							description: "多选框（有限制、必选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 8,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "单选框（可选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 9,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "附件说明",
-							content: 1
-						},
-						{
-							type: 10,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "上传附件（无限制、可选）",
-							content: null
-						},
-						{
-							type: 10,
-							max_len: -1,
-							min_len: 10000,
-							required: true,
-							description: "上传附件（有限制、必选）",
-							content: null
-						},
-						{
-							type: 11,
-							description: "表格",
-							content: ["列1", "列2", "列3"]
-						}
-					],
-					template: ""
-				},
-				testFill: {
-					data0: "",
-					data1: "1200",
-					data2: "100",
-					data3: "linzinan1995@126.com",
-					data4: "18800182102",
-					data5: "test",
-					data6: "test2",
-					data7: "test\ntest",
-					data8: "",
-					data9: [],
-					data10: ["A", "B"],
-					data11: "A",
-					data15: [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
-				},
 
 				viewVisible: false,
 				applyVisible: false,
@@ -503,28 +326,24 @@
 				this.availableTotal = 0;
 				var uid = sessionStorage.getItem("uid");
 				apiGetUser(uid).then(res => {
-					var group = res.data.group;
-					var type = res.data.type;
-					return apiGetGroupId(group, type).then(id => {
-						var params = {
-							group_id: id,
-							available: 1
-						};
-						return apiGetHonorList(params).then(res => {
-							var tHonors = res.data;
-							var tasks = []
-							for (var i in tHonors) {
-								tasks.push(apiGetUserHonor(uid, {honor_ids: tHonors.id}));
-							}
-							return Promise.all(tasks).then(reses => {
-								for (var j in tHonors) {
-									if (reses[j].data.length == 0 || reses[j].data[0].state === this._APPLY_STATUS.TEMP) {
-										this.availableHonors.push(tHonors[j]);
-									}
+					var params = {
+						group_id: res.data.group_id,
+						available: 1
+					};
+					return apiGetHonorList(params).then(res => {
+						var tHonors = res.data;
+						var tasks = []
+						for (var i in tHonors) {
+							tasks.push(apiGetUserHonor(uid, {honor_ids: tHonors.id}));
+						}
+						return Promise.all(tasks).then(reses => {
+							for (var j in tHonors) {
+								if (reses[j].data.length == 0 || reses[j].data[0].state === this._APPLY_STATUS.TEMP) {
+									this.availableHonors.push(tHonors[j]);
 								}
-								this.availableTotal = this.availableHonors.length;
-								this.availableListLoading = false;
-							});
+							}
+							this.availableTotal = this.availableHonors.length;
+							this.availableListLoading = false;
 						});
 					});
 				}).catch(error => {

@@ -223,33 +223,35 @@
 				</el-table-column>
 			</template>
 
-			<template slot="append">
-				<tr>
-					<td colspan="5" style="text-align:center;">申请人数</td>
-					<template v-for="(honor, index) in rateHonors">
-						<td style="text-align:center;">{{ countApply(index) }}</td>
-					</template>					
-				</tr>
-				<tr>
-					<td colspan="5" style="text-align:center;">获得人数</td>
-					<template v-for="(honor, index) in rateHonors">
-						<td style="text-align:center;">{{ countGet(index) }}</td>
-					</template>					
-				</tr>
-				<tr>
-					<td colspan="5" style="text-align:center;">名额</td>
-					<template v-for="(honor, index) in rateHonors">
-						<td style="text-align:center;">{{ countQuota(index) }}</td>
-					</template>					
-				</tr>
-				<tr>
-					<td colspan="5" style="text-align:center;">操作</td>
-					<template v-for="(honor, index) in rateHonors">
-					<td style="text-align:center;">
-						<el-button size="small" @click="singleAssignHonor(index)">按名额授予得分最高的同学</el-button>
-					</td>
-					</template>					
-				</tr>
+			<template v-if="rates.length > 0">
+				<template slot="append">
+					<tr>
+						<td colspan="5" style="text-align:center;">申请人数</td>
+						<template v-for="(honor, index) in rateHonors">
+							<td style="text-align:center;">{{ countApply(index) }}</td>
+						</template>					
+					</tr>
+					<tr>
+						<td colspan="5" style="text-align:center;">获得人数</td>
+						<template v-for="(honor, index) in rateHonors">
+							<td style="text-align:center;">{{ countGet(index) }}</td>
+						</template>					
+					</tr>
+					<tr>
+						<td colspan="5" style="text-align:center;">名额</td>
+						<template v-for="(honor, index) in rateHonors">
+							<td style="text-align:center;">{{ countQuota(index) }}</td>
+						</template>					
+					</tr>
+					<tr>
+						<td colspan="5" style="text-align:center;">操作</td>
+						<template v-for="(honor, index) in rateHonors">
+						<td style="text-align:center;">
+							<el-button size="small" @click="singleAssignHonor(index)">按名额授予得分最高的同学</el-button>
+						</td>
+						</template>					
+					</tr>
+				</template>
 			</template>
 		</el-table>
 
@@ -294,7 +296,7 @@
 <script>
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
-	import { apiGetFormList, apiGetHonorList, apiUpdateHonor, apiAddHonor, apiGetGroupId, apiDeleteHonor } from "../../api/api"
+	import { apiGetFormList, apiGetHonorList, apiUpdateHonor, apiAddHonor, apiGetGroupId, apiDeleteHonor, apiGetGroupHonor, apiGetUser, apiGetHonor, apiGetForm, apiAddUserHonorScore, apiUpdateUserHonorScore, apiDeleteUserHonorScore, apiUpdateUserHonorAdmin } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import FormType from "../../common/js/formType"
 	import ApplyStatus from "../../common/js/applyStatus"
@@ -302,6 +304,12 @@
 
 	export default {
 		computed: {
+			...mapGetters([
+				"getForm",
+				"getFields",
+				"getFill",
+				"getRate"
+			]),
 			_USER_TYPE: function() {
 				return UserType.USER_TYPE;
 			},
@@ -357,311 +365,17 @@
 				rateGroup: "",
 				rateType: "",
 				rateListLoading: false,
-				rates: [
-					{
-						id: 1,
-						name: "林梓楠",
-						class: "无37",
-						student_id: "2013011217",
-						honor_fill_ids: [1, 2, 3],
-						honor_states: ["applied", "success", "fail"],
-						honor_scores: [
-							{
-								"3": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [100, 200, 300]
-					},
-					{
-						id: 2,
-						name: "宁雪妃",
-						class: "无39",
-						student_id: "2019011217",
-						honor_fill_ids: [1, null, 3],
-						honor_states: ["applied", null, "fail"],
-						honor_scores: [
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							null,
-							{
-								"3": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [200, null, 500]
-					},
-					{
-						id: 3,
-						name: "宁雪妃2",
-						class: "无392",
-						student_id: "2019012172",
-						honor_fill_ids: [1, null, 3],
-						honor_states: ["applied", null, "success"],
-						honor_scores: [
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							null,
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [50, null, 900]
-					}
-				],
+				rates: [],
 				rateSels: [],
+				hasMyRate: false,
+				scoreMap: [],
 
 				honorStateSettingVisible: false,
 				honorStateSettingUser: {},
 				honorStateSettingHonor: {},
 				honorStateSettingState: "",
 				applyEditLoading: false,
-				testForm: {
-					id: "1",
-					name: "测试表单1",
-					type: "apply",
-					fields: [
-						{
-							type: 1,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "说明文字",
-							content: null
-						},
-						{
-							type: 2,
-							max_len: 1267,
-							min_len: 1200,
-							required: false,
-							description: "数字（有限制、可选）",
-							content: null
-						},
-						{
-							type: 2,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "数字（无限制、必选）",
-							content: null
-						},
-						{
-							type: 3,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "邮箱（无限制、必选）",
-							content: null
-						},
-						{
-							type: 4,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "手机（无限制、必选）",
-							content: null
-						},
-						{
-							type: 5,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "单行字符串（无限制、必选）",
-							content: null
-						},
-						{
-							type: 5,
-							max_len: 100,
-							min_len: 1,
-							required: false,
-							description: "单行字符串（有限制、可选）",
-							content: null
-						},
-						{
-							type: 6,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "多行字符串（无限制、必选）",
-							content: null
-						},
-						{
-							type: 6,
-							max_len: 100,
-							min_len: 1,
-							required: false,
-							description: "多行字符串（有限制、可选）",
-							content: null
-						},
-						{
-							type: 7,
-							max_len: 2,
-							min_len: 1,
-							required: false,
-							description: "多选框（有限制、可选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 7,
-							max_len: 2,
-							min_len: 1,
-							required: true,
-							description: "多选框（有限制、必选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 8,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "单选框（可选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 9,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "附件说明",
-							content: 1
-						},
-						{
-							type: 10,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "上传附件（无限制、可选）",
-							content: null
-						},
-						{
-							type: 10,
-							max_len: -1,
-							min_len: 10000,
-							required: true,
-							description: "上传附件（有限制、必选）",
-							content: null
-						},
-						{
-							type: 11,
-							description: "表格",
-							content: ["列1", "列2", "列3"]
-						}
-					],
-					template: ""
-				},
-				testFill: {
-					data0: "",
-					data1: "1200",
-					data2: "100",
-					data3: "linzinan1995@126.com",
-					data4: "18800182102",
-					data5: "test",
-					data6: "test2",
-					data7: "test\ntest",
-					data8: "",
-					data9: [],
-					data10: ["A", "B"],
-					data11: "A",
-					data15: [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
-				},
-
+				
 				honorRateVisible: false,
 				honorRateUser: {},
 				honorRateHonor: {},
@@ -813,17 +527,53 @@
 				this.honorStateSettingUser = this.rates[row];
 				this.honorStateSettingHonor = this.rateHonors[col];
 				this.honorStateSettingState = this.rates[row].honor_states[col];
-				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
-				this.setFill(JSON.parse(JSON.stringify(this.testFill)));
-				this.honorStateSettingVisible = true;
+				var fill = JSON.parse(this.rates[row].honor_fills[col]);
+				apiGetForm(this.rateHonors[col].form_id).then(formRes => {
+					var form = formRes.data;
+					this.setForm(JSON.parse(JSON.stringify(form)));
+					this.setFill(JSON.parse(JSON.stringify(fill)));
+					this.honorStateSettingVisible = true;
+				}).catch(error => {
+					this.$notify({
+						title: "加载申请表失败",
+						message: "获取荣誉申请表失败",
+						type: "error"
+					});	
+				});
 			},
 			singleChangeApplyStatusSubmit: function () {
-				console.log(this.honorStateSettingUser);
-				console.log(this.honorStateSettingHonor);
-				console.log(this.honorStateSettingState);
+				apiUpdateUserHonorAdmin(this.honorStateSettingUser.id, this.honorStateSettingHonor.id, {state: this.honorStateSettingState}).then(res => {
+					this.$notify({
+						title: "修改成功",
+						message: "修改申请状态成功",
+						type: "success"
+					});	
+					this.honorStateSettingVisible = false;
+					this.getRateList();
+				}).catch(error => {
+					this.$notify({
+						title: "修改失败",
+						message: "修改申请状态失败",
+						type: "error"
+					});	
+				});
 			},
 			singleApplyEditSubmit: function () {
-
+				apiUpdateUserHonorAdmin(this.honorStateSettingUser.id, this.honorStateSettingHonor.id, {fill: this.getFill}).then(res => {
+					this.$notify({
+						title: "修改成功",
+						message: "修改申请表成功",
+						type: "success"
+					});	
+					this.honorStateSettingVisible = false;
+					this.getRateList();
+				}).catch(error => {
+					this.$notify({
+						title: "修改失败",
+						message: "修改申请表失败",
+						type: "error"
+					});	
+				});
 			},
 			singleHonorAddSubmit: function () {
 				this.honorAddForm.start_time = this.start_time_date.toISOString();
@@ -880,40 +630,173 @@
 			singleRate: function (row, col) {
 				this.honorRateUser = this.rates[row];
 				this.honorRateHonor = this.rateHonors[col];
-				var tmpForm = JSON.parse(JSON.stringify(this.testForm));
-				tmpForm.fields = [];
-				var tmpFill = {};
-				var tmpRate = {};
-				for (var i in this.rates[row].honor_scores[col]) {
-					tmpRate[i] = [];
-				}
-				for (var i = 0; i < this.testForm.fields.length; i++) {
-					if (this.testForm.fields[i].type === this._QUE_TYPE.STRING_SINGLE_LINE || this.testForm.fields[i].type === this._QUE_TYPE.STRING_MULTIPLE_LINE) {
-						tmpForm.fields.push(this.testForm.fields[i]);
-						tmpFill["data" + (tmpForm.fields.length - 1)] = this.testFill["data" + i];
-						for (var j in this.rates[row].honor_scores[col]) {
-							tmpRate[j].push(this.rates[row].honor_scores[col][j]["score" + i])
+				var fill = JSON.parse(this.rates[row].honor_fills[col]);
+				apiGetForm(this.rateHonors[col].form_id).then(formRes => {
+					var form = formRes.data;
+					var tmpForm = JSON.parse(JSON.stringify(form));
+					tmpForm.fields = [];
+					var tmpFill = {};
+					var tmpRate = {};
+					for (var i in this.rates[row].honor_scores[col]) {
+						tmpRate[i] = [];
+					}
+					this.scoreMap = [];
+					for (var i = 0; i < form.fields.length; i++) {
+						if (form.fields[i].type === this._QUE_TYPE.STRING_SINGLE_LINE || form.fields[i].type === this._QUE_TYPE.STRING_MULTIPLE_LINE) {
+							tmpForm.fields.push(form.fields[i]);
+							tmpFill["data" + (tmpForm.fields.length - 1)] = fill["data" + i];
+							for (var j in this.rates[row].honor_scores[col]) {
+								tmpRate[j].push(this.rates[row].honor_scores[col][j]["score" + i])
+
+							}
+							this.scoreMap.push({
+								key: "score" + i,
+								inArray: false
+							})
+						} else if (form.fields[i].type === this._QUE_TYPE.TABLE) {
+							for (var j = 0; j < fill["data" + i].length; j++) {
+								tmpForm.fields.push(JSON.parse(JSON.stringify(form.fields[i])));
+								tmpFill["data" + (tmpForm.fields.length - 1)] = [ fill["data" + i][j] ];
+								for (var k in this.rates[row].honor_scores[col]) {
+									tmpRate[k].push(this.rates[row].honor_scores[col][k]["score" + i][j])
+								}
+								this.scoreMap.push({
+									key: "score" + i,
+									inArray: true
+								})							
+							}
 						}
-					} else if (this.testForm.fields[i].type === this._QUE_TYPE.TABLE) {
-						for (var j = 0; j < this.testFill["data" + i].length; j++) {
-							tmpForm.fields.push(JSON.parse(JSON.stringify(this.testForm.fields[i])));
-							tmpFill["data" + (tmpForm.fields.length - 1)] = [ this.testFill["data" + i][j] ];
-							for (var k in this.rates[row].honor_scores[col]) {
-								tmpRate[k].push(this.rates[row].honor_scores[col][k]["score" + i][j])
-							}							
+					}
+					this.setForm(tmpForm);
+					this.setFill(tmpFill);
+					this.setRate(tmpRate);
+					this.hasMyRate = tmpRate[sessionStorage.getItem("uid")] !== undefined;
+					this.honorRateVisible = true;	
+				}).catch(error => {
+					this.$notify({
+						title: "加载评分表失败",
+						message: "获取荣誉申请表失败",
+						type: "error"
+					});	
+				});
+			},
+			singleRateSubmit: function () {
+				var nowRate = this.getRate;
+				var uid = sessionStorage.getItem("uid");
+				if (nowRate[uid] !== undefined) {
+					var score = {};
+					for (var i in nowRate[uid]) {
+						if (!this.scoreMap[i].inArray) {
+							score[this.scoreMap[i].key] = nowRate[uid][i];
+						} else {
+							if (score[this.scoreMap[i].key] === undefined) {
+								score[this.scoreMap[i].key] = [ nowRate[uid][i] ];
+							} else {
+								score[this.scoreMap[i].key].push(nowRate[uid][i]);
+							}
+						}
+					}
+					if (!this.hasMyRate) {
+						apiAddUserHonorScore(this.honorRateUser.id, this.honorRateHonor.id, {score: score}).then(res => {
+							this.$notify({
+								title: "评分成功",
+								message: "创建评分成功",
+								type: "success"
+							});	
+							this.honorRateVisible = false;		
+							this.getRateList();
+						}).catch(error => {
+							this.$notify({
+								title: "评分失败",
+								message: "创建评分失败",
+								type: "error"
+							});	
+						});
+					} else {
+						apiUpdateUserHonorScore(this.honorRateUser.id, this.honorRateHonor.id, uid, {score: score}).then(res => {
+							this.$notify({
+								title: "评分成功",
+								message: "修改评分成功",
+								type: "success"
+							});	
+							this.honorRateVisible = false;		
+							this.getRateList();
+						}).catch(error => {
+							this.$notify({
+								title: "评分失败",
+								message: "修改评分失败",
+								type: "error"
+							});	
+						});
+					}
+				} else {
+					if (this.hasMyRate) {
+						apiDeleteUserHonorScore(this.honorRateUser.id, this.honorRateHonor.id, uid).then(res => {
+							this.$notify({
+								title: "评分成功",
+								message: "删除评分成功",
+								type: "success"
+							});	
+							this.honorRateVisible = false;		
+							this.getRateList();
+						}).catch(error => {
+							this.$notify({
+								title: "评分失败",
+								message: "删除评分失败",
+								type: "error"
+							});	
+						});
+					} else {
+						this.$notify({
+							title: "您没有做出评分",
+							message: "",
+							type: "success"
+						});
+						this.honorRateVisible = false;							
+					}
+				}
+			},
+			singleAssignHonor: function (index) {
+				var quota = this.countQuota(index);
+				var scoreList = [];
+				for (var i in this.rates) {
+					if (this.rates[i].honor_states[index] != null) {
+						if (this.rates[i].honor_aveScore[index] == null) {
+							scoreList.push({
+								id: this.rates[i].id,
+								score: 0
+							});
+						} else {
+							scoreList.push({
+								id: this.rates[i].id,
+								score: this.rates[i].honor_aveScore[index]
+							});
 						}
 					}
 				}
-				this.setForm(tmpForm);
-				this.setFill(tmpFill);
-				this.setRate(tmpRate);
-				this.honorRateVisible = true;			
-			},
-			singleRateSubmit: function () {
-
-			},
-			singleAssignHonor: function (index) {
-				console.log(index);
+				_.reverse(_.sortBy(scoreList, "score"));
+				var tasks = [];
+				for (var i in scoreList) {
+					if (i < quota) {
+						tasks.push(apiUpdateUserHonorAdmin(scoreList[i].id, this.rateHonors[index].id, {state: this._APPLY_STATUS.SUCCESS}));
+					} else {
+						tasks.push(apiUpdateUserHonorAdmin(scoreList[i].id, this.rateHonors[index].id, {state: this._APPLY_STATUS.FAIL}));
+					}
+				}
+				Promise.all(tasks).then(reses => {
+					this.$notify({
+						title: "荣誉分配成功",
+						message: "",
+						type: "success"
+					});
+					this.getRateList();					
+				}).catch(error => {
+					this.$notify({
+						title: "荣誉分配失败",
+						message: "",
+						type: "error"
+					});								
+				});
 			},
 			updateTable: function () {
 				for (var i = 0; i < this.rates.length; i++) {
@@ -921,10 +804,8 @@
 				}
 			},
 			rateSearch: function () {
-				this.rateHonors = this.honors;
-				this.rateGroup = this.rateFilters.group;
-				this.rateType = this.rateFilters.type;
-				this.updateTable();
+				this.getRateList();
+				//this.updateTable();
 			},
 			sort: function (index) {
 				return function(a, b) {
@@ -1004,6 +885,72 @@
 						message: "请检查网络连接",
 						type: "error"
 					});
+				});
+			},
+			getRateList: function () {
+				this.rateHonors = [];
+				this.rateGroup = "";
+				this.rateType = "";
+				this.rates = [];
+				this.rateListLoading = true;
+				apiGetGroupId(this.rateFilters.group, this.rateFilters.type).then(groupId => {
+					var honor_ids = _.join(this.rateFilters.honors, ",");
+					return apiGetGroupHonor(groupId, {honor_ids: honor_ids}).then(res => {
+						var tRates = res.data;
+						var uids = _.keys(tRates);
+						var tasks = _.map(uids, apiGetUser);
+						return Promise.all(tasks).then(userReses => {
+							var newRates = [];
+							for (var i in userReses) {
+								var obj = userReses[i].data;
+								obj.honor_fills = [];
+								obj.honor_fill_ids = [];
+								obj.honor_states = [];
+								obj.honor_scores = [];
+								obj.honor_aveScore = [];
+								for (var j in tRates[obj.id]) {
+									if (tRates[obj.id][j] == null) {
+										obj.honor_fills.push(null);
+										obj.honor_fill_ids.push(null);
+										obj.honor_states.push(null);
+										obj.honor_scores.push(null);
+										obj.honor_aveScore.push(null);
+									} else {
+										//console.log(tRates[obj.id][j]);
+										obj.honor_fills.push(tRates[obj.id][j].fill)
+										obj.honor_fill_ids.push(tRates[obj.id][j].fill_id);
+										obj.honor_states.push(tRates[obj.id][j].state);
+										if (tRates[obj.id][j].scores.length != 0) {
+											var score = _.mapValues(_.keyBy(tRates[obj.id][j].scores, "scorer_id"), (h) => {return JSON.parse(h.score) });
+											obj.honor_scores.push(score);
+											var scoreList = _.map(_.values(score), this.calcSum);
+											var aveScore = _.reduce(scoreList, (sum, n) => { return sum + n }, 0) / scoreList.length;
+											obj.honor_aveScore.push(aveScore);
+										} else {
+											obj.honor_scores.push([]);
+											obj.honor_aveScore.push(null);
+										}
+									}
+								}
+								newRates.push(obj);
+							}
+							var tasks = _.map(this.rateFilters.honors, apiGetHonor);
+							return Promise.all(tasks).then(honorReses => {
+								this.rates = newRates;
+								this.rateHonors = _.map(honorReses, (h) => { return h.data});
+								this.rateGroup = this.rateFilters.group;
+								this.rateType = this.rateFilters.type;
+								this.rateListLoading = false;
+							});
+						});
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉评比列表失败",
+						message: "请检查学生年级、学生类别是否填写正确",
+						type: "error"
+					});
+					this.rateListLoading = false;
 				});
 			},
 			getHonorList: function () {

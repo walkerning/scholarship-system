@@ -72,6 +72,16 @@ export const apiApplyUserHonor = (id, params) => { return postWithToken(`${base}
 
 export const apiUpdateUserHonor = (id, honorId, params) => { return putWithToken(`${base}/api/v1/users/${id}/honors/${honorId}`, params) };
 
+export const apiUpdateUserHonorAdmin = (id, honorId, params) => { return putWithToken(`${base}/api/v1/users/${id}/honors/${honorId}/admin`, params) };
+
+export const apiGetGroupHonor = (id, params) => { return getWithToken(`${base}/api/v1/groups/${id}/honors`, params) };
+
+export const apiAddUserHonorScore = (id, honorId, params) => { return postWithToken(`${base}/api/v1/users/${id}/honors/${honorId}/scores`, params) };
+
+export const apiUpdateUserHonorScore = (id, honorId, scorerId, params) => { return putWithToken(`${base}/api/v1/users/${id}/honors/${honorId}/scores/${scorerId}`, params) };
+
+export const apiDeleteUserHonorScore = (id, honorId, scorerId) => { return deleteWithToken(`${base}/api/v1/users/${id}/honors/${honorId}/scores/${scorerId}`) };
+
 export const apiGetGroupId = (group_name, group_type) => {
 	return apiGetGroup().then(res => {
 		//console.log(res);

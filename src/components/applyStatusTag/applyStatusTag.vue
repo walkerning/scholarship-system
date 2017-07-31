@@ -8,6 +8,9 @@
 		</template>
 		<template v-else-if="applyStatus === _APPLY_STATUS.APPLIED">
 			<el-tag type="primary"> {{ _applyStatusString(applyStatus) }} </el-tag>
+		</template>	
+		<template v-else-if="applyStatus === _APPLY_STATUS.TEMP">
+			<el-tag type="gray"> {{ _applyStatusString(applyStatus) }} </el-tag>
 		</template>		
 	</span>
 </template>
