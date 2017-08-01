@@ -435,9 +435,6 @@
 			},
 			singleHonorFinal: function (index, row) {
 				this.$confirm("提交后，荣誉信息、荣誉分配情况无法修改。确定提交？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
-					apiDeleteUser(row.id).then(res => {
-					}).catch(error => {
-					});
 				}).catch(() => {
 				});
 			},
@@ -472,6 +469,9 @@
 				});
 			},
 			singleHonorEditSubmit: function () {
+				if (!this.checkGroupQuota(this.honorEditForm.group_quota)) {
+					return;
+				}
 				this.honorEditForm.start_time = this.start_time_date.toISOString();
 				this.honorEditForm.end_time = this.end_time_date.toISOString();
 				var params = {
@@ -576,6 +576,9 @@
 				});
 			},
 			singleHonorAddSubmit: function () {
+				if (!this.checkGroupQuota(this.honorAddForm.group_quota)) {
+					return;
+				}
 				this.honorAddForm.start_time = this.start_time_date.toISOString();
 				this.honorAddForm.end_time = this.end_time_date.toISOString();
 				var params = {
@@ -862,6 +865,25 @@
 				}
 				return sum;
 			},
+			checkGroupQuota: function(groupQuota) {
+				if (groupQuota.length == 0) {
+					this.$notify({
+						title: "更新失败",
+						message: "名额不允许为空",
+						type: "error"
+					});
+					return false;
+				}
+				if (_.uniqWith(groupQuota, (a, b) => { return a.group == b.group && a.type == b.type } ).length != groupQuota.length) {
+					this.$notify({
+						title: "更新失败",
+						message: "名额不允许重复",
+						type: "error"
+					});
+					return false;					
+				}
+				return true;
+			},
 			_userTypeString: function (type) {
 				return UserType.userTypeString(type);
 			},
@@ -970,6 +992,13 @@
 					this.$notify({
 						title: "加载失败",
 						message: error.response.data.message,
+						type: "error"
+					});
+					this.honorListLoading = false;
+				}).catch(error => {
+					this.$notify({
+						title: "加载失败",
+						message: "请检查网络连接",
 						type: "error"
 					});
 					this.honorListLoading = false;

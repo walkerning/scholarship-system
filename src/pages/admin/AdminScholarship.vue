@@ -28,10 +28,10 @@
 			</el-table-column>
 			<el-table-column prop="year" label="年份" width="100" sortable>
 			</el-table-column>
-			<el-table-column label="操作">
+			<el-table-column label="操作" width="400">
 				<template scope="scope">
 					<el-button size="small" @click="singleScholarshipEdit(scope.$index, scope.row)">编辑</el-button>
-					<el-button type="danger" size="small" @click="singleSchoarshipDel(scope.$index, scope.row)">删除</el-button>
+					<el-button type="danger" size="small" @click="singleScholarshipDel(scope.$index, scope.row)">删除</el-button>
 					<el-button type="primary" size="small" @click="singleScholarshipFinal(scope.$index, scope.row)">最终提交</el-button>
 					<el-button size="small" @click="singleScholarshipCopy(scope.$index, scope.row)">从该奖学金创建</el-button>
 				</template>
@@ -216,7 +216,6 @@
 						</el-row>
 					</el-form-item>
 				</template>
-
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="scholarshipAddFormVisible = false">取消</el-button>
@@ -274,7 +273,6 @@
 					{{ countExistence(scope.row.honor_states, _APPLY_STATUS.SUCCESS) }}
 				</template>
 			</el-table-column>
-			</el-table-column>
 			<el-table-column prop="scholarship_money_sum" label="已获奖学金额度" width="90" sortable>
 			</el-table-column>
 			<el-table-column type="expand">
@@ -282,11 +280,11 @@
 					<h4>分配的奖学金及金额</h4>
 					<template v-for="(scholarship, index) in allocScholarships">
 						<template v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
-							<el-row :gutter="20">
+							<el-row :gutter="15">
 								<el-col :span="7" :offset="1">
 									{{scholarship.year}} {{scholarship.name}}
 								</el-col>
-								<el-col :span="5">
+								<el-col :span="7">
 									<template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
 										<el-input-number v-model="scholarship.money" size="small" :disabled="true"></el-input-number>
 									</template>
@@ -295,17 +293,17 @@
 									</template>
 								</el-col>
 								<template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
-									<el-col :span="3">
+									<el-col :span="4">
 										<el-button size="small" type="primary" @click="singleScholarshipAllocSubmit(scope.$index, index)">修改金额</el-button>
 									</el-col>
 								</template>
-								<el-col :span="3">
+								<el-col :span="4">
 									<el-button size="small" type="danger" @click="singleScholarshipAllocDelete(scope.$index, index)">删除</el-button>
 								</el-col>
 							</el-row>
 						</template>
 					</template>
-					<el-row :gutter="20">
+					<el-row :gutter="15">
 						<el-col :span="7" :offset="1">
 							<el-select v-model="scope.row.scholarship_add" placeholder="新增奖学金">
 								<template v-for="(scholarship, index) in allocScholarships">
@@ -315,7 +313,7 @@
 							</el-select>
 						</el-col>
 						<template v-if="scope.row.scholarship_add !== null">
-							<el-col :span="5">
+							<el-col :span="7">
 								<template v-if="allocScholarships[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
 									<el-input-number v-model="allocScholarships[scope.row.scholarship_add].money" size="small" :disabled="true"></el-input-number>
 								</template>
@@ -323,7 +321,7 @@
 									<el-input-number v-model="scope.row.scholarship_money_add" size="small"></el-input-number>
 								</template>
 							</el-col>
-							<el-col :span="3">
+							<el-col :span="4">
 								<el-button size="small" type="primary" @click="singleScholarshipAllocAddSubmit(scope.$index)">添加</el-button>
 							</el-col>
 						</template>
@@ -357,7 +355,7 @@
 			</el-table-column>
 			<el-table-column label="已分配总金额/名额">
 				<template scope="scope">
-					{{ findQuota(scope.row.group_alloc_quota, allocGroup, allocType) }}
+					{{ findAlready(scope.row, scope.$index) }}
 				</template>
 			</el-table-column>
 		</el-table>
@@ -418,14 +416,16 @@
 			<form-view></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="thanksViewVisible = false">取消</el-button>
-				<el-button type="primary" @click.native="singleThanksSubmit" :loading="thanksViewLoading">提交</el-button>
+				<el-button type="primary" @click.native="singleThanksSubmit" :loading="thanksViewLoading">修改</el-button>
 			</div>
 		</el-dialog>
 	</section>
 </template>
 
 <script>
+	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
+	import { apiGetScholarshipList, apiUpdateScholarship, apiGetGroupId, apiAddScholarship, apiDeleteScholarship, apiGetHonorList, apiGetGroupScholarship, apiDeleteUserScholarship, apiUpdateUserScholarshipForm, apiAddUserScholarshipForm, apiAddUserScholarship, apiGetScholarship, apiGetHonor, apiGetUser, apiGetGroupHonor, apiUpdateUserScholarship, apiGetForm } from "../../api/api"
 	import { apiGetFormList } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import FormType from "../../common/js/formType"
@@ -434,6 +434,11 @@
 
 	export default {
 		computed: {
+			...mapGetters([
+				"getForm",
+				"getFields",
+				"getFill"
+			]),
 			_USER_TYPE: function() {
 				return UserType.USER_TYPE;
 			},
@@ -454,72 +459,7 @@
 					year: ""
 				},
 				scholarshipListLoading: false,
-				scholarships: [
-					{
-						id: 1,
-						name: "国家奖学金",
-						year: "2017",
-						form_id: 5,
-						alloc: "quota",
-						group_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 15
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 4
-							}
-						],
-						group_alloc_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 10
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 2
-							}
-						],
-						money: 8000
-					},
-					{
-						id: 2,
-						name: "一二九奖学金",
-						year: "2015",
-						form_id: 5,
-						alloc: "money",
-						group_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 20000
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 40000
-							}
-						],
-						group_alloc_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 10000
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 20000
-							}
-						],
-						money: null
-					}
-				],
+				scholarships: [],
 				scholarshipTotal: 0,
 				scholarshipSels: [],
 
@@ -538,71 +478,7 @@
 				scholarshipAddFormVisible: false,
 				scholarshipAddLoading: false,
 
-				honors: [
-					{
-						id: 4,
-						name: "学业优秀奖",
-						year: "2018",
-						form_id: 6,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793",
-						group_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 10
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 4
-							}
-						],
-						form_id: 4
-					},
-					{
-						id: 5,
-						name: "科技创新优秀奖",
-						year: "2018",
-						form_id: 6,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793",
-						group_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 10
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 4
-							}
-						],
-						form_id: 4
-					},
-					{
-						id: 6,
-						name: "社会工作优秀奖",
-						year: "2018",
-						form_id: 7,
-						start_time: "2017-09-01T10:54:24.738793",
-						end_time: "2017-09-28T10:54:24.738793",
-						group_quota: [
-							{
-								group: "2015",
-								type: "undergraduate",
-								quota: 10
-							},
-							{
-								group: "2016",
-								type: "undergraduate",
-								quota: 4
-							}
-						],
-						form_id: 4
-					}
-				],
+				honors: [],
 
 				allocFilters: {
 					group: "",
@@ -615,173 +491,7 @@
 				allocGroup: "",
 				allocType: "",
 				allocListLoading: false,
-				alloc: [
-					{
-						id: 1,
-						name: "林梓楠",
-						class: "无37",
-						student_id: "2013011217",
-						honor_fill_ids: [1, 2, 3],
-						honor_states: ["applied", "success", "fail"],
-						honor_scores: [
-							{
-								"3": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [100, 200, 300],
-						scholarship_money_sum: 10000,
-						scholarship_states: ["success", "success"],
-						scholarship_money: [1000, 4000],
-						scholarship_add: null,
-						scholarship_money_add: 0,
-						scholarship_fill_ids: [1, null]
-					},
-					{
-						id: 2,
-						name: "宁雪妃",
-						class: "无39",
-						student_id: "2019011217",
-						honor_fill_ids: [1, null, 3],
-						honor_states: ["applied", null, "fail"],
-						honor_scores: [
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							null,
-							{
-								"3": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [200, null, 500],
-						scholarship_money_sum: 20000,
-						scholarship_states: ["success", null],
-						scholarship_money: [null, null],
-						scholarship_add: null,
-						scholarship_money_add: 0,
-						scholarship_fill_ids: [1, null]
-					},
-					{
-						id: 3,
-						name: "宁雪妃2",
-						class: "无392",
-						student_id: "2019012172",
-						honor_fill_ids: [1, null, 3],
-						honor_states: ["applied", null, "success"],
-						honor_scores: [
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							null,
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [50, null, 900],
-						scholarship_money_sum: 30000,
-						scholarship_states: [null, "success"],
-						scholarship_money: [null, 3000],
-						scholarship_add: null,
-						scholarship_money_add: 0,
-						scholarship_fill_ids: [null, null]
-					}
-				],
+				alloc: [],
 				allocSels: [],
 
 				allocScholarshipListLoading: false,
@@ -790,337 +500,24 @@
 				thanksListLoading: false,
 				thanksSels: [],
 
-				testForm: {
-					id: "1",
-					name: "测试表单1",
-					type: "apply",
-					fields: [
-						{
-							type: 1,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "说明文字",
-							content: null
-						},
-						{
-							type: 2,
-							max_len: 1267,
-							min_len: 1200,
-							required: false,
-							description: "数字（有限制、可选）",
-							content: null
-						},
-						{
-							type: 2,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "数字（无限制、必选）",
-							content: null
-						},
-						{
-							type: 3,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "邮箱（无限制、必选）",
-							content: null
-						},
-						{
-							type: 4,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "手机（无限制、必选）",
-							content: null
-						},
-						{
-							type: 5,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "单行字符串（无限制、必选）",
-							content: null
-						},
-						{
-							type: 5,
-							max_len: 100,
-							min_len: 1,
-							required: false,
-							description: "单行字符串（有限制、可选）",
-							content: null
-						},
-						{
-							type: 6,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "多行字符串（无限制、必选）",
-							content: null
-						},
-						{
-							type: 6,
-							max_len: 100,
-							min_len: 1,
-							required: false,
-							description: "多行字符串（有限制、可选）",
-							content: null
-						},
-						{
-							type: 7,
-							max_len: 2,
-							min_len: 1,
-							required: false,
-							description: "多选框（有限制、可选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 7,
-							max_len: 2,
-							min_len: 1,
-							required: true,
-							description: "多选框（有限制、必选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 8,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "单选框（可选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 9,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "附件说明",
-							content: 1
-						},
-						{
-							type: 10,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "上传附件（无限制、可选）",
-							content: null
-						},
-						{
-							type: 10,
-							max_len: -1,
-							min_len: 10000,
-							required: true,
-							description: "上传附件（有限制、必选）",
-							content: null
-						},
-						{
-							type: 11,
-							description: "表格",
-							content: ["列1", "列2", "列3"]
-						}
-					],
-					template: ""
-				},
-				testFill: {
-					data0: "",
-					data1: "1200",
-					data2: "100",
-					data3: "linzinan1995@126.com",
-					data4: "18800182102",
-					data5: "test",
-					data6: "test2",
-					data7: "test\ntest",
-					data8: "",
-					data9: [],
-					data10: ["A", "B"],
-					data11: "A",
-					data15: [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
-				},
-
 				thanksFilters: {
 					group: "",
 					type: "",
 					scholarships: []
 				},
-				thanks: [
-					{
-						id: 1,
-						name: "林梓楠",
-						class: "无37",
-						student_id: "2013011217",
-						honor_fill_ids: [1, 2, 3],
-						honor_states: ["applied", "success", "fail"],
-						honor_scores: [
-							{
-								"3": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [100, 200, 300],
-						scholarship_money_sum: 10000,
-						scholarship_states: ["success", "success"],
-						scholarship_money: [1000, 4000],
-						scholarship_add: null,
-						scholarship_money_add: 0,
-						scholarship_fill_ids: [1, null]
-					},
-					{
-						id: 2,
-						name: "宁雪妃",
-						class: "无39",
-						student_id: "2019011217",
-						honor_fill_ids: [1, null, 3],
-						honor_states: ["applied", null, "fail"],
-						honor_scores: [
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							null,
-							{
-								"3": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [200, null, 500],
-						scholarship_money_sum: 20000,
-						scholarship_states: ["success", null],
-						scholarship_money: [null, null],
-						scholarship_add: null,
-						scholarship_money_add: 0,
-						scholarship_fill_ids: [1, null]
-					},
-					{
-						id: 3,
-						name: "宁雪妃2",
-						class: "无392",
-						student_id: "2019012172",
-						honor_fill_ids: [1, null, 3],
-						honor_states: ["applied", null, "success"],
-						honor_scores: [
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							},
-							null,
-							{
-								"1": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								},
-								"2": {
-									score5: 70,
-									score6: 80,
-									score7: 90,
-									score8: 100,
-									score15: [10, 20, 30]
-								}
-							}
-						],
-						honor_aveScore: [50, null, 900],
-						scholarship_money_sum: 30000,
-						scholarship_states: [null, "success"],
-						scholarship_money: [null, 3000],
-						scholarship_add: null,
-						scholarship_money_add: 0,
-						scholarship_fill_ids: [null, null]
-					}
-				],
+				thanks: [],
 				thanksScholarships: [],
 				thanksGroup: "",
 				thanksType: "",
 				thanksViewVisible: false,
-				thanksViewLoading: false
+				thanksViewLoading: false,
+				thanksScholarshipId: null,
+				thanksUserId: null
 			}
 		},
 		methods: {
 			allScholarshipSearch: function () {
-
+				this.getScholarshipList();
 			},
 			allScholarshipAdd: function () {
 				this.scholarshipAddFormVisible = true;
@@ -1133,17 +530,133 @@
 				this.scholarshipEditFormVisible = true;
 			},
 			singleScholarshipEditSubmit: function () {
-
+				if (!this.checkGroupQuota(this.scholarshipEditForm.group_quota)) {
+					return;
+				}
+				var params = {
+					name: this.scholarshipEditForm.name,
+					year: this.scholarshipEditForm.year,
+					form_id: this.scholarshipEditForm.form_id,
+					alloc: this.scholarshipEditForm.alloc,
+					money: this.scholarshipEditForm.money,
+					group_quota: []
+				};
+				var tasks = [];
+				for (var i in this.scholarshipEditForm.group_quota) {
+					tasks.push(apiGetGroupId(this.scholarshipEditForm.group_quota[i].group, this.scholarshipEditForm.group_quota[i].type));
+				}
+				Promise.all(tasks).then(reses => {
+					for (var i in this.scholarshipEditForm.group_quota) {
+						params.group_quota.push({
+							group_id: reses[i],
+							quota: this.scholarshipEditForm.group_quota[i].quota
+						});
+					}
+					apiUpdateScholarship(this.scholarshipEditForm.id, params).then(res => {
+						this.$notify({
+							title: "更新成功",
+							message: "更新奖学金信息成功",
+							type: "success"
+						});
+						this.scholarshipEditFormVisible = false;
+						this.getScholarshipList();
+					}).catch(error => {
+						//console.log(error);
+						this.$notify({
+							title: "更新失败",
+							message: error.response.data.message,
+							type: "error"
+						});
+					}).catch(error => {
+						this.$notify({
+							title: "更新失败",
+							message: "请检查网络连接",
+							type: "error"
+						});
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "更新失败",
+						message: "获取组id失败",
+						type: "error"
+					});	
+				});
 			},
 			singleScholarshipAddSubmit: function () {
-
+				if (!this.checkGroupQuota(this.scholarshipAddForm.group_quota)) {
+					return;
+				}
+				var params = {
+					name: this.scholarshipAddForm.name,
+					year: this.scholarshipAddForm.year,
+					form_id: this.scholarshipAddForm.form_id,
+					alloc: this.scholarshipAddForm.alloc,
+					money: this.scholarshipAddForm.money,
+					group_quota: []
+				};
+				var tasks = [];
+				for (var i in this.scholarshipAddForm.group_quota) {
+					tasks.push(apiGetGroupId(this.scholarshipAddForm.group_quota[i].group, this.scholarshipAddForm.group_quota[i].type));
+				}
+				Promise.all(tasks).then(reses => {
+					for (var i in this.scholarshipAddForm.group_quota) {
+						params.group_quota.push({
+							group_id: reses[i],
+							quota: this.scholarshipAddForm.group_quota[i].quota
+						});
+					}
+					apiAddScholarship(params).then(res => {
+						this.$notify({
+							title: "新增成功",
+							message: "新增奖学金信息成功",
+							type: "success"
+						});
+						this.scholarshipAddFormVisible = false;
+						this.getScholarshipList();
+					}).catch(error => {
+						//console.log(error);
+						this.$notify({
+							title: "新增失败",
+							message: error.response.data.message,
+							type: "error"
+						});
+					}).catch(error => {
+						this.$notify({
+							title: "新增失败",
+							message: "请检查网络连接",
+							type: "error"
+						});
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "新增失败",
+						message: "获取组id失败",
+						type: "error"
+					});	
+				});
 			},
 			singleScholarshipCopy: function(index, row) {
 				this.scholarshipAddForm = JSON.parse(JSON.stringify(row));
 				this.scholarshipAddFormVisible = true;
 			},
-			singleSchoarshipDel: function (index, row) {
-
+			singleScholarshipDel: function (index, row) {
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					apiDeleteScholarship(row.id).then(res => {
+						this.$notify({
+							title: "删除成功",
+							message: "删除奖学金成功",
+							type: "success"
+						});
+						this.getScholarshipList();
+					}).catch(error => {
+						this.$notify({
+							title: "删除失败",
+							message: "删除奖学金失败",
+							type: "error"
+						});	
+					});
+				}).catch(() => {
+				});
 			},
 			singleScholarshipFinal: function (index, row) {
 				this.$confirm("提交后，奖学金信息、奖学金分配情况无法修改。确定提交？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
@@ -1154,7 +667,28 @@
 				});
 			},
 			allScholarshipBatchRemove: function () {
-
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					var tasks = [];
+					for (var i in this.scholarshipSels) {
+						tasks.push(apiDeleteScholarship(this.scholarshipSels[i].id));
+					}
+					Promise.all(tasks).then(reses => {
+						this.$notify({
+							title: "删除成功",
+							message: "批量删除奖学金成功",
+							type: "success"
+						});
+						this.getScholarshipList();
+					}).catch(error => {
+						this.$notify({
+							title: "删除失败",
+							message: "批量删除奖学金失败",
+							type: "error"
+						});
+						this.getScholarshipList();
+					});
+				}).catch(() => {
+				});
 			},
 			allScholarshipCurrentChange: function (val) {
 
@@ -1165,23 +699,84 @@
 				}
 			},
 			allocSearch: function () {
-				this.allocHonors = this.honors;
-				this.allocScholarships = this.scholarships;
-				this.allocGroup = this.allocFilters.group;
-				this.allocType = this.allocFilters.type;
-				this.updateTable();
+				this.getAllocList();
 			},
 			allAllocSelsChange: function (sels) {
 				this.allocSels = sels;
 			},
-			singleScholarshipAllocDelete: function (row, col) {
-
+			singleScholarshipAllocDelete: function (rowId, colId) {
+				apiDeleteUserScholarship(this.alloc[rowId].id, this.allocScholarships[colId].id).then(res => {
+					this.$notify({
+						title: "删除奖学金分配成功",
+						message: "",
+						type: "success"
+					});
+					this.getAllocList();					
+				}).catch(error => {
+					this.$notify({
+						title: "删除奖学金分配失败",
+						message: "",
+						type: "error"
+					});
+				});
 			},
-			singleScholarshipAllocSubmit: function (row, col) {
-
+			singleScholarshipAllocSubmit: function (rowId, colId) {
+				var params = {
+					money: this.alloc[rowId].scholarship_money[colId]
+				}
+				var uid = this.alloc[rowId].id;
+				var scholarId = this.allocScholarships[colId].id;
+				apiUpdateUserScholarship(uid, scholarId, params).then(res => {
+					this.$notify({
+						title: "修改奖学金分配成功",
+						message: "",
+						type: "success"
+					});
+					this.getAllocList();	
+				}).catch(error => {
+					console.log(error.response);
+					this.$notify({
+						title: "修改奖学金分配失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "修改奖学金分配失败",
+						message: "请检查网络连接",
+						type: "error"
+					});					
+				});
 			},
-			singleScholarshipAllocAddSubmit: function (row) {
-
+			singleScholarshipAllocAddSubmit: function (rowId) {
+				var params = {
+					scholar_id: this.allocScholarships[this.alloc[rowId].scholarship_add].id
+				}
+				if (this.allocScholarships[this.alloc[rowId].scholarship_add].alloc == this._SCHOLARSHIP_ALLOC_TYPE.MONEY) {
+					params.money = this.alloc[rowId].scholarship_money_add;
+				}
+				var uid = this.alloc[rowId].id;
+				apiAddUserScholarship(uid, params).then(res => {
+					this.$notify({
+						title: "新增奖学金分配成功",
+						message: "",
+						type: "success"
+					});
+					this.getAllocList();	
+				}).catch(error => {
+					console.log(error.response);
+					this.$notify({
+						title: "新增奖学金分配失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "新增奖学金分配失败",
+						message: "请检查网络连接",
+						type: "error"
+					});					
+				});
 			},
 			allAllocScholarshipSelsChange: function (sels) {
 				this.allocScholarshipSels = sels;
@@ -1190,15 +785,50 @@
 				this.thanksSels = sels;
 			},
 			singleThanksView: function (row, col) {
-				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
-				this.setFill(JSON.parse(JSON.stringify(this.testFill)));
-				this.thanksViewVisible = true;
+				apiGetForm(this.thanksScholarships[col].form_id).then(res => {
+					this.setForm(res.data);
+					this.setFill(JSON.parse(this.thanks[row].scholarship_fills[col]));
+					this.thanksScholarshipId = col;
+					this.thanksUserId = row;
+					this.thanksViewVisible = true;
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金感谢信表单失败",
+						message: error.response.data.message,
+						type: "error"
+					});					
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金感谢信表单失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+				});
 			},
 			thanksSearch: function () {
-				this.thanksScholarships = this.scholarships;
+				this.getThanksList();
 			},
 			singleThanksSubmit: function () {
-
+				var uid = this.thanks[this.thanksUserId].id;
+				var scholarshipId = this.thanksScholarships[this.thanksScholarshipId].id;
+				var params = {
+					fill: this.getFill
+				}
+				apiUpdateUserScholarshipForm(uid, scholarshipId, params).then(res => {
+					this.$notify({
+						title: "修改成功",
+						message: "修改奖学金感谢信成功",
+						type: "success"
+					});
+					this.thanksViewVisible = false;
+					this.getThanksList();
+				}).catch(error => {
+					this.$notify({
+						title: "修改失败",
+						message: "修改奖学金感谢信失败",
+						type: "error"
+					});
+				});				
 			},
 			findQuota: function (quota_list, group, type) {
 				for (var i = 0; i < quota_list.length; i++) {
@@ -1207,6 +837,23 @@
 					}
 				}
 				return 0;
+			},
+			findAlready: function(row, index) {
+				var ans = 0;
+				if (row.alloc == this._SCHOLARSHIP_ALLOC_TYPE.QUOTA) {
+					for (var i in this.alloc) {
+						if (this.alloc[i].scholarship_states[index] === this._APPLY_STATUS.SUCCESS) {
+							ans += 1;
+						}
+					}
+				} else {
+					for (var i in this.alloc) {
+						if (this.alloc[i].scholarship_states[index] === this._APPLY_STATUS.SUCCESS) {
+							ans += this.alloc[i].scholarship_money[index];
+						}
+					}
+				}
+				return ans;
 			},
 			countExistence: function (arr, obj) {
 				var ans = 0;
@@ -1217,11 +864,247 @@
 				}
 				return ans;
 			},
+			checkGroupQuota: function(groupQuota) {
+				if (groupQuota.length == 0) {
+					this.$notify({
+						title: "更新失败",
+						message: "名额不允许为空",
+						type: "error"
+					});
+					return false;
+				}
+				if (_.uniqWith(groupQuota, (a, b) => { return a.group == b.group && a.type == b.type } ).length != groupQuota.length) {
+					this.$notify({
+						title: "更新失败",
+						message: "名额不允许重复",
+						type: "error"
+					});
+					return false;					
+				}
+				return true;
+			},
 			_userTypeString: function (type) {
 				return UserType.userTypeString(type);
 			},
 			_scholarshipAllocTypeString: function(str) {
 				return ScholarshipAllocType.scholarshipAllocTypeString(str);
+			},
+			getThanksList: function() {
+				this.thanksScholarships = [];
+				this.thanksType = "";
+				this.thanksGroup = "";
+				this.thanks = [];
+				this.thanksListLoading = true;
+
+				apiGetGroupId(this.thanksFilters.group, this.thanksFilters.type).then(groupId => {
+					var scholarship_ids = _.join(this.thanksFilters.scholarships, ",");
+					apiGetGroupScholarship(groupId, {scholar_ids: scholarship_ids}).then(res => {
+						var tThanks = res.data;
+						var getScholarshipTasks = _.map(this.thanksFilters.scholarships, apiGetScholarship);
+						return Promise.all(getScholarshipTasks).then(scholarshipReses => {
+							var scholarships = _.map(scholarshipReses, (h) => { return h.data });
+							var newThanks = {};
+							for (var i in tThanks) {
+								var obj = {
+									scholarship_states: [],
+									scholarship_fill_ids: [],
+									scholarship_fills: []
+								}
+								for (var j in tThanks[i]) {
+									if (tThanks[i][j] == null) {
+										obj.scholarship_states.push(null);
+										obj.scholarship_fill_ids.push(null);
+										obj.scholarship_fills.push(null);
+									} else {
+										obj.scholarship_states.push(tThanks[i][j].state);
+										obj.scholarship_fill_ids.push(tThanks[i][j].fill_id);
+										if (tThanks[i][j].fill !== undefined) {
+											obj.scholarship_fills.push(tThanks[i][j].fill);
+										} else {
+											obj.scholarship_fills.push(null);
+										}
+									}
+								}
+								newThanks[i] = obj;
+							}
+							var allUids = _.keys(newThanks);
+							var getUserTasks = _.map(allUids, apiGetUser);
+							return Promise.all(getUserTasks).then(userReses => {
+								var finalThanks = []
+								for (var i in userReses) {
+									finalThanks.push(_.extend(userReses[i].data, newThanks[userReses[i].data.id]));
+								}
+								this.thanks = finalThanks;
+								this.thanksScholarships = scholarships;
+								this.thanksGroup = this.thanksFilters.group;
+								this.thanksType = this.thanksFilters.type;
+								this.thanksListLoading = false;
+							});
+						});
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "加载感谢信列表失败",
+						message: "请检查学生年级、学生类别是否填写正确",
+						type: "error"
+					});
+					this.thanksListLoading = false;
+				});	
+			},
+			getAllocList: function () {
+				this.allocHonors = [];
+				this.allocScholarships = [];
+				this.allocGroup = "";
+				this.allocType = "";
+				this.alloc = [];
+				this.allocListLoading = true;
+				this.allocScholarshipListLoading = true;
+				apiGetGroupId(this.allocFilters.group, this.allocFilters.type).then(groupId => {
+					var honor_ids = _.join(this.allocFilters.honors, ",");
+					var scholarship_ids = _.join(this.allocFilters.scholarships, ",");
+					var topTasks = [];
+					
+					var scholarships = [];
+					var newAlloc = {};
+					var emptyAlloc = {};
+					var honors = [];
+					var newRate ={};
+					var emptyRate = {};
+
+					topTasks.push(apiGetGroupScholarship(groupId, {scholar_ids: scholarship_ids}).then(res => {
+						var tAlloc = res.data;
+						var getScholarshipTasks = _.map(this.allocFilters.scholarships, apiGetScholarship);
+						return Promise.all(getScholarshipTasks).then(scholarshipReses => {
+							scholarships = _.map(scholarshipReses, (h) => { return h.data });
+							for (var i in tAlloc) {
+								var obj = {
+									scholarship_money_sum: 0,
+									scholarship_states: [],
+									scholarship_money: [],
+									scholarship_add: null,
+									scholarship_money_add: 0,
+									scholarship_fill_ids: [],
+									scholarship_fills: []
+								}
+								for (var j in tAlloc[i]) {
+									if (tAlloc[i][j] == null) {
+										obj.scholarship_states.push(null);
+										obj.scholarship_money.push(null);
+										obj.scholarship_fill_ids.push(null);
+										obj.scholarship_fills.push(null);
+									} else {
+										obj.scholarship_states.push(tAlloc[i][j].state);
+										obj.scholarship_money.push((scholarships[j].alloc === this._SCHOLARSHIP_ALLOC_TYPE.QUOTA) ? scholarships[j].money : tAlloc[i][j].money);
+										obj.scholarship_money_sum += obj.scholarship_money[obj.scholarship_money.length - 1];
+										obj.scholarship_fill_ids.push(tAlloc[i][j].fill_id);
+										if (tAlloc[i][j].fill !== undefined) {
+											obj.scholarship_fills.push(tAlloc[i][j].fill);
+										} else {
+											obj.scholarship_fills.push(null);
+										}
+									}
+								}
+								newAlloc[i] = obj;
+							}
+							emptyAlloc = {
+								scholarship_money_sum: 0,
+								scholarship_states: _.fill(Array(scholarships.length), null),
+								scholarship_money: _.fill(Array(scholarships.length), null),
+								scholarship_add: null,
+								scholarship_money_add: 0,
+								scholarship_fill_ids: _.fill(Array(scholarships.length), null),
+								scholarship_fills: _.fill(Array(scholarships.length), null)
+							}
+							return null;
+						});
+					}));
+
+					topTasks.push(apiGetGroupHonor(groupId, {honor_ids: honor_ids}).then(res => {
+						var tRate = res.data;
+						var getHonorTasks = _.map(this.allocFilters.honors, apiGetHonor);
+						return Promise.all(getHonorTasks).then(honorReses => {
+							honors = _.map(honorReses, (h) => { return h.data });
+							for (var i in tRate) {
+								var obj = {
+									honor_fills: [],
+									honor_fill_ids: [],
+									honor_states: [],
+									honor_scores: [],
+									honor_aveScore: []
+								}
+								for (var j in tRate[i]) {
+									if (tRate[i][j] == null) {
+										obj.honor_fills.push(null);
+										obj.honor_fill_ids.push(null);
+										obj.honor_states.push(null);
+										obj.honor_scores.push(null);
+										obj.honor_aveScore.push(null);
+									} else {
+										obj.honor_fills.push(tRate[i][j].fill)
+										obj.honor_fill_ids.push(tRate[i][j].fill_id);
+										obj.honor_states.push(tRate[i][j].state);
+										if (tRate[i][j].scores.length != 0) {
+											var score = _.mapValues(_.keyBy(tRate[i][j].scores, "scorer_id"), (h) => {return JSON.parse(h.score) });
+											obj.honor_scores.push(score);
+											var scoreList = _.map(_.values(score), this.calcSum);
+											var aveScore = _.reduce(scoreList, (sum, n) => { return sum + n }, 0) / scoreList.length;
+											obj.honor_aveScore.push(aveScore);
+										} else {
+											obj.honor_scores.push([]);
+											obj.honor_aveScore.push(null);
+										}
+									}										
+								}
+								newRate[i] = obj;
+							}
+							emptyRate = {
+								honor_fills: _.fill(Array(honors.length), null),
+								honor_fill_ids: _.fill(Array(honors.length), null),
+								honor_states: _.fill(Array(honors.length), null),
+								honor_scores: [],
+								honor_aveScore: []							
+							}
+							return null;  
+						});
+					}));
+
+					return Promise.all(topTasks).then(reses => {
+						var allUids = _.union(_.keys(newAlloc), _.keys(newRate));
+						var getUserTasks = _.map(allUids, apiGetUser);
+						return Promise.all(getUserTasks).then(userReses => {
+							var finalAlloc = [];
+							for (var i in userReses) {
+								var obj = userReses[i].data;
+								if (newAlloc.hasOwnProperty(obj.id)) {
+									obj = _.extend(obj, newAlloc[obj.id]);
+								} else {
+									obj = _.extend(obj, JSON.parse(JSON.stringify(emptyAlloc)));
+								}
+								if (newRate.hasOwnProperty(obj.id)) {
+									obj = _.extend(obj, newRate[obj.id]);
+								} else {
+									obj = _.extend(obj, JSON.parse(JSON.stringify(emptyRate)));
+								}
+								finalAlloc.push(obj);
+							}
+							this.alloc = finalAlloc;
+							this.allocScholarships = scholarships;
+							this.allocHonors = honors;
+							this.allocGroup = this.allocFilters.group;
+							this.allocType = this.allocFilters.type;
+							this.allocListLoading = false;
+							this.allocScholarshipListLoading = false;
+						});
+					})
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金分配列表失败",
+						message: "请检查学生年级、学生类别是否填写正确",
+						type: "error"
+					});
+					this.allocListLoading = false;
+					this.allocScholarshipListLoading = false;
+				});			
 			},
 			getFormList: function () {
 				var params = {};
@@ -1242,6 +1125,52 @@
 					});
 				});
 			},
+			getHonorList: function () {
+				apiGetHonorList({}).then(res => {
+					this.honors = res.data;
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉列表失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "加载荣誉列表失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+				});
+			},
+			getScholarshipList: function () {
+				this.scholarshipListLoading = true;
+				var params = {};
+				if (this.scholarshipFilters.name != "") {
+					params["name"] = this.scholarshipFilters.name;
+				}
+				if (this.scholarshipFilters.year != "") {
+					params["year"] = this.scholarshipFilters.year;
+				}
+				apiGetScholarshipList(params).then(res => {
+					this.scholarships = res.data;
+					this.scholarshipListLoading = false;
+					this.scholarshipTotal = this.scholarships.length;
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金列表失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+					this.scholarshipListLoading = false;
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金列表失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+					this.honorListLoading = false;
+				});
+			},
 			...mapActions([
 				"setForm",
 				"setFill"
@@ -1249,6 +1178,8 @@
 		},
 		mounted() {
 			this.getFormList();
+			this.getScholarshipList();
+			this.getHonorList();
 		}
 	}
 

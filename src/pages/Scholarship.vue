@@ -34,6 +34,10 @@
 		<!--查看界面-->
 		<el-dialog title="查看" v-model="viewVisible" size="large">
 			<form-view :disabled="true"></form-view>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click.native="viewVisible = false">取消</el-button>
+				<el-button type="primary" @click.native="singleFillUpdate" :loading="viewLoading">修改</el-button>
+			</div>
 		</el-dialog>
 
 		<!--填写界面-->
@@ -41,7 +45,6 @@
 			<form-view></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="fillVisible = false">取消</el-button>
-				<el-button @click.native="singleFillSave">暂存</el-button>
 				<el-button type="primary" @click.native="singleFillSubmit" :loading="fillLoading">提交</el-button>
 			</div>
 		</el-dialog>
@@ -51,7 +54,8 @@
 
 <script>
 	import { mapGetters } from "vuex"
-	import { mapActions } from "vuex"
+	import { mapActions } from "vuex"	
+	import { apiGetUserScholarship, apiGetScholarship, apiGetForm, apiAddUserScholarshipForm, apiUpdateUserScholarshipForm } from "../api/api"
 	import QueType from "../common/js/queType"
 	import ApplyStatus from "../common/js/applyStatus"
 
@@ -72,188 +76,15 @@
 		data() {
 			return {
 				listLoading: false,
-				scholarships: [
-					{
-						id: 1,
-						name: "国家奖学金",
-						year: "2017",
-						form_id: 6,
-						state: "success",
-						fill_id: 10
-					},
-					{
-						id: 2,
-						name: "本科生特等奖学金",
-						year: "2018",
-						form_id: 6,
-						state: "fail",
-						fill_id: null
-					},
-					{
-						id: 3,
-						name: "研究生特等奖学金",
-						year: "2017",
-						form_id: 7,
-						state: "success",
-						fill_id: null
-					},
-					{
-						id: 2,
-						name: "一二九奖学金",
-						year: "2015",
-						form_id: 7,
-						state: "fail",
-						fill_id: 11
-					}
-				],
-				total: 4,
-
-				testForm: {
-					id: "1",
-					name: "测试表单1",
-					type: "apply",
-					fields: [
-						{
-							type: 1,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "说明文字",
-							content: null
-						},
-						{
-							type: 2,
-							max_len: 1267,
-							min_len: 1200,
-							required: false,
-							description: "数字（有限制、可选）",
-							content: null
-						},
-						{
-							type: 2,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "数字（无限制、必选）",
-							content: null
-						},
-						{
-							type: 3,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "邮箱（无限制、必选）",
-							content: null
-						},
-						{
-							type: 4,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "手机（无限制、必选）",
-							content: null
-						},
-						{
-							type: 5,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "单行字符串（无限制、必选）",
-							content: null
-						},
-						{
-							type: 5,
-							max_len: 100,
-							min_len: 1,
-							required: false,
-							description: "单行字符串（有限制、可选）",
-							content: null
-						},
-						{
-							type: 6,
-							max_len: -1,
-							min_len: 0,
-							required: true,
-							description: "多行字符串（无限制、必选）",
-							content: null
-						},
-						{
-							type: 6,
-							max_len: 100,
-							min_len: 1,
-							required: false,
-							description: "多行字符串（有限制、可选）",
-							content: null
-						},
-						{
-							type: 7,
-							max_len: 2,
-							min_len: 1,
-							required: false,
-							description: "多选框（有限制、可选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 7,
-							max_len: 2,
-							min_len: 1,
-							required: true,
-							description: "多选框（有限制、必选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 8,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "单选框（可选）",
-							content: ["A", "B", "C"]
-						},
-						{
-							type: 9,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "附件说明",
-							content: 1
-						},
-						{
-							type: 10,
-							max_len: -1,
-							min_len: -1,
-							required: false,
-							description: "上传附件（无限制、可选）",
-							content: null
-						},
-						{
-							type: 10,
-							max_len: -1,
-							min_len: 10000,
-							required: true,
-							description: "上传附件（有限制、必选）",
-							content: null
-						}
-					],
-					template: "<latex></latex>"
-				},
-				testFill: {
-					data0: "",
-					data1: "1200",
-					data2: "100",
-					data3: "linzinan1995@126.com",
-					data4: "18800182102",
-					data5: "test",
-					data6: "test2",
-					data7: "test\ntest",
-					data8: "",
-					data9: [],
-					data10: ["A", "B"],
-					data11: "A"
-				},
+				scholarships: [],
+				total: 0,
 
 				viewVisible: false,
+				viewLoading: false,
+				viewScholarshipId: null,
 				fillVisible: false,
 				fillLoading: false,
+				fillScholarshipId: null,
 
 				sels: [],//列表选中列
 			}
@@ -263,40 +94,141 @@
 				this.sels = sels;
 			},
 			singleFill: function (index, row) {
-				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
-				var fill = {};
-				for (var i in this.getFields) {
-					var field = this.getFields[i];
-					if (field.type === this._QUE_TYPE.CHECKBOX) {
-						fill["data" + i] = [];
-					} else {
-						fill["data" + i] = null;
+				apiGetForm(row.form_id).then(res => {
+					this.setForm(JSON.parse(JSON.stringify(res.data)));
+					var fill = {};
+					for (var i in this.getFields) {
+						var field = this.getFields[i];
+						if (field.type === this._QUE_TYPE.CHECKBOX || field.type === this._QUE_TYPE.TABLE) {
+							fill["data" + i] = [];
+						} else {
+							fill["data" + i] = "";
+						}
 					}
-				}
-				this.setFill(fill);
-				this.fillVisible = true;
+					this.setFill(fill);
+					this.fillScholarshipId = index;
+					this.fillVisible = true;
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金感谢信表单失败",
+						message: error.response.data.message,
+						type: "error"
+					});					
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金感谢信表单失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+				});
 			},
 			singleView: function (index, row) {
-				this.setForm(JSON.parse(JSON.stringify(this.testForm)));
-				this.setFill(JSON.parse(JSON.stringify(this.testFill)));
-				this.viewVisible = true;
+				apiGetForm(row.form_id).then(res => {
+					this.setForm(JSON.parse(JSON.stringify(res.data)));
+					this.setFill(JSON.parse(row.fill));
+					this.viewScholarshipId = index;
+					this.viewVisible = true;
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金感谢信表单失败",
+						message: error.response.data.message,
+						type: "error"
+					});					
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金感谢信表单失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+				});
 			},
 			allCurrentChange: function (val) {
 
 			},
 			singleFillSubmit: function () {
-
+				var uid = sessionStorage.getItem("uid");
+				var scholarshipId = this.scholarships[this.fillScholarshipId].id;
+				var params = {
+					fill: this.getFill
+				}
+				apiAddUserScholarshipForm(uid, scholarshipId, params).then(res => {
+					this.$notify({
+						title: "提交成功",
+						message: "提交奖学金感谢信成功",
+						type: "success"
+					});
+					this.fillVisible = false;
+					this.getScholarshipList();
+				}).catch(error => {
+					this.$notify({
+						title: "提交失败",
+						message: "提交奖学金感谢信失败",
+						type: "error"
+					});
+				});
 			},
-			singleFillSave: function() {
-
+			singleFillUpdate: function () {
+				var uid = sessionStorage.getItem("uid");
+				var scholarshipId = this.scholarships[this.viewScholarshipId].id;
+				var params = {
+					fill: this.getFill
+				}
+				apiUpdateUserScholarshipForm(uid, scholarshipId, params).then(res => {
+					this.$notify({
+						title: "修改成功",
+						message: "修改奖学金感谢信成功",
+						type: "success"
+					});
+					this.viewVisible = false;
+					this.getScholarshipList();
+				}).catch(error => {
+					this.$notify({
+						title: "修改失败",
+						message: "修改奖学金感谢信失败",
+						type: "error"
+					});
+				});
 			},
 			_applyStatusString: function(str) {
 				return ApplyStatus.applyStatusString(str);
+			},
+			getScholarshipList: function () {
+				this.listLoading = true;
+				var uid = sessionStorage.getItem("uid");
+				apiGetUserScholarship(uid).then(res => {
+					var userScholarshipStates = res.data;
+					var scholarshipIds = _.map(userScholarshipStates, (h) => { return h.scholar_id });
+					var tasks = _.map(scholarshipIds, apiGetScholarship);
+					return Promise.all(tasks).then(scholarshipReses => {
+						for (var i in userScholarshipStates) {
+							userScholarshipStates[i] = _.extend(userScholarshipStates[i], scholarshipReses[i].data);
+						}
+						this.scholarships = userScholarshipStates;
+						this.listLoading = false;
+					});
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金历史列表失败",
+						message: error.response.data.message,
+						type: "error"
+					});
+					this.listLoading = false;
+				}).catch(error => {
+					this.$notify({
+						title: "加载奖学金历史列表失败",
+						message: "请检查网络连接",
+						type: "error"
+					});
+					this.listLoading = false;
+				});
 			},
 			...mapActions([
 				"setForm",
 				"setFill"
 			])
+		},
+		mounted() {
+			this.getScholarshipList();
 		}
 	}
 

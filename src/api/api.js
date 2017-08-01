@@ -82,6 +82,30 @@ export const apiUpdateUserHonorScore = (id, honorId, scorerId, params) => { retu
 
 export const apiDeleteUserHonorScore = (id, honorId, scorerId) => { return deleteWithToken(`${base}/api/v1/users/${id}/honors/${honorId}/scores/${scorerId}`) };
 
+export const apiGetScholarship = id => { return getWithToken(`${base}/api/v1/scholars/${id}`, {}) };
+
+export const apiGetScholarshipList = params => { return getWithToken(`${base}/api/v1/scholars`, params) };
+
+export const apiAddScholarship = params => { return postWithToken(`${base}/api/v1/scholars`, params) };
+
+export const apiUpdateScholarship = (id, params) => { return putWithToken(`${base}/api/v1/scholars/${id}`, params) };
+
+export const apiDeleteScholarship = id => { return deleteWithToken(`${base}/api/v1/scholars/${id}`) };
+
+export const apiGetUserScholarship = id => { return getWithToken(`${base}/api/v1/users/${id}/scholars`, {}) };
+
+export const apiAddUserScholarship = (id, params) => { return postWithToken(`${base}/api/v1/users/${id}/scholars`, params) };
+
+export const apiUpdateUserScholarship = (id, scholarshipId, params) => { return putWithToken(`${base}/api/v1/users/${id}/scholars/${scholarshipId}`, params) };
+
+export const apiAddUserScholarshipForm = (id, scholarshipId, params) => { return postWithToken(`${base}/api/v1/users/${id}/scholars/${scholarshipId}/thanksletter`, params) };
+
+export const apiUpdateUserScholarshipForm = (id, scholarshipId, params) => { return putWithToken(`${base}/api/v1/users/${id}/scholars/${scholarshipId}/thanksletter`, params) }
+
+export const apiDeleteUserScholarship = (id, scholarshipId) => { return deleteWithToken(`${base}/api/v1/users/${id}/scholars/${scholarshipId}`) };
+
+export const apiGetGroupScholarship = (id, params) => { return getWithToken(`${base}/api/v1/groups/${id}/scholars`, params) };
+
 export const apiGetGroupId = (group_name, group_type) => {
 	return apiGetGroup().then(res => {
 		//console.log(res);
