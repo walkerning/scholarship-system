@@ -22,7 +22,10 @@
 		<el-table :data="honors" highlight-current-row v-loading="honorListLoading" @selection-change="allHonorSelsChange" style="width: 100%;" border>
 			<el-table-column type="selection" width="55">
 			</el-table-column>
-			<el-table-column type="index" width="60">
+			<el-table-column label="#" width="60">
+				<template scope="scope">
+					{{ (currentPage - 1) * pageSize + scope.$index + 1 }}
+				</template>
 			</el-table-column>
 			<el-table-column prop="name" label="荣誉名" width="200" sortable>
 			</el-table-column>

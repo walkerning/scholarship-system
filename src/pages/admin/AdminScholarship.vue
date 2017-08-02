@@ -22,7 +22,10 @@
 		<el-table :data="scholarships" highlight-current-row v-loading="scholarshipListLoading" @selection-change="allScholarshipSelsChange" style="width: 100%;" border>
 			<el-table-column type="selection" width="55">
 			</el-table-column>
-			<el-table-column type="index" width="60">
+			<el-table-column label="#" width="60">
+				<template scope="scope">
+					{{ (currentPage - 1) * pageSize + scope.$index + 1 }}
+				</template>
 			</el-table-column>
 			<el-table-column prop="name" label="奖学金名" width="200" sortable>
 			</el-table-column>

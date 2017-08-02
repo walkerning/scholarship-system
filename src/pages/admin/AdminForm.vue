@@ -27,7 +27,10 @@
 		<el-table :data="forms" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;" border>
 			<el-table-column type="selection" width="55">
 			</el-table-column>
-			<el-table-column type="index" width="60">
+			<el-table-column label="#" width="60">
+				<template scope="scope">
+					{{ (currentPage - 1) * pageSize + scope.$index + 1 }}
+				</template>
 			</el-table-column>
 			<el-table-column prop="name" label="表单名" width="220" sortable>
 			</el-table-column>
