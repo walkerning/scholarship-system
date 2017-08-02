@@ -36,7 +36,7 @@
 			</el-table-column>
 			<el-table-column prop="type" label="类别" width="180" :formatter="typeFormatter" sortable>
 			</el-table-column>
-			<el-table-column label="操作">
+			<el-table-column label="操作" width="200">
 				<template scope="scope">
 					<el-button size="small" @click="singleEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="info" size="small" @click="singlePreview(scope.$index, scope.row)">预览</el-button>

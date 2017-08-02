@@ -136,10 +136,11 @@ export const apiGetGroupId = (group_name, group_type) => {
 export const apiLogout = () => {
 	sessionStorage.removeItem("token");
 	sessionStorage.removeItem("uid");
-	sessionStorage.removeItem("userName");
+	sessionStorage.removeItem("user");
 };
 
 export const apiLogin = (data) => {
 	sessionStorage.setItem("token", data.token);
-	sessionStorage.setItem("uid", data.id);
+	sessionStorage.setItem("uid", data.user.id);
+	sessionStorage.setItem("user", JSON.stringify(data.user));
 };

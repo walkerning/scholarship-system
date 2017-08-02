@@ -26,11 +26,11 @@
 				<el-menu :default-active="$route.path" class="el-menu-vertical-demo" @open="handleopen" @close="handleclose" @select="handleselect"
 					 unique-opened router v-show="!collapsed">
 					<template v-for="(item,index) in $router.options.routes" v-if="!item.hidden">
-						<el-submenu :index="index+''" v-if="!item.leaf">
+						<el-submenu :index="index+''" v-if="!item.leaf&&hasPermission(item.permission)">
 							<template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
-							<el-menu-item v-for="child in item.children" :index="child.path" v-if="!child.hidden">{{child.name}}</el-menu-item>
+							<el-menu-item v-for="child in item.children" :index="child.path" v-if="!child.hidden&&hasPermission(child.permission)">{{child.name}}</el-menu-item>
 						</el-submenu>
-						<el-menu-item v-if="item.leaf&&item.children.length>0" :index="item.children[0].path"><i :class="item.iconCls"></i>{{item.children[0].name}}</el-menu-item>
+						<el-menu-item v-if="item.leaf&&item.children.length>0&&hasPermission(item.permission)" :index="item.children[0].path"><i :class="item.iconCls"></i>{{item.children[0].name}}</el-menu-item>
 					</template>
 				</el-menu>
 				<!--导航菜单-折叠后-->
@@ -92,7 +92,8 @@
 				sysName: "清华电子奖学金系统",
 				collapsed:  false,
 				sysUserName: "",
-				aboutVisible: false
+				aboutVisible: false,
+				sysUserPermissions: []
 			}
 		},
 		methods: {
@@ -122,27 +123,20 @@
 			},
 			userinfo: function () {
 				this.$router.push("/user");
+			},
+			hasPermission: function(requiredPermissions) {
+				for (var i in requiredPermissions) {
+					if (requiredPermissions[i] == null || _.includes(this.sysUserPermissions, requiredPermissions[i])) {
+						return true;
+					}
+				}
+				return false;
 			}
 		},
 		mounted() {
-			var userName = sessionStorage.getItem("userName");
-			if (userName) {
-				this.sysUserName = userName;
-			} else {
-				var uid = sessionStorage.getItem("uid");
-				apiGetUser(uid).then(res => {
-					userName = res.data.name;
-					sessionStorage.setItem("userName", userName);
-					this.sysUserName = userName;
-				}).catch(error => {
-					this.$notify({
-						title: "加载用户信息失败",
-						message: "",
-						type: "error"
-					});
-					this.sysUserName = "";
-				});
-			}
+			var user = JSON.parse(sessionStorage.getItem("user"));
+			this.sysUserName = user.name;
+			this.sysUserPermissions = user.permissions;
 		}
 	}
 
