@@ -25,12 +25,6 @@
 			</el-table-column>
 		</el-table>
 
-		<!--工具条-->
-		<el-col :span="24" class="toolbar">
-			<el-pagination layout="prev, pager, next" @current-change="allCurrentChange" :page-size="20" :total="total" style="float:right;">
-			</el-pagination>
-		</el-col>
-
 		<!--查看界面-->
 		<el-dialog title="查看" v-model="viewVisible" size="large">
 			<form-view :disabled="true"></form-view>
@@ -77,7 +71,6 @@
 			return {
 				listLoading: false,
 				scholarships: [],
-				total: 0,
 
 				viewVisible: false,
 				viewLoading: false,
@@ -141,9 +134,6 @@
 						type: "error"
 					});
 				});
-			},
-			allCurrentChange: function (val) {
-
 			},
 			singleFillSubmit: function () {
 				var uid = sessionStorage.getItem("uid");

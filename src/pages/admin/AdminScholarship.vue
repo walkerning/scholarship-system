@@ -40,7 +40,7 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
 			<el-button type="danger" @click="allScholarshipBatchRemove" :disabled="this.scholarshipSels.length===0">批量删除</el-button>
-			<el-pagination layout="prev, pager, next" @current-change="allScholarshipCurrentChange" :page-size="20" :total="scholarshipTotal" style="float:right;">
+			<el-pagination layout="prev, pager, next" @current-change="allScholarshipCurrentChange" :page-size="pageSize" :total="scholarshipTotal" style="float:right;" :current-page.sync="currentPage">
 			</el-pagination>
 		</el-col>
 		
@@ -462,6 +462,8 @@
 				scholarships: [],
 				scholarshipTotal: 0,
 				scholarshipSels: [],
+				pageSize: 20,
+				currentPage: 1,
 
 				scholarshipEditForm: {},
 				scholarshipEditFormVisible: false,
@@ -517,6 +519,7 @@
 		},
 		methods: {
 			allScholarshipSearch: function () {
+				this.currentPage = 1;
 				this.getScholarshipList();
 			},
 			allScholarshipAdd: function () {
@@ -691,7 +694,7 @@
 				});
 			},
 			allScholarshipCurrentChange: function (val) {
-
+				this.getScholarshipList();
 			},
 			updateTable: function () {
 				for (var i = 0; i < this.alloc.length; i++) {
@@ -1144,7 +1147,10 @@
 			},
 			getScholarshipList: function () {
 				this.scholarshipListLoading = true;
-				var params = {};
+				var params = {
+					page: this.currentPage,
+					pageSize: this.pageSize
+				};
 				if (this.scholarshipFilters.name != "") {
 					params["name"] = this.scholarshipFilters.name;
 				}
@@ -1152,9 +1158,9 @@
 					params["year"] = this.scholarshipFilters.year;
 				}
 				apiGetScholarshipList(params).then(res => {
-					this.scholarships = res.data;
+					this.scholarships = res.data.data;
 					this.scholarshipListLoading = false;
-					this.scholarshipTotal = this.scholarships.length;
+					this.scholarshipTotal = res.data.pagination.rowCount;
 				}).catch(error => {
 					this.$notify({
 						title: "加载奖学金列表失败",

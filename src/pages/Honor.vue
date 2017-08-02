@@ -13,17 +13,12 @@
 			</el-table-column>
 			<el-table-column prop="end_time" label="申请结束时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
-			<el-table-column label="操作">
+			<el-table-column label="操作" width="80">
 				<template scope="scope">
 					<el-button size="small" type="primary" @click="singleApply(scope.$index, scope.row)">申请</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
-		<!--当前列表工具条-->
-		<el-col :span="24" class="toolbar">
-			<el-pagination layout="prev, pager, next" @current-change="availableAllCurrentChange" :page-size="20" :total="availableTotal" style="float:right;">
-			</el-pagination>
-		</el-col>
 
 		<!--历史列表-->
 		<h1>申请历史</h1>
@@ -41,18 +36,12 @@
 			</el-table-column>
 			<el-table-column prop="apply_time" label="申请时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
-			<el-table-column label="操作">
+			<el-table-column label="操作" width="140">
 				<template scope="scope">
 					<el-button size="small" @click="singleView(scope.$index, scope.row)">查看申请表单</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
-
-		<!--历史列表工具条-->
-		<el-col :span="24" class="toolbar">
-			<el-pagination layout="prev, pager, next" @current-change="allCurrentChange" :page-size="20" :total="total" style="float:right;">
-			</el-pagination>
-		</el-col>
 
 		<el-dialog title="查看" v-model="viewVisible" size="large">
 			<form-view :disabled="true"></form-view>
@@ -97,11 +86,9 @@
 			return {
 				listLoading: false,
 				honors: [],
-				total: 0,
 
 				availableListLoading: false,
 				availableHonors: [],
-				availableTotal: 0,
 
 				isSave: false,
 
@@ -185,12 +172,6 @@
 				} else {
 					return new Date(row.apply_time).toLocaleString().replace(/:\d{1,2}$/,' '); 
 				}
-			},
-			allCurrentChange: function (val) {
-
-			},
-			availableAllCurrentChange: function (val) {
-
 			},
 			singleApplySubmit: function () {
 				this.$refs.form.validate((valid) => {
@@ -283,8 +264,7 @@
 			},
 			getHistoryHonorList: function () {
 				this.listLoading = true;
-				this.honors = []
-				this.total = 0;
+				this.honors = [];
 				var uid = sessionStorage.getItem("uid");
 				apiGetUserHonor(uid, {}).then(res => {
 					var userHonorStates = res.data;
@@ -300,7 +280,6 @@
 						for (var i in tUserHonorStates) {
 							this.honors.push(_.extend(tUserHonorStates[i], _.pick(reses[i].data, ["form_id", "name", "year"])));
 						}
-						this.total = this.honors.length;
 						this.listLoading = false;
 					});
 
@@ -322,8 +301,7 @@
 			},
 			getAvailableHonorList: function () {
 				this.availableListLoading = true;
-				this.availableHonors = []
-				this.availableTotal = 0;
+				this.availableHonors = [];
 				var uid = sessionStorage.getItem("uid");
 				apiGetUser(uid).then(res => {
 					var params = {
@@ -342,7 +320,6 @@
 									this.availableHonors.push(tHonors[j]);
 								}
 							}
-							this.availableTotal = this.availableHonors.length;
 							this.availableListLoading = false;
 						});
 					});

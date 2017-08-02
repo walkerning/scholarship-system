@@ -45,7 +45,7 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
 			<el-button type="danger" @click="allBatchRemove" :disabled="this.sels.length===0">批量删除</el-button>
-			<el-pagination layout="prev, pager, next" @current-change="allCurrentChange" :page-size="20" :total="total" style="float:right;">
+			<el-pagination layout="prev, pager, next" @current-change="allCurrentChange" :page-size="pageSize" :total="total" style="float:right;" :current-page.sync="currentPage">
 			</el-pagination>
 		</el-col>
 
@@ -114,9 +114,10 @@
 
 				sels: [],//列表选中列
 
-				forms: [
-				],
-				total: 0
+				forms: [],
+				total: 0,
+				pageSize: 20,
+				currentPage: 1
 			}
 		},
 		methods: {
@@ -124,6 +125,7 @@
 				return FormType.formTypeString(str);
 			},
 			allSearch: function() {
+				this.currentPage = 1;
 				this.getFormList();
 			},
 			allAdd: function() {
@@ -163,7 +165,7 @@
 				});
 			},
 			allCurrentChange: function (val) {
-
+				this.getFormList();
 			},
 			singleDel: function (index, row) {
 				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
@@ -256,7 +258,10 @@
 			},
 			getFormList: function () {
 				this.listLoading = true;
-				var params = {};
+				var params = {
+					page: this.currentPage,
+					pageSize: this.pageSize
+				};
 				if (this.filters.name != "") {
 					params["name"] = this.filters.name;
 				}
@@ -264,8 +269,8 @@
 					params["type"] = this.filters.type;
 				}
 				apiGetFormList(params).then(res => {
-					this.forms = res.data;
-					this.total = this.forms.length;
+					this.forms = res.data.data;
+					this.total = res.data.pagination.rowCount;
 					this.listLoading = false;
 					//console.log(this.forms);
 				}).catch(error => {

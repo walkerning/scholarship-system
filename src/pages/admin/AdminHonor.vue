@@ -44,7 +44,7 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
 			<el-button type="danger" @click="allHonorBatchRemove" :disabled="this.honorSels.length===0">批量删除</el-button>
-			<el-pagination layout="prev, pager, next" @current-change="allHonorCurrentChange" :page-size="20" :total="honorTotal" style="float:right;">
+			<el-pagination layout="prev, pager, next" @current-change="allHonorCurrentChange" :page-size="pageSize" :total="honorTotal" style="float:right;" :current-page.sync="currentPage">
 			</el-pagination>
 		</el-col>
 
@@ -336,6 +336,8 @@
 				honors: [],
 				honorTotal: 0,
 				honorSels: [],
+				pageSize: 20,
+				currentPage: 1,
 
 				honorEditForm: {},
 				honorEditFormVisible: false,
@@ -392,6 +394,7 @@
 				}
 			},
 			allHonorSearch: function () {
+				this.currentPage = 1;
 				this.getHonorList();
 			},
 			allHonorAdd: function () {
@@ -406,7 +409,7 @@
 				this.rateSels = sels;
 			},
 			allHonorCurrentChange: function (val) {
-
+				this.getHonorList();
 			},
 			singleHonorEdit: function (index, row) {
 				this.honorEditForm = JSON.parse(JSON.stringify(row));
@@ -959,7 +962,7 @@
 							var tasks = _.map(this.rateFilters.honors, apiGetHonor);
 							return Promise.all(tasks).then(honorReses => {
 								this.rates = newRates;
-								this.rateHonors = _.map(honorReses, (h) => { return h.data});
+								this.rateHonors = _.map(honorReses, (h) => { return h.data });
 								this.rateGroup = this.rateFilters.group;
 								this.rateType = this.rateFilters.type;
 								this.rateListLoading = false;
@@ -977,7 +980,10 @@
 			},
 			getHonorList: function () {
 				this.honorListLoading = true;
-				var params = {};
+				var params = {
+					page: this.currentPage,
+					pageSize: this.pageSize
+				};
 				if (this.honorFilters.name != "") {
 					params["name"] = this.honorFilters.name;
 				}
@@ -985,19 +991,19 @@
 					params["year"] = this.honorFilters.year;
 				}
 				apiGetHonorList(params).then(res => {
-					this.honors = res.data;
+					this.honors = res.data.data;
 					this.honorListLoading = false;
-					this.honorTotal = this.honors.length;
+					this.honorTotal = res.data.pagination.rowCount;
 				}).catch(error => {
 					this.$notify({
-						title: "加载失败",
+						title: "加载荣誉列表失败",
 						message: error.response.data.message,
 						type: "error"
 					});
 					this.honorListLoading = false;
 				}).catch(error => {
 					this.$notify({
-						title: "加载失败",
+						title: "加载荣誉列表失败",
 						message: "请检查网络连接",
 						type: "error"
 					});
