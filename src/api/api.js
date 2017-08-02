@@ -1,5 +1,25 @@
 import axios from 'axios';
 import UserType from "../common/js/userType"
+import vueInst from "../main"
+
+// Intercept 401 error
+axios.interceptors.response.use(function (response) {
+	return response;
+}, function (error) {
+	console.log(error.response.status == 401);
+	if (error.response.status == 401) {
+		vueInst.$notify({
+			title: "登录超时，请重新登录",
+			message: "",
+			type: "error"
+		});
+		vueInst.$router.push({ path: "/login" });
+		return Promise.reject(error);
+	} else {
+		return Promise.reject(error);
+	}
+});
+
 
 //let base = 'http://foxfi.eva6.nics.cc:8080';
 let base = 'http://localhost:3000';

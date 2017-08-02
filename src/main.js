@@ -50,12 +50,13 @@ router.beforeEach((to, from, next) => {
 //NProgress.done();
 //});
 
-new Vue({
+var vueInst = new Vue({
   //el: '#app',
   //template: '<App/>',
   router,
   store,
   //components: { App }
   render: h => h(App)
-}).$mount('#app')
+}).$mount('#app');
 
+export default vueInst;
