@@ -35,11 +35,11 @@
 			</el-table-column>
 			<el-table-column prop="end_time" label="申请结束时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
-			<el-table-column label="操作" width="350" >
+			<el-table-column label="操作" width="250" >
 				<template scope="scope">
 					<el-button size="small" @click="singleHonorEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="singleHonorDel(scope.$index, scope.row)">删除</el-button>
-					<el-button type="primary" size="small" @click="singleHonorFinal(scope.$index, scope.row)">最终提交</el-button>
+					<!--<el-button type="primary" size="small" @click="singleHonorFinal(scope.$index, scope.row)">最终提交</el-button>-->
 					<el-button size="small" @click="singleHonorCopy(scope.$index, scope.row)">从该荣誉创建</el-button>
 				</template>
 			</el-table-column>

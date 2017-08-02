@@ -31,11 +31,11 @@
 			</el-table-column>
 			<el-table-column prop="year" label="年份" width="100" sortable>
 			</el-table-column>
-			<el-table-column label="操作" width="400">
+			<el-table-column label="操作" width="300">
 				<template scope="scope">
 					<el-button size="small" @click="singleScholarshipEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="singleScholarshipDel(scope.$index, scope.row)">删除</el-button>
-					<el-button type="primary" size="small" @click="singleScholarshipFinal(scope.$index, scope.row)">最终提交</el-button>
+					<!--<el-button type="primary" size="small" @click="singleScholarshipFinal(scope.$index, scope.row)">最终提交</el-button>-->
 					<el-button size="small" @click="singleScholarshipCopy(scope.$index, scope.row)">从该奖学金创建</el-button>
 				</template>
 			</el-table-column>
