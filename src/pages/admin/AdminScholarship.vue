@@ -297,11 +297,11 @@
 								</el-col>
 								<template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
 									<el-col :span="4">
-										<el-button size="small" type="primary" @click="singleScholarshipAllocSubmit(scope.$index, index)">修改金额</el-button>
+										<el-button size="small" type="primary" @click="singleScholarshipAllocSubmit(scope.row, index)">修改金额</el-button>
 									</el-col>
 								</template>
 								<el-col :span="4">
-									<el-button size="small" type="danger" @click="singleScholarshipAllocDelete(scope.$index, index)">删除</el-button>
+									<el-button size="small" type="danger" @click="singleScholarshipAllocDelete(scope.row, index)">删除</el-button>
 								</el-col>
 							</el-row>
 						</template>
@@ -325,7 +325,7 @@
 								</template>
 							</el-col>
 							<el-col :span="4">
-								<el-button size="small" type="primary" @click="singleScholarshipAllocAddSubmit(scope.$index)">添加</el-button>
+								<el-button size="small" type="primary" @click="singleScholarshipAllocAddSubmit(scope.row)">添加</el-button>
 							</el-col>
 						</template>
 					</el-row>
@@ -358,7 +358,7 @@
 			</el-table-column>
 			<el-table-column label="已分配总金额/名额">
 				<template scope="scope">
-					{{ findAlready(scope.row, scope.$index) }}
+					{{ findAlready(scope.row) }}
 				</template>
 			</el-table-column>
 		</el-table>
@@ -407,7 +407,7 @@
 								未填写感谢信
 							</template>
 							<template v-else>
-								<el-button size="small" @click="singleThanksView(scope.$index, index)">查看感谢信</el-button>
+								<el-button size="small" @click="singleThanksView(scope.row, index)">查看感谢信</el-button>
 							</template>
 						</template>
 					</template>
@@ -710,8 +710,8 @@
 			allAllocSelsChange: function (sels) {
 				this.allocSels = sels;
 			},
-			singleScholarshipAllocDelete: function (rowId, colId) {
-				apiDeleteUserScholarship(this.alloc[rowId].id, this.allocScholarships[colId].id).then(res => {
+			singleScholarshipAllocDelete: function (row, colId) {
+				apiDeleteUserScholarship(row.id, this.allocScholarships[colId].id).then(res => {
 					this.$notify({
 						title: "删除奖学金分配成功",
 						message: "",
@@ -726,11 +726,11 @@
 					});
 				});
 			},
-			singleScholarshipAllocSubmit: function (rowId, colId) {
+			singleScholarshipAllocSubmit: function (row, colId) {
 				var params = {
-					money: this.alloc[rowId].scholarship_money[colId]
+					money: row.scholarship_money[colId]
 				}
-				var uid = this.alloc[rowId].id;
+				var uid = row.id;
 				var scholarId = this.allocScholarships[colId].id;
 				apiUpdateUserScholarship(uid, scholarId, params).then(res => {
 					this.$notify({
@@ -754,14 +754,14 @@
 					});					
 				});
 			},
-			singleScholarshipAllocAddSubmit: function (rowId) {
+			singleScholarshipAllocAddSubmit: function (row) {
 				var params = {
-					scholar_id: this.allocScholarships[this.alloc[rowId].scholarship_add].id
+					scholar_id: this.allocScholarships[row.scholarship_add].id
 				}
-				if (this.allocScholarships[this.alloc[rowId].scholarship_add].alloc == this._SCHOLARSHIP_ALLOC_TYPE.MONEY) {
-					params.money = this.alloc[rowId].scholarship_money_add;
+				if (this.allocScholarships[row.scholarship_add].alloc == this._SCHOLARSHIP_ALLOC_TYPE.MONEY) {
+					params.money = row.scholarship_money_add;
 				}
-				var uid = this.alloc[rowId].id;
+				var uid = row.id;
 				apiAddUserScholarship(uid, params).then(res => {
 					this.$notify({
 						title: "新增奖学金分配成功",
@@ -790,12 +790,12 @@
 			allThanksSelsChange: function (sels) {
 				this.thanksSels = sels;
 			},
-			singleThanksView: function (row, col) {
-				apiGetForm(this.thanksScholarships[col].form_id).then(res => {
+			singleThanksView: function (row, colId) {
+				apiGetForm(this.thanksScholarships[colId].form_id).then(res => {
 					this.setForm(res.data);
-					this.setFill(JSON.parse(this.thanks[row].scholarship_fills[col]));
-					this.thanksScholarshipId = col;
-					this.thanksUserId = row;
+					this.setFill(JSON.parse(row.scholarship_fills[colId]));
+					this.thanksScholarshipId = this.thanksScholarships[colId].id;
+					this.thanksUserId = row.id;
 					this.thanksViewVisible = true;
 				}).catch(error => {
 					this.$notify({
@@ -815,8 +815,8 @@
 				this.getThanksList();
 			},
 			singleThanksSubmit: function () {
-				var uid = this.thanks[this.thanksUserId].id;
-				var scholarshipId = this.thanksScholarships[this.thanksScholarshipId].id;
+				var uid = this.thanksUserId;
+				var scholarshipId = this.thanksScholarshipId;
 				var params = {
 					fill: this.getFill
 				}
@@ -844,18 +844,25 @@
 				}
 				return 0;
 			},
-			findAlready: function(row, index) {
+			findAlready: function(row) {
+				var colId = null;
+				for (var i in this.allocScholarships) {
+					if (this.allocScholarships[i].id == row.id) {
+						colId = i;
+						break;
+					}
+				}
 				var ans = 0;
 				if (row.alloc == this._SCHOLARSHIP_ALLOC_TYPE.QUOTA) {
 					for (var i in this.alloc) {
-						if (this.alloc[i].scholarship_states[index] === this._APPLY_STATUS.SUCCESS) {
+						if (this.alloc[i].scholarship_states[colId] === this._APPLY_STATUS.SUCCESS) {
 							ans += 1;
 						}
 					}
 				} else {
 					for (var i in this.alloc) {
-						if (this.alloc[i].scholarship_states[index] === this._APPLY_STATUS.SUCCESS) {
-							ans += this.alloc[i].scholarship_money[index];
+						if (this.alloc[i].scholarship_states[colId] === this._APPLY_STATUS.SUCCESS) {
+							ans += this.alloc[i].scholarship_money[colId];
 						}
 					}
 				}

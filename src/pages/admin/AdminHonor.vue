@@ -207,13 +207,13 @@
 				<el-table-column :prop="honor.year + ' ' + honor.name" :sort-method="sort(index)" :label="honor.year + ' ' + honor.name" width="200" sortable>
 					<template scope="scope">
 						<template v-if="scope.row.honor_states[index] !== null">
-							<a @click="singleChangeApplyStatus(scope.$index, index)" style="cursor: pointer;">
+							<a @click="singleChangeApplyStatus(scope.row, index)" style="cursor: pointer;">
 								<apply-status-tag :applyStatus="scope.row.honor_states[index]"></apply-status-tag>
 							</a>
-							<a @click="singleRate(scope.$index, index)" style="cursor: pointer;">
+							<a @click="singleRate(scope.row, index)" style="cursor: pointer;">
 								<el-tag type="gray"> 平均评分：{{ scope.row.honor_aveScore[index] }} </el-tag>
 							</a>
-							<a @click="singleRate(scope.$index, index)" style="cursor: pointer;">
+							<a @click="singleRate(scope.row, index)" style="cursor: pointer;">
 								<template v-if="scope.row.honor_scores[index][_UID] === undefined">
 									<el-tag>您尚未给出评分</el-tag>
 								</template>
@@ -529,12 +529,19 @@
 					});	
 				});
 			},
-			singleChangeApplyStatus: function (row, col) {
-				this.honorStateSettingUser = this.rates[row];
-				this.honorStateSettingHonor = this.rateHonors[col];
-				this.honorStateSettingState = this.rates[row].honor_states[col];
-				var fill = JSON.parse(this.rates[row].honor_fills[col]);
-				apiGetForm(this.rateHonors[col].form_id).then(formRes => {
+			singleChangeApplyStatus: function (row, colId) {
+				var rowId = null;
+				for (var i in this.rates) {
+					if (this.rates[i].id == row.id) {
+						rowId = i;
+						break;
+					}
+				}
+				this.honorStateSettingUser = this.rates[rowId];
+				this.honorStateSettingHonor = this.rateHonors[colId];
+				this.honorStateSettingState = this.rates[rowId].honor_states[colId];
+				var fill = JSON.parse(this.rates[rowId].honor_fills[colId]);
+				apiGetForm(this.rateHonors[colId].form_id).then(formRes => {
 					var form = formRes.data;
 					this.setForm(JSON.parse(JSON.stringify(form)));
 					this.setFill(JSON.parse(JSON.stringify(fill)));
@@ -636,17 +643,24 @@
 					});	
 				});
 			},
-			singleRate: function (row, col) {
-				this.honorRateUser = this.rates[row];
-				this.honorRateHonor = this.rateHonors[col];
-				var fill = JSON.parse(this.rates[row].honor_fills[col]);
-				apiGetForm(this.rateHonors[col].form_id).then(formRes => {
+			singleRate: function (row, colId) {
+				var rowId = null;
+				for (var i in this.rates) {
+					if (this.rates[i].id == row.id) {
+						rowId = i;
+						break;
+					}
+				}
+				this.honorRateUser = this.rates[rowId];
+				this.honorRateHonor = this.rateHonors[colId];
+				var fill = JSON.parse(this.rates[rowId].honor_fills[colId]);
+				apiGetForm(this.rateHonors[colId].form_id).then(formRes => {
 					var form = formRes.data;
 					var tmpForm = JSON.parse(JSON.stringify(form));
 					tmpForm.fields = [];
 					var tmpFill = {};
 					var tmpRate = {};
-					for (var i in this.rates[row].honor_scores[col]) {
+					for (var i in this.rates[rowId].honor_scores[colId]) {
 						tmpRate[i] = [];
 					}
 					this.scoreMap = [];
@@ -654,8 +668,8 @@
 						if (form.fields[i].type === this._QUE_TYPE.STRING_SINGLE_LINE || form.fields[i].type === this._QUE_TYPE.STRING_MULTIPLE_LINE) {
 							tmpForm.fields.push(form.fields[i]);
 							tmpFill["data" + (tmpForm.fields.length - 1)] = fill["data" + i];
-							for (var j in this.rates[row].honor_scores[col]) {
-								tmpRate[j].push(this.rates[row].honor_scores[col][j]["score" + i])
+							for (var j in this.rates[rowId].honor_scores[colId]) {
+								tmpRate[j].push(this.rates[rowId].honor_scores[colId][j]["score" + i])
 
 							}
 							this.scoreMap.push({
@@ -666,8 +680,8 @@
 							for (var j = 0; j < fill["data" + i].length; j++) {
 								tmpForm.fields.push(JSON.parse(JSON.stringify(form.fields[i])));
 								tmpFill["data" + (tmpForm.fields.length - 1)] = [ fill["data" + i][j] ];
-								for (var k in this.rates[row].honor_scores[col]) {
-									tmpRate[k].push(this.rates[row].honor_scores[col][k]["score" + i][j])
+								for (var k in this.rates[rowId].honor_scores[colId]) {
+									tmpRate[k].push(this.rates[rowId].honor_scores[colId][k]["score" + i][j])
 								}
 								this.scoreMap.push({
 									key: "score" + i,
