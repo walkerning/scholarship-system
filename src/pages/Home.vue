@@ -69,8 +69,17 @@
 			</section>
 		</el-col>
 		<el-dialog title="清华电子奖学金系统" size="small" v-model="aboutVisible">
-			<b>奖学金、荣誉申请问题请联系辅导员，系统bug请联系开发者</b>
 			<hr />
+			<b>顾问</b>
+			<ul>
+				<li><a style="color:green;" href="http://nics.ee.tsinghua.edu.cn/people/wangyu/index.html" target="_blank">汪玉</a></li>
+				<li><a style="color:green;" href="http://oa.ee.tsinghua.edu.cn/~shenyuan/" target="_blank">沈渊</a></li>
+			</ul>
+			<b>策划</b>
+			<ul>
+				<li><a style="color:green;" href="#">徐晗</a></li>
+				<li><a style="color:green;" href="#">王超</a></li>
+			</ul>
 			<b>开发者</b>
 			<ul>
 				<li><a style="color:green;" href="mailto:linzinan1995@126.com">林梓楠 清华大学电子系2013级本科生 </a></li>
@@ -78,6 +87,8 @@
 				<li><a style="color:green;" href="mailto:huangzc13@mails.tsinghua.edu.cn">黄志超 清华大学电子系2013级本科生 </a></li>
 				<li><a style="color:green;" href="mailto:huangzc13@975114697@qq.com">许璀杰 清华大学电子系2016级本科生 </a></li>
 			</ul>
+			<hr />
+			<b>奖学金、荣誉申请问题请联系辅导员，系统bug请联系开发者</b>
 			<hr />
 			Powered by <a href="https://github.com/taylorchen709/vue-admin" target="_blank">vue-admin</a>, <a href="https://cn.vuejs.org/" target="_blank">Vue.js</a> and <a href="http://element.eleme.io/#/zh-CN" target="_blank">Element UI</a>.
 		</el-dialog>
