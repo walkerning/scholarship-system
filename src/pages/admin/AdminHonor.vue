@@ -832,7 +832,79 @@
 				//this.updateTable();
 			},
 			rateExport: function () {
+				function cell(value, colSpan) {
+					var bookCell = new wijmo.xlsx.WorkbookCell();
+					bookCell.value = value;
+					if (colSpan != undefined) {
+						bookCell.colSpan = colSpan;
+					}
+					return bookCell;
+				}
+				if (this.rates.length === 0) {
+					this.$notify({
+						title: "结果为空。请查询后再导出",
+						message: "",
+						type: "error"
+					});					
+					return;
+				}
+ 			    var book = new wijmo.xlsx.Workbook();
+			    var sheet = new wijmo.xlsx.WorkSheet();
 
+			    var title = new wijmo.xlsx.WorkbookRow();
+			    title.cells.push(cell("姓名"));
+			    title.cells.push(cell("班级"));
+			    title.cells.push(cell("学号"));
+			    title.cells.push(cell("已获荣誉数"));
+			    for (var i in this.rateHonors) {
+			    	title.cells.push(cell(this.rateHonors[i].year + " " + this.rateHonors[i].name));
+			    }
+			    sheet.rows.push(title);
+
+			    for (var i in this.rates) {
+			    	var row = new wijmo.xlsx.WorkbookRow();
+			    	row.cells.push(cell(this.rates[i].name));
+			    	row.cells.push(cell(this.rates[i].class));
+			    	row.cells.push(cell(this.rates[i].student_id + ""));
+			    	row.cells.push(cell(this.countExistence(this.rates[i].honor_states, this._APPLY_STATUS.SUCCESS)));
+			    	for (var j in this.rates[i].honor_states) {
+			    		row.cells.push(cell(this._applyStatusString(this.rates[i].honor_states[j])));
+			    	}
+			    	sheet.rows.push(row);
+			    }
+
+			    var bottom1 = new wijmo.xlsx.WorkbookRow();
+			    bottom1.cells.push(cell("申请人数", 4));
+			    for (var i in [2, 3, 4]) {
+			    	bottom1.cells.push(undefined);
+			    }
+			    for (var i in this.rateHonors) {
+			    	bottom1.cells.push(cell(this.countApply(i)));
+			    }
+			    sheet.rows.push(bottom1);
+
+			    var bottom2 = new wijmo.xlsx.WorkbookRow();
+			    bottom2.cells.push(cell("获得人数", 4));
+			    for (var i in [2, 3, 4]) {
+			    	bottom2.cells.push(undefined);
+			    }
+			    for (var i in this.rateHonors) {
+			    	bottom2.cells.push(cell(this.countGet(i)));
+			    }
+			    sheet.rows.push(bottom2);
+
+			    var bottom3 = new wijmo.xlsx.WorkbookRow();
+			    bottom3.cells.push(cell("名额", 4));
+			    for (var i in [2, 3, 4]) {
+			    	bottom3.cells.push(undefined);
+			    }
+			    for (var i in this.rateHonors) {
+			    	bottom3.cells.push(cell(this.countQuota(i)));
+			    }
+			    sheet.rows.push(bottom3);
+
+			    book.sheets.push(sheet);
+			    book.save("荣誉评比结果");
 			},
 			sort: function (index) {
 				return function(a, b) {
