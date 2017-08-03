@@ -78,7 +78,7 @@
 			<b>策划</b>
 			<ul>
 				<li><a style="color:green;" href="#">徐晗</a></li>
-				<li><a style="color:green;" href="#">王超</a></li>
+				<li><a style="color:green;" href="#">王超 清华大学电子系2015级研究生、辅导员</a></li>
 			</ul>
 			<b>开发者</b>
 			<ul>
