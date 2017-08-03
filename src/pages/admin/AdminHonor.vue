@@ -184,6 +184,7 @@
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="rateSearch">查询</el-button>
+					<el-button type="primary" @click="rateExport">导出</el-button>
 				</el-form-item>
 			</el-form>
 		</el-col>
@@ -829,6 +830,9 @@
 			rateSearch: function () {
 				this.getRateList();
 				//this.updateTable();
+			},
+			rateExport: function () {
+
 			},
 			sort: function (index) {
 				return function(a, b) {

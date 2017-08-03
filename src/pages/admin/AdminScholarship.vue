@@ -1184,7 +1184,7 @@
 						message: "请检查网络连接",
 						type: "error"
 					});
-					this.honorListLoading = false;
+					this.scholarshipListLoading = false;
 				});
 			},
 			...mapActions([

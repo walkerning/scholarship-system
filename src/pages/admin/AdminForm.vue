@@ -278,10 +278,17 @@
 					//console.log(this.forms);
 				}).catch(error => {
 					this.$notify({
-						title: "加载失败",
+						title: "加载表单列表失败",
 						message: error.response.data.message,
 						type: "error"
 					});
+					this.listLoading = false;
+				}).catch(error => {
+					this.$notify({
+						title: "加载表单列表失败",
+						message: "请检查网络连接",
+						type: "error"
+					});	
 					this.listLoading = false;
 				});
 			},

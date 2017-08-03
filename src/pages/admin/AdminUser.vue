@@ -395,141 +395,177 @@
 				var reader, workbook, file, sheet, row, that;
 				that = this;
 				file = document.getElementById("importFormUserFile").files[0];
+				if (file == undefined) {
+					this.$notify({
+						title: "请选择文件",
+						message: "",
+						type: "error"
+					});
+					return;
+				}
 				reader = new FileReader;				
 				reader.readAsDataURL(file);				
-				reader.onload = function(e)
-				{
-					workbook = new wijmo.xlsx.Workbook();
-					workbook.load(reader.result);				
-					sheet = workbook._sheets[0];	
-					that.importFormFeedback = [];
-					var tasks = [];
-					that.importFormFeedbackLoading = true;
-					for (let i=0, il=sheet._rows.length; i<il; i++)
-					{
-						row = sheet._rows[i];
-						if (row == undefined) break;
-						if (row._cells == undefined) break;
-						//console.log("i= " + i);
-						tasks.push(
-							(function(row_) {
-								var params = {
-									name: row_._cells[0].value,
-									student_id: row_._cells[1].value+'',
-									class: row_._cells[2].value,
-									group: row_._cells[3].value,
-									type: row_._cells[4].value,
-									phone: row_._cells[5].value+'',
-									email: row_._cells[6].value
-								};		
-								return apiGetGroupId(row_._cells[3].value+'', row_._cells[4].value+'').then(group_id => {
-									params.group_id = group_id;
-									//console.log(params);
-									apiAddUser(params).then(res => {
-										params.status = "导入成功";
-										that.importFormFeedback.push(params);
+				reader.onload = function(e) {
+					try {
+						workbook = new wijmo.xlsx.Workbook();
+						workbook.load(reader.result);				
+						sheet = workbook._sheets[0];	
+						that.importFormFeedback = [];
+						var tasks = [];
+						that.importFormFeedbackLoading = true;
+						for (let i=0, il=sheet._rows.length; i<il; i++)
+						{
+							row = sheet._rows[i];
+							if (row == undefined) break;
+							if (row._cells == undefined) break;
+							//console.log("i= " + i);
+							tasks.push(
+								(function(row_) {
+									var params = {
+										name: row_._cells[0].value,
+										student_id: row_._cells[1].value+'',
+										class: row_._cells[2].value,
+										group: row_._cells[3].value,
+										type: row_._cells[4].value,
+										phone: row_._cells[5].value+'',
+										email: row_._cells[6].value
+									};		
+									return apiGetGroupId(row_._cells[3].value+'', row_._cells[4].value+'').then(group_id => {
+										params.group_id = group_id;
+										//console.log(params);
+										apiAddUser(params).then(res => {
+											params.status = "导入成功";
+											that.importFormFeedback.push(params);
+										}).catch(error => {
+											//console.log(error);
+											params.status = "导入失败，" + error.response.data.message;
+											that.importFormFeedback.push(params);
+										}).catch(error => {
+											params.status = "导入失败，请检查网络"; 
+											that.importFormFeedback.push(params);
+										});	
 									}).catch(error => {
-										//console.log(error);
-										params.status = "导入失败，" + error.response.data.message;
+										//console.log(error.response);
+										params.status = "导入失败，获取group_id失败";
 										that.importFormFeedback.push(params);
-									}).catch(error => {
-										params.status = "导入失败，请检查网络"; 
-										that.importFormFeedback.push(params);
-									});	
-								}).catch(error => {
-									//console.log(error.response);
-									params.status = "导入失败，获取group_id失败";
-									that.importFormFeedback.push(params);
-								});;
-							})(row));
+									});;
+								})(row));
+						}
+						that.importFormVisible = false;
+						that.importFormFeedbackVisible = true;
+						Promise.all(tasks).then(res => {
+							that.importFormFeedbackLoading = false;
+							that.getUserList();
+						});
+					} catch(error) {
+						that.$notify({
+							title: "文件格式有误",
+							message: "",
+							type: "error"
+						});
 					}
-					that.importFormVisible = false;
-					that.importFormFeedbackVisible = true;
-					Promise.all(tasks).then(res => {
-						that.importFormFeedbackLoading = false;
-						that.getUserList();
-					});
 				};
 			},			
 			allImportScore: function () {
 				var reader, workbook, file, sheet, row, that;
 				that = this;
 				file = document.getElementById("importFormScoreFile").files[0];
+				if (file == undefined) {
+					this.$notify({
+						title: "请选择文件",
+						message: "",
+						type: "error"
+					});
+					return;
+				}
 				reader = new FileReader;				
 				reader.readAsDataURL(file);				
-				reader.onload = function(e)
-				{
-					workbook = new wijmo.xlsx.Workbook();
-					workbook.load(reader.result);				
-					sheet = workbook._sheets[0];	
-					that.importFormFeedback = [];
-					var tasks = [];
-					that.importFormFeedbackLoading = true;
-					for (let i=0, il=sheet._rows.length; i<il; i++)
-					{
-						//console.log(i + ' ' + il);
-						row = sheet._rows[i];
-						if (row == undefined) break;
-						if (row._cells == undefined) break;
-						tasks.push(
-							(function(row_) {			
-								var str = "";
-								for (let k=0, kl=row_._cells.length; k<kl; k++)
-									str += row_._cells[k].value+"  ";
-								//console.log(str);
-								return apiGetUserList({student_id: row_._cells[0].value}).then(res => {
-									var user = res.data[0];
-									//console.log("user: " + user);
-									if (user == undefined) {
-										user.student_id = row_._cells[0].value;
-										user.status = "导入失败，该学生不存在";
-										that.importFormFeedback.push(user);
-									}else {
-										var params = {
-											id: user.id,
-											name: user.name,
-											student_id: user.student_id,
-											class: user.class,
-											group_id: user.group_id,
-											type: user.type,
-											phone: user.phone,
-											email: user.email
-										};
-										var uid = user.id;
-										params.gpa = row_.cells[1].value;
-										params.class_rank = row_._cells[2].value;
-										params.year_rank = row_._cells[3].value;
-										//console.log("uid: ", uid);
-										//console.log("importScore update: ", params);
+				reader.onload = function(e) {
+					try {
+						workbook = new wijmo.xlsx.Workbook();
+						workbook.load(reader.result);				
+						sheet = workbook._sheets[0];	
+						that.importFormFeedback = [];
+						var tasks = [];
+						that.importFormFeedbackLoading = true;
+						for (let i=0, il=sheet._rows.length; i<il; i++)
+						{
+							//console.log(i + ' ' + il);
+							row = sheet._rows[i];
+							if (row == undefined) break;
+							if (row._cells == undefined) break;
+							tasks.push(
+								(function(row_) {			
+									var str = "";
+									for (let k=0, kl=row_._cells.length; k<kl; k++)
+										str += row_._cells[k].value+"  ";
+									//console.log(str);
+									return apiGetUserList({student_id: row_._cells[0].value}).then(res => {
+										var user = res.data[0];
+										//console.log("user: " + user);
+										if (user == undefined) {
+											user.student_id = row_._cells[0].value;
+											user.status = "导入失败，该学生不存在";
+											that.importFormFeedback.push(user);
+										}else {
+											var params = {
+												id: user.id,
+												name: user.name,
+												student_id: user.student_id,
+												class: user.class,
+												group_id: user.group_id,
+												type: user.type,
+												phone: user.phone,
+												email: user.email
+											};
+											var uid = user.id;
+											params.gpa = row_.cells[1].value;
+											params.class_rank = row_._cells[2].value;
+											params.year_rank = row_._cells[3].value;
+											//console.log("uid: ", uid);
+											//console.log("importScore update: ", params);
 
-										return apiUpdateUser(uid, params).then(res => {
-											user.status = "导入成功";
-											that.importFormFeedback.push(user);
-										}).catch(error => {
-											user.status = "导入失败，" + error.response.data.message;
-											//console.log("failed in apiUpdateUser: " + error);
-											that.importFormFeedback.push(user);
-										}).catch(error => {
-											user.status = "导入失败，请检查网络连接";
-											that.importFormFeedback.push(user);
-										});	
-									}
-								}).catch(error => {
-									var user = {
-										student_id: row_._cells[0].value,
-										status: "导入失败，该学生不存在"
-									};
-									//console.log("failed in apiFindUser: " + error);
-									that.importFormFeedback.push(user);
-								});
-							})(row));
+											return apiUpdateUser(uid, params).then(res => {
+												user.status = "导入成功";
+												that.importFormFeedback.push(user);
+											}).catch(error => {
+												user.status = "导入失败，" + error.response.data.message;
+												//console.log("failed in apiUpdateUser: " + error);
+												that.importFormFeedback.push(user);
+											}).catch(error => {
+												user.status = "导入失败，请检查网络连接";
+												that.importFormFeedback.push(user);
+											});	
+										}
+									}).catch(error => {
+										var user = {
+											student_id: row_._cells[0].value,
+											status: "导入失败，" + error.response.data.message
+										};
+										//console.log("failed in apiFindUser: " + error);
+										that.importFormFeedback.push(user);
+									}).catch(error => {
+										var user = {
+											student_id: row_._cells[0].value,
+											status: "导入失败，请检查网络连接"
+										};
+										that.importFormFeedback.push(user);
+									});
+								})(row));
+						}
+						that.importFormVisible = false;
+						that.importFormFeedbackVisible = true;
+						Promise.all(tasks).then(res => {
+							that.importFormFeedbackLoading = false;
+							that.getUserList();
+						});
+					} catch(error) {
+						that.$notify({
+							title: "文件格式有误",
+							message: "",
+							type: "error"
+						});						
 					}
-					that.importFormVisible = false;
-					that.importFormFeedbackVisible = true;
-					Promise.all(tasks).then(res => {
-						that.importFormFeedbackLoading = false;
-						that.getUserList();
-					});
 				};
 			},
 			allBatchRemove: function () {
