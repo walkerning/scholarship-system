@@ -1,5 +1,5 @@
 <template>
-	<el-form ref="form" :model="form" :rules="rules" label-width="80px" @submit.prevent="onSubmit" style="margin:20px;width:60%;min-width:600px;" v-loading="formLoading">
+	<el-form ref="form" :model="form" :rules="rules" label-width="180px" @submit.prevent="onSubmit" style="margin:20px;width:60%;min-width:600px;" v-loading="formLoading">
 		<el-form-item label="姓名">
 			<el-input v-model="form.name" :readonly="true"></el-input>
 		</el-form-item>
@@ -21,7 +21,7 @@
 		<el-form-item label="邮箱" prop="email">
 			<el-input v-model="form.email"></el-input>
 		</el-form-item>
-		<el-form-item label="修改密码（不修改则放空）" prop="pass">
+		<el-form-item label="修改密码，至少8位，至多30位（不修改则放空）" prop="pass">
 			<el-input type="password" v-model="form.pass" auto-complete="off"></el-input>
 		</el-form-item>
 		<el-form-item label="确认密码" prop="dupPass">

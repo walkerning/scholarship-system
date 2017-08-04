@@ -162,7 +162,7 @@
 		<el-dialog title="导入" v-model="importFormVisible" :close-on-click-modal="false">
 			<el-form :model="importForm" label-width="20px" ref="importForm">
 				<h4> 导入新用户 </h4>
-				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[姓名]、[学号]、[班级]、[年级]、[类别（undergraduate or graduate）]、[电话]、[邮箱]
+				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[姓名]、[学号]、[班级]、[年级]、[类别（undergraduate or graduate）]、[电话]、[邮箱]。初始密码为用户学号。
 				<el-form-item label="" prop="userFile">
 					<!-- <el-input type="file" v-model="importForm.userFile" auto-complete="off"></el-input> -->
 					<input type="file" id="importFormUserFile" />  				
@@ -172,7 +172,7 @@
 			<hr />
 			<el-form :model="importForm" label-width="20px" ref="importForm">
 				<h4> 导入成绩 </h4>
-				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[学号]、[GPA]、[班级排名]、[年级排名]
+				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[学号]、[GPA]、[班级排名]、[年级排名]。
 				<el-form-item label="" prop="scoreFile">
 					<!-- <el-input type="file" v-model="importForm.scoreFile" auto-complete="off"></el-input> -->
 					<input type="file" id="importFormScoreFile" />
@@ -704,8 +704,8 @@
 				var uid = this.editForm.id;
 				apiResetPassword(uid).then(() => {
 					this.$notify({
-						title: "重设密码成功",
-						message: "重设密码成功。新密码已发送至该用户邮箱！",
+						title: "重置密码成功",
+						message: "重置密码成功，为用户学号！",
 						type: "success"
 					});
 				}).catch(error => {
