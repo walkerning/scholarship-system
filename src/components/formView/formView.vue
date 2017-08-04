@@ -91,6 +91,7 @@
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../../common/js/queType"
+	import util from "../../common/js/util.js"
 
 	export default {
 		props: {
@@ -239,7 +240,13 @@
 				"deleteFillOption"
 			]),
 			print: function() {
-				console.log("print");
+				var body = this.getForm.template;
+				for (var i in this.getFill) {
+					var regExp = new RegExp("{{" + i + "}}", "g");
+					body = body.replace(regExp, util.htmlEncode(this.getFill[i]));
+				}
+				var j = window.open('');
+				j.document.write(body);
 			},
 			validate: function(callback) {
 				this.$refs.form.validate(callback);

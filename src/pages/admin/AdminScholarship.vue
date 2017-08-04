@@ -257,6 +257,7 @@
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="allocSearch">查询</el-button>
+					<el-button type="primary" @click="allocExport">导出</el-button>
 				</el-form-item>
 			</el-form>
 		</el-col>
@@ -707,6 +708,82 @@
 			allocSearch: function () {
 				this.getAllocList();
 			},
+			allocExport: function () {
+				function cell(value, colSpan) {
+					var bookCell = new wijmo.xlsx.WorkbookCell();
+					bookCell.value = value;
+					if (colSpan != undefined) {
+						bookCell.colSpan = colSpan;
+					}
+					return bookCell;
+				}
+				if (this.alloc.length === 0) {
+					this.$notify({
+						title: "结果为空。请查询后再导出",
+						message: "",
+						type: "error"
+					});					
+					return;
+				}
+ 			    var book = new wijmo.xlsx.Workbook();
+
+			    var sheet1 = new wijmo.xlsx.WorkSheet();
+			    sheet1.name = "奖学金分配名单";
+			    var title1 = new wijmo.xlsx.WorkbookRow();
+			    title1.cells.push(cell("姓名"));
+			    title1.cells.push(cell("班级"));
+			    title1.cells.push(cell("学号"));
+			    title1.cells.push(cell("已获荣誉数"));
+			    title1.cells.push(cell("已获奖学金额度"));
+			    for (var i in this.allocHonors) {
+			    	title1.cells.push(cell(this.allocHonors[i].year + " " + this.allocHonors[i].name));
+			    }
+			    title1.cells.push(cell("获得的奖学金及金额"));
+			    sheet1.rows.push(title1);
+			    for (var i in this.alloc) {
+			    	var row = new wijmo.xlsx.WorkbookRow();
+			    	row.cells.push(cell(this.alloc[i].name));
+			    	row.cells.push(cell(this.alloc[i].class));
+			    	row.cells.push(cell(this.alloc[i].student_id + ""));
+			    	row.cells.push(cell(this.countExistence(this.alloc[i].honor_states, this._APPLY_STATUS.SUCCESS)));
+			    	row.cells.push(cell(this.alloc[i].scholarship_money_sum));
+			    	for (var j in this.alloc[i].honor_states) {
+			    		row.cells.push(cell(this._applyStatusString(this.alloc[i].honor_states[j])));
+			    	}
+			    	for (var j in this.alloc[i].scholarship_states) {
+			    		if (this.alloc[i].scholarship_states[j] == this._APPLY_STATUS.SUCCESS) {
+			    			row.cells.push(cell(this.allocScholarships[j].year + " " + this.allocScholarships[j].name));
+			    			if (this.allocScholarships[j].alloc == this._SCHOLARSHIP_ALLOC_TYPE.MONEY) {
+			    				row.cells.push(cell(this.alloc[i].scholarship_money[j]));
+			    			} else {
+			    				row.cells.push(cell(this.allocScholarships[j].money));
+			    			}
+			    		}
+			    	}
+			    	sheet1.rows.push(row);
+			    }
+			    book.sheets.push(sheet1);
+
+			    var sheet2 = new wijmo.xlsx.WorkSheet();
+			    sheet2.name = "奖学金支出情况";
+			    var title2 = new wijmo.xlsx.WorkbookRow();
+			    title2.cells.push(cell("奖学金名"));
+			    title2.cells.push(cell("年份"));
+			    title2.cells.push(cell("可分配总金额/名额"));
+			    title2.cells.push(cell("已分配总金额/名额"));
+			    sheet2.rows.push(title2);
+			    for (var i in this.allocScholarships) {
+			    	var row = new wijmo.xlsx.WorkbookRow();
+			    	row.cells.push(cell(this.allocScholarships[i].name));
+			    	row.cells.push(cell(this.allocScholarships[i].year));
+			    	row.cells.push(cell(this.findQuota(this.allocScholarships[i].group_quota, this.allocGroup, this.allocType)));
+			    	row.cells.push(cell(this.findAlready(this.allocScholarships[i])));
+			    	sheet2.rows.push(row);
+			    }
+			    book.sheets.push(sheet2);
+
+			    book.save("奖学金分配结果");
+			},
 			allAllocSelsChange: function (sels) {
 				this.allocSels = sels;
 			},
@@ -901,6 +978,9 @@
 			},
 			_scholarshipAllocTypeString: function(str) {
 				return ScholarshipAllocType.scholarshipAllocTypeString(str);
+			},
+			_applyStatusString: function(str) {
+				return ApplyStatus.applyStatusString(str);
 			},
 			getThanksList: function() {
 				this.thanksScholarships = [];
