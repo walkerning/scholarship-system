@@ -162,7 +162,7 @@
 		<el-dialog title="导入" v-model="importFormVisible" :close-on-click-modal="false">
 			<el-form :model="importForm" label-width="20px" ref="importForm">
 				<h4> 导入新用户 </h4>
-				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[姓名]、[学号]、[班级]、[年级]、[类别（undergraduate or graduate）]、[电话]、[邮箱]。初始密码为用户学号。
+				选择Excel(.xlsx)文件，文件内只有一个sheet，每一行包含一个用户的信息，各列分别为：[姓名]、[学号]、[班级]、[年级]、[类别（undergraduate or graduate or faculty）]、[电话]、[邮箱]。初始密码为用户学号。
 				<el-form-item label="" prop="userFile">
 					<!-- <el-input type="file" v-model="importForm.userFile" auto-complete="off"></el-input> -->
 					<input type="file" id="importFormUserFile" />  				
@@ -201,7 +201,7 @@
 
 <script>
 	import _ from "lodash"
-	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroupId, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser } from "../../api/api"
+	import { apiGetUserList, apiUpdateUser, apiAddUser, apiGetGroupId, apiDeleteUser, apiResetPassword, apiAddPermissionUser, apiDeletePermissionUser, apiAddGroups } from "../../api/api"
 	import UserType from "../../common/js/userType"
 	import PermissionType from "../../common/js/permissionType"
 	export default {
@@ -412,6 +412,7 @@
 						sheet = workbook._sheets[0];	
 						that.importFormFeedback = [];
 						var tasks = [];
+						var groups = [];
 						that.importFormFeedbackLoading = true;
 						for (let i=0, il=sheet._rows.length; i<il; i++)
 						{
@@ -419,6 +420,7 @@
 							if (row == undefined) break;
 							if (row._cells == undefined) break;
 							//console.log("i= " + i);
+							groups.push({name: row._cells[3].value, type: row._cells[4].value});
 							tasks.push(
 								(function(row_) {
 									var params = {
@@ -453,10 +455,12 @@
 						}
 						that.importFormVisible = false;
 						that.importFormFeedbackVisible = true;
-						Promise.all(tasks).then(res => {
-							that.importFormFeedbackLoading = false;
-							that.getUserList();
-						});
+						apiAddGroups(groups).then(() => {
+							return Promise.all(tasks).then(res => {
+								that.importFormFeedbackLoading = false;
+								that.getUserList();
+							});
+						})
 					} catch(error) {
 						that.$notify({
 							title: "文件格式有误",

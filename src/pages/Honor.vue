@@ -36,9 +36,12 @@
 			</el-table-column>
 			<el-table-column prop="apply_time" label="申请时间" :formatter="timeFormatter" width="190" sortable>
 			</el-table-column>
-			<el-table-column label="操作" width="140">
+			<el-table-column label="操作" width="230">
 				<template scope="scope">
 					<el-button size="small" @click="singleView(scope.$index, scope.row)">查看申请表单</el-button>
+					<template v-if="scope.row.state === _APPLY_STATUS.APPLIED">
+						<el-button type="danger" size="small" @click="singleCancel(scope.$index, scope.row)">删除申请</el-button>
+					</template>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -62,7 +65,7 @@
 
 <script>
 	import _ from "lodash"
-	import { apiGetUser, apiGetHonorList, apiGetGroupId, apiGetUserHonor, apiGetHonor, apiGetForm, apiApplyUserHonor, apiUpdateUserHonor } from "../api/api"
+	import { apiGetUser, apiGetHonorList, apiGetGroupId, apiGetUserHonor, apiGetHonor, apiGetForm, apiApplyUserHonor, apiUpdateUserHonor, apiDeleteUserHonor } from "../api/api"
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../common/js/queType"
@@ -124,6 +127,28 @@
 						message: "请检查网络连接",
 						type: "error"
 					});
+				});
+			},
+			singleCancel: function(index, row) {
+				this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+					var uid = sessionStorage.getItem("uid");
+					var honorId = row.honor_id;
+					apiDeleteUserHonor(uid, honorId).then(res => {
+						this.$notify({
+							title: "删除成功",
+							message: "删除荣誉申请表成功",
+							type: "success"
+						});
+						this.getHistoryHonorList();
+						this.getAvailableHonorList();
+					}).catch(error => {
+						this.$notify({
+							title: "删除失败",
+							message: "删除荣誉申请表失败",
+							type: "error"
+						});
+					})
+				}).catch(() => {
 				});
 			},
 			singleApply: function (index, row) {
@@ -312,11 +337,11 @@
 						var tHonors = res.data;
 						var tasks = []
 						for (var i in tHonors) {
-							tasks.push(apiGetUserHonor(uid, {honor_ids: tHonors.id}));
+							tasks.push(apiGetUserHonor(uid, {honor_id: tHonors[i].id}));
 						}
 						return Promise.all(tasks).then(reses => {
 							for (var j in tHonors) {
-								if (reses[j].data.length == 0 || reses[j].data[0].state === this._APPLY_STATUS.TEMP) {
+								if (reses[j].data.length === 0 || reses[j].data[0].state === this._APPLY_STATUS.TEMP) {
 									this.availableHonors.push(tHonors[j]);
 								}
 							}
