@@ -27,7 +27,7 @@
 					{{ (currentPage - 1) * pageSize + scope.$index + 1 }}
 				</template>
 			</el-table-column>
-			<el-table-column prop="name" label="奖学金名" width="200" sortable>
+			<el-table-column prop="name" label="奖学金名" width="300" sortable>
 			</el-table-column>
 			<el-table-column prop="year" label="年份" width="100" sortable>
 			</el-table-column>
