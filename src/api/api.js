@@ -22,7 +22,8 @@ axios.interceptors.response.use(function (response) {
 
 
 //let base = 'http://foxfi.eva6.nics.cc:8080';
-let base = 'http://localhost:3000';
+let base = 'http://foxfi.eva6.nics.cc:3000';
+//let base = 'http://localhost:3000';
 
 const getWithToken = (url, params) => {
 	return axios.get(url, { params: params, headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
@@ -130,7 +131,6 @@ export const apiGetGroupScholarship = (id, params) => { return getWithToken(`${b
 
 export const apiGetGroupId = (group_name, group_type) => {
 	return apiGetGroup().then(res => {
-		//console.log(res);
 		var start = null;
 		var groups = res.data;
 		for (var i = 0; i < groups.length; i++) {
@@ -161,15 +161,15 @@ export const apiAddGroups = groups => {
 		var tasks = [];
 		for (var i in groups) {
 			if (_.find(old_groups, groups[i]) == undefined) {
-				tasks.push(() => {
+			    tasks.push((() => {
 					var params = {
 						name: groups[i].name,
 						type: groups[i].type,
 						description: groups[i].name + "级" + UserType.userTypeString(groups[i].type)
 					};
 					return apiAddGroup(params);	
-				})
-				old_groups.push(groups[i]);
+			    })());
+			    old_groups.push(groups[i]);
 			}
 		}
 		return Promise.all(tasks);
