@@ -87,12 +87,23 @@
 	</section>
 </template>
 
+<!-- <script src='/assets_pdf/pdfmake.min.js'></script> -->
+<!-- <script src='/assets_pdf/vfs_fonts.js'></script> -->
+<script>
+pdfMake.fonts = {
+  chinese: {
+    normal: 'msyh.ttf',
+    bold: 'msyh.ttf',
+    italics: 'msyh.ttf',
+    bolditalics: 'msyh.ttf'
+  }
+};
+</script>
 <script>
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
 	import QueType from "../../common/js/queType"
 	import util from "../../common/js/util.js"
-
 	export default {
 		props: {
 			disabled: {
@@ -245,9 +256,13 @@
 					var regExp = new RegExp("{{" + i + "}}", "g");
 					body = body.replace(regExp, util.htmlEncode(this.getFill[i]));
 				}
-				var j = window.open('');
-				j.document.write(body);
+                                var docdef = JSON.parse(body);
+                                if (!docdef.hasOwnProperty("defaultStyle")) {
+                                  docdef["defaultStyle"] = "chinese";
+                                }
+			        pdfMake.createPdf(docdef).open();
 			},
+
 			validate: function(callback) {
 				this.$refs.form.validate(callback);
 			}
