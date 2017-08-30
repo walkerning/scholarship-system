@@ -13,8 +13,10 @@
     "echarts": "^3.3.2",
     "lodash": "^4.17.4",
     "nprogress": "^0.2.0",
+    "semver": "^5.4.1",
     "vue": "^2.1.10",
-    "vuex": "^2.0.0-rc.6"
+    "vuex": "^2.0.0-rc.6",
+    "webpack": "^1.15.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.6.1",
@@ -51,7 +53,7 @@
     "vue-router": "^2.1.2",
     "vue-style-loader": "^1.0.0",
     "vue-template-compiler": "^2.1.10",
-    "webpack": "^1.14.0",
+    "webpack": "^3.5.5",
     "webpack-dev-middleware": "^1.9.0",
     "webpack-hot-middleware": "^2.15.0",
     "webpack-merge": "^2.4.0"

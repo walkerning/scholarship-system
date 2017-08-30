@@ -87,18 +87,6 @@
 	</section>
 </template>
 
-<!-- <script src='/assets_pdf/pdfmake.min.js'></script> -->
-<!-- <script src='/assets_pdf/vfs_fonts.js'></script> -->
-<script>
-pdfMake.fonts = {
-  chinese: {
-    normal: 'msyh.ttf',
-    bold: 'msyh.ttf',
-    italics: 'msyh.ttf',
-    bolditalics: 'msyh.ttf'
-  }
-};
-</script>
 <script>
 	import { mapGetters } from "vuex"
 	import { mapActions } from "vuex"
@@ -251,16 +239,22 @@ pdfMake.fonts = {
 				"deleteFillOption"
 			]),
 			print: function() {
-				var body = this.getForm.template;
-				for (var i in this.getFill) {
-					var regExp = new RegExp("{{" + i + "}}", "g");
-					body = body.replace(regExp, util.htmlEncode(this.getFill[i]));
-				}
-                                var docdef = JSON.parse(body);
-                                if (!docdef.hasOwnProperty("defaultStyle")) {
-                                  docdef["defaultStyle"] = "chinese";
-                                }
-			        pdfMake.createPdf(docdef).open();
+			  var body = this.getForm.template;
+			  for (var i in this.getFill) {
+			    var regExp = new RegExp("{{" + i + "}}", "g");
+                            body = body.replace(regExp, JSON.stringify(this.getFill[i]).slice(1, -1));
+			  }
+                          var docdef = JSON.parse(body);
+                          docdef["defaultStyle"] = {font: "chinese"};
+                          pdfMake.fonts = {
+                            chinese: {
+                              normal: 'msyh.ttf',
+                              bold: 'msyh.ttf',
+                              italics: 'msyh.ttf',
+                              bolditalics: 'msyh.ttf'
+                            }
+                          };
+			  pdfMake.createPdf(docdef).open();
 			},
 
 			validate: function(callback) {
