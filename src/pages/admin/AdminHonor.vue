@@ -567,7 +567,7 @@
 				}).catch(error => {
 					this.$notify({
 						title: "修改失败",
-						message: "修改申请状态失败",
+						message: error.response.data.message,
 						type: "error"
 					});	
 				});
