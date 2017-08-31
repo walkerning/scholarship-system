@@ -20,15 +20,15 @@
 						<el-button type="info" size="small" @click="singleFill(scope.$index, scope.row)" :disabled="scope.row.state !== 'success'">填写感谢信</el-button>
 					</template>
 					<template v-if="scope.row.fill_id !== null">
-						<el-button size="small" @click="singleView(scope.$index, scope.row)">查看感谢信</el-button>
+						<el-button size="small" @click="singleView(scope.$index, scope.row)">查看/修改感谢信</el-button>
 					</template>
 				</template>
 			</el-table-column>
 		</el-table>
 
 		<!--查看界面-->
-		<el-dialog title="查看" v-model="viewVisible" size="large">
-			<form-view :disabled="true"></form-view>
+		<el-dialog title="查看/修改" v-model="viewVisible" size="large">
+			<form-view></form-view>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="viewVisible = false">取消</el-button>
 				<el-button type="primary" @click.native="singleFillUpdate" :loading="viewLoading">修改</el-button>
@@ -226,5 +226,4 @@
 </script>
 
 <style scoped>
-
 </style>
