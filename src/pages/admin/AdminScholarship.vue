@@ -277,10 +277,16 @@
 					{{ countExistence(scope.row.honor_states, _APPLY_STATUS.SUCCESS) }}
 				</template>
 			</el-table-column>
-			<el-table-column prop="scholarship_money_sum" label="已获奖学金额度" width="90" sortable>
+                        <el-table-column prop="numOfOwnScholarship" label="获已选奖学金数" width="90" sortable>
+			        <template scope="scope">
+					{{ countExistence(scope.row.scholarship_states, _APPLY_STATUS.SUCCESS) }}
+				</template>
+			</el-table-column>
+			<el-table-column prop="scholarship_money_sum" label="获已选奖学金额度" width="90" sortable>
 			</el-table-column>
 			<el-table-column type="expand">
-				<template scope="scope">
+			  <template scope="scope">
+                            <template v-if="countExistence(scope.row.honor_states, _APPLY_STATUS.SUCCESS) > 0">
 					<h4>分配的奖学金及金额</h4>
 					<template v-for="(scholarship, index) in allocScholarships">
 						<template v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
@@ -330,6 +336,7 @@
 							</el-col>
 						</template>
 					</el-row>
+                                    </template>
 				</template>
 			</el-table-column>
 			<template v-for="(honor, index) in allocHonors">
@@ -1146,7 +1153,7 @@
 											obj.honor_scores.push([]);
 											obj.honor_aveScore.push(null);
 										}
-									}										
+									}
 								}
 								newRate[i] = obj;
 							}
@@ -1155,7 +1162,7 @@
 								honor_fill_ids: _.fill(Array(honors.length), null),
 								honor_states: _.fill(Array(honors.length), null),
 								honor_scores: [],
-								honor_aveScore: []							
+								honor_aveScore: []
 							}
 							return null;  
 						});

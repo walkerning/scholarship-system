@@ -798,7 +798,7 @@
 						}
 					}
 				}
-				_.reverse(_.sortBy(scoreList, "score"));
+			        scoreList = _.reverse(_.sortBy(scoreList, "score"));
 				var tasks = [];
 				for (var i in scoreList) {
 					if (i < quota) {
