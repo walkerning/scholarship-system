@@ -433,7 +433,7 @@
 					}).catch(error => {
 						this.$notify({
 							title: "删除失败",
-							message: "删除荣誉失败",
+							message: error.response.data.message,
 							type: "error"
 						});	
 					});
@@ -550,7 +550,7 @@
 				}).catch(error => {
 					this.$notify({
 						title: "加载申请表失败",
-						message: "获取荣誉申请表失败",
+						message: error.response.data.message,
 						type: "error"
 					});	
 				});
@@ -766,7 +766,7 @@
 						}).catch(error => {
 							this.$notify({
 								title: "评分失败",
-								message: "删除评分失败",
+								message: error.response.data.message,
 								type: "error"
 							});	
 						});
