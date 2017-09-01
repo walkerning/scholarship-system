@@ -4,20 +4,20 @@ import vueInst from "../main"
 
 // Intercept 401 error
 axios.interceptors.response.use(function (response) {
-	return response;
+  return response;
 }, function (error) {
-	console.log(error.response.status == 401);
-	if (error.response.status == 401) {
-		vueInst.$notify({
-			title: "登录超时，请重新登录",
-			message: "",
-			type: "error"
-		});
-		vueInst.$router.push({ path: "/login" });
-		return Promise.reject(error);
-	} else {
-		return Promise.reject(error);
-	}
+  console.log(error.response.status == 401);
+  if (error.response.status == 401) {
+    vueInst.$notify({
+      title: "登录超时，请重新登录",
+      message: "",
+      type: "error"
+    });
+    vueInst.$router.push({ path: "/login" });
+    return Promise.reject(error);
+  } else {
+    return Promise.reject(error);
+  }
 });
 
 
@@ -26,19 +26,19 @@ let base = 'http://foxfi.eva6.nics.cc:3000';
 //let base = 'http://localhost:3000';
 
 const getWithToken = (url, params) => {
-	return axios.get(url, { params: params, headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
+  return axios.get(url, { params: params, headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
 }
 
 const postWithToken = (url, params) => {
-	return axios.post(url, params, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
+  return axios.post(url, params, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
 }
 
 const putWithToken = (url, params) => {
-	return axios.put(url, params, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
+  return axios.put(url, params, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
 }
 
 const deleteWithToken = (url) => {
-	return axios.delete(url, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
+  return axios.delete(url, { headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
 }
 
 export const apiRequestLogin = params => { return axios.post(`${base}/auth`, params) };
@@ -130,60 +130,60 @@ export const apiDeleteUserScholarship = (id, scholarshipId) => { return deleteWi
 export const apiGetGroupScholarship = (id, params) => { return getWithToken(`${base}/api/v1/groups/${id}/scholars`, params) };
 
 export const apiGetGroupId = (group_name, group_type) => {
-	return apiGetGroup().then(res => {
-		var start = null;
-		var groups = res.data;
-		for (var i = 0; i < groups.length; i++) {
-			if (groups[i].name === group_name && groups[i].type === group_type) {
-				start = Promise.resolve(groups[i].id);
-				break;
-			}
-		}
-		if (start == null) {
-			var params = {
-				name: group_name,
-				type: group_type,
-				description: group_name + "级" + UserType.userTypeString(group_type)
-			};
-			//console.log(params);
-			start = apiAddGroup(params).then(res => {
-				//console.log(res);
-				return res.data.id;
-			})
-		}
-		return start;
-	})
+  return apiGetGroup().then(res => {
+    var start = null;
+    var groups = res.data;
+    for (var i = 0; i < groups.length; i++) {
+      if (groups[i].name === group_name && groups[i].type === group_type) {
+	start = Promise.resolve(groups[i].id);
+	break;
+      }
+    }
+    if (start == null) {
+      var params = {
+	name: group_name,
+	type: group_type,
+	description: group_name + "级" + UserType.userTypeString(group_type)
+      };
+      //console.log(params);
+      start = apiAddGroup(params).then(res => {
+	//console.log(res);
+	return res.data.id;
+      })
+    }
+    return start;
+  })
 };
 
 export const apiAddGroups = groups => {
-	return apiGetGroup().then(res => {
-	  var old_groups = _.map(res.data, group => { return { name: _.toNumber(group.name), type: group.type} });
-	  var tasks = [];
-	  for (var i in groups) {
-	    if (_.find(old_groups, groups[i]) == undefined) {
-			    tasks.push((() => {
-					var params = {
-						name: groups[i].name,
-						type: groups[i].type,
-						description: groups[i].name + "级" + UserType.userTypeString(groups[i].type)
-					};
-					return apiAddGroup(params);
-			    })());
-			    old_groups.push(groups[i]);
-			}
-		}
-		return Promise.all(tasks);
-	})
+  return apiGetGroup().then(res => {
+    var old_groups = _.map(res.data, group => { return { name: _.toNumber(group.name), type: group.type} });
+    var tasks = [];
+    for (var i in groups) {
+      if (_.find(old_groups, groups[i]) == undefined) {
+	tasks.push((() => {
+	  var params = {
+	    name: groups[i].name,
+	    type: groups[i].type,
+	    description: groups[i].name + "级" + UserType.userTypeString(groups[i].type)
+	  };
+	  return apiAddGroup(params);
+	})());
+	old_groups.push(groups[i]);
+      }
+    }
+    return Promise.all(tasks);
+  })
 };
 
 export const apiLogout = () => {
-	sessionStorage.removeItem("token");
-	sessionStorage.removeItem("uid");
-	sessionStorage.removeItem("user");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("uid");
+  sessionStorage.removeItem("user");
 };
 
 export const apiLogin = (data) => {
-	sessionStorage.setItem("token", data.token);
-	sessionStorage.setItem("uid", data.user.id);
-	sessionStorage.setItem("user", JSON.stringify(data.user));
+  sessionStorage.setItem("token", data.token);
+  sessionStorage.setItem("uid", data.user.id);
+  sessionStorage.setItem("user", JSON.stringify(data.user));
 };
