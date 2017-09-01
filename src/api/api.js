@@ -157,17 +157,17 @@ export const apiGetGroupId = (group_name, group_type) => {
 
 export const apiAddGroups = groups => {
 	return apiGetGroup().then(res => {
-		var old_groups = _.map(res.data, group => { return { name: group.name, key: group.key} });
-		var tasks = [];
-		for (var i in groups) {
-			if (_.find(old_groups, groups[i]) == undefined) {
+	  var old_groups = _.map(res.data, group => { return { name: _.toNumber(group.name), type: group.type} });
+	  var tasks = [];
+	  for (var i in groups) {
+	    if (_.find(old_groups, groups[i]) == undefined) {
 			    tasks.push((() => {
 					var params = {
 						name: groups[i].name,
 						type: groups[i].type,
 						description: groups[i].name + "级" + UserType.userTypeString(groups[i].type)
 					};
-					return apiAddGroup(params);	
+					return apiAddGroup(params);
 			    })());
 			    old_groups.push(groups[i]);
 			}
