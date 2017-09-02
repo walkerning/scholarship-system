@@ -101,7 +101,7 @@ let routes = [
         permission: ["scholar", "user_scholar"]
       }
     ],
-    permission: ["user", "form", "honor", "scholar"]
+    permission: ["user", "form", "honor", "scholar", "user_scholar", "user_honor"]
   },
   {
     path: '*',
