@@ -320,7 +320,7 @@
 	  <el-row :gutter="15">
 	    <el-col :span="7" :offset="1">
 	      <el-select v-model="scope.row.scholarship_add" placeholder="新增奖学金">
-		<template v-for="(scholarship, index) in allocScholarshipsRemoveZero">
+		<template v-for="(scholarship, index) in allocScholarshipsRemoveZero" v-if="scope.row.scholarship_states[index] !== _APPLY_STATUS.SUCCESS">
 		  <el-option :key="index" :value="index" :label="scholarship.year + ' ' + scholarship.name">
 		  </el-option>
 		</template>
@@ -846,6 +846,7 @@ export default {
 	  message: error.response.data.message,
 	  type: "error"
 	});
+        this.getAllocList();
       }).catch(error => {
 	this.$notify({
 	  title: "修改奖学金分配失败",
