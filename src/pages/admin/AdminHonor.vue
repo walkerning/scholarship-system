@@ -537,7 +537,7 @@ export default {
 	  title: "更新失败",
 	  message: "获取组id失败",
 	  type: "error"
-	});	
+	});
       });
     },
     singleChangeApplyStatus: function (row, colId) {
@@ -786,7 +786,7 @@ export default {
 	    message: "",
 	    type: "success"
 	  });
-	  this.honorRateVisible = false;							
+	  this.honorRateVisible = false;
 	}
       }
     },
@@ -802,6 +802,7 @@ export default {
 	    });
 	  } else {
 	    scoreList.push({
+              state: this.rates[i].honor_states[index],
 	      id: this.rates[i].id,
 	      score: this.rates[i].honor_aveScore[index]
 	    });
@@ -809,25 +810,38 @@ export default {
 	}
       }
       scoreList = _.reverse(_.sortBy(scoreList, "score"));
-      var tasks = [];
+      var success_ids = [];
+      var fail_tasks = [];
+      var successed_num = 0;
       for (var i in scoreList) {
-	if (i < quota) {
-	  tasks.push(apiUpdateUserHonorAdmin(scoreList[i].id, this.rateHonors[index].id, {state: this._APPLY_STATUS.SUCCESS}));
+	if (successed_num < quota) {
+          if (scoreList[i].state !== this._APPLY_STATUS.LEAVEOUT) {
+            success_ids.push(scoreList[i].id);
+            successed_num = successed_num + 1;
+          }
 	} else {
-	  tasks.push(apiUpdateUserHonorAdmin(scoreList[i].id, this.rateHonors[index].id, {state: this._APPLY_STATUS.FAIL}));
+          fail_tasks.push(apiUpdateUserHonorAdmin(scoreList[i].id, this.rateHonors[index].id, {state: this._APPLY_STATUS.FAIL}));
 	}
       }
-      Promise.all(tasks).then(reses => {
+
+      Promise.all(fail_tasks).then(() => {
+        var success_tasks = [];
+        for (var i in success_ids) {
+          success_tasks.push(apiUpdateUserHonorAdmin(success_ids[i], this.rateHonors[index].id, {state: this._APPLY_STATUS.SUCCESS}));
+        }
+        return Promise.all(success_tasks);
+      })
+      .then(reses => {
 	this.$notify({
 	  title: "荣誉分配成功",
 	  message: "",
 	  type: "success"
 	});
-	this.getRateList();					
+	this.getRateList();
       }).catch(error => {
 	this.$notify({
 	  title: "荣誉分配失败",
-	  message: "",
+	  message: error.response.data.message,
 	  type: "error"
 	});								
       });
@@ -1075,7 +1089,7 @@ export default {
       }).catch(error => {
 	this.$notify({
 	  title: "加载荣誉评比列表失败",
-	  message: "请检查学生年级、学生类别是否填写正确",
+	  message: "请检查学生年级、学生类别是否填写正确: " + error.response.data.message,
 	  type: "error"
 	});
 	this.rateListLoading = false;
