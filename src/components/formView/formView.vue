@@ -245,13 +245,14 @@
                             body = body.replace(regExp, JSON.stringify(this.getFill[i]).slice(1, -1));
 			  }
                           var docdef = JSON.parse(body);
-                          docdef["defaultStyle"] = {font: "chinese"};
+                          // 宋体小四号
+                          docdef["defaultStyle"] = {font: "chinese", fontSize: 12};
                           pdfMake.fonts = {
                             chinese: {
-                              normal: 'msyh.ttf',
-                              bold: 'msyh.ttf',
-                              italics: 'msyh.ttf',
-                              bolditalics: 'msyh.ttf'
+                              normal: 'SimSun.ttf',
+                              bold: 'SimSun.ttf',
+                              italics: 'SimSun.ttf',
+                              bolditalics: 'SimSun.ttf'
                             }
                           };
 			  pdfMake.createPdf(docdef).open();
