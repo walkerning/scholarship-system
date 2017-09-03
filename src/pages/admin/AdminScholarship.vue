@@ -51,7 +51,7 @@
       <el-pagination layout="prev, pager, next" @current-change="allScholarshipCurrentChange" :page-size="pageSize" :total="scholarshipTotal" style="float:right;" :current-page.sync="currentPage">
       </el-pagination>
     </el-col>
-    
+
     <!--奖学金编辑/查看界面-->
     <el-dialog :title="hasPermissionScholar?'编辑':'查看'" v-model="scholarshipEditFormVisible" :close-on-click-modal="false" size="large">
       <el-form :model="scholarshipEditForm" label-width="80px" ref="scholarshipEditForm">
@@ -268,7 +268,7 @@
     </el-col>
 
     <!--学生分配列表-->
-    <el-table :data="alloc" highlight-current-row v-loading="allocListLoading" @selection-change="allAllocSelsChange" style="width: 100%;" border max-height="1000">
+    <el-table :data="allocRemoveZero" highlight-current-row v-loading="allocListLoading" @selection-change="allAllocSelsChange" style="width: 100%;" border max-height="1000">
       <el-table-column type="index" width="60">
       </el-table-column>
       <el-table-column prop="name" label="姓名" width="90" sortable>
@@ -293,55 +293,53 @@
 	<template scope="scope">
           <template v-if="countExistence(scope.row.honor_states, _APPLY_STATUS.SUCCESS) > 0">
 	    <h4>分配的奖学金及金额</h4>
-	    <template v-for="(scholarship, index) in allocScholarships">
-	      <template v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
-		<el-row :gutter="15">
-		  <el-col :span="7" :offset="1">
-		    {{scholarship.year}} {{scholarship.name}}
-		  </el-col>
-		  <el-col :span="7">
-		    <template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
-		      <el-input-number v-model="scholarship.money" size="small" :disabled="true"></el-input-number>
-		    </template>
-		    <template v-else-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
-		      <el-input-number v-model="scope.row.scholarship_money[index]" size="small"></el-input-number>
-		    </template>
-		  </el-col>
-		  <template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
-		    <el-col :span="4">
-		      <el-button size="small" type="primary" @click="singleScholarshipAllocSubmit(scope.row, index)">修改金额</el-button>
-		    </el-col>
-		  </template>
-		  <el-col :span="4">
-		    <el-button size="small" type="danger" @click="singleScholarshipAllocDelete(scope.row, index)">删除</el-button>
-		  </el-col>
-		</el-row>
-	      </template>
-	    </template>
-	    <el-row :gutter="15">
-	      <el-col :span="7" :offset="1">
-		<el-select v-model="scope.row.scholarship_add" placeholder="新增奖学金">
-		  <template v-for="(scholarship, index) in allocScholarships">
-		    <el-option :key="index" :value="index" :label="scholarship.year + ' ' + scholarship.name">
-		    </el-option>
-		  </template>
-		</el-select>
-	      </el-col>
-	      <template v-if="scope.row.scholarship_add !== null">
+	    <template v-for="(scholarship, index) in allocScholarshipsRemoveZero">
+	      <el-row :gutter="15">
+		<el-col :span="7" :offset="1">
+		  {{scholarship.year}} {{scholarship.name}}
+		</el-col>
 		<el-col :span="7">
-		  <template v-if="allocScholarships[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
-		    <el-input-number v-model="allocScholarships[scope.row.scholarship_add].money" size="small" :disabled="true"></el-input-number>
+		  <template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
+		    <el-input-number v-model="scholarship.money" size="small" :disabled="true"></el-input-number>
 		  </template>
-		  <template v-else-if="allocScholarships[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
-		    <el-input-number v-model="scope.row.scholarship_money_add" size="small"></el-input-number>
+		  <template v-else-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+		    <el-input-number v-model="scope.row.scholarship_money[index]" size="small"></el-input-number>
 		  </template>
 		</el-col>
+		<template v-if="scholarship.alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+		  <el-col :span="4">
+		    <el-button size="small" type="primary" @click="singleScholarshipAllocSubmit(scope.row, index)">修改金额</el-button>
+		  </el-col>
+		</template>
 		<el-col :span="4">
-		  <el-button size="small" type="primary" @click="singleScholarshipAllocAddSubmit(scope.row)">添加</el-button>
+		  <el-button size="small" type="danger" @click="singleScholarshipAllocDelete(scope.row, index)">删除</el-button>
 		</el-col>
-	      </template>
-	    </el-row>
-          </template>
+	      </el-row>
+	    </template>
+	  </template>
+	  <el-row :gutter="15">
+	    <el-col :span="7" :offset="1">
+	      <el-select v-model="scope.row.scholarship_add" placeholder="新增奖学金">
+		<template v-for="(scholarship, index) in allocScholarshipsRemoveZero">
+		  <el-option :key="index" :value="index" :label="scholarship.year + ' ' + scholarship.name">
+		  </el-option>
+		</template>
+	      </el-select>
+	    </el-col>
+	    <template v-if="scope.row.scholarship_add !== null">
+	      <el-col :span="7">
+		<template v-if="allocScholarshipsRemoveZero[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
+		  <el-input-number v-model="allocScholarshipsRemoveZero[scope.row.scholarship_add].money" size="small" :disabled="true"></el-input-number>
+		</template>
+		<template v-else-if="allocScholarshipsRemoveZero[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+		  <el-input-number v-model="scope.row.scholarship_money_add" size="small"></el-input-number>
+		</template>
+	      </el-col>
+	      <el-col :span="4">
+		<el-button size="small" type="primary" @click="singleScholarshipAllocAddSubmit(scope.row)">添加</el-button>
+	      </el-col>
+	    </template>
+	  </el-row>
 	</template>
       </el-table-column>
       <template v-for="(honor, index) in allocHonors">
@@ -357,7 +355,7 @@
 
     <br />
     <!--奖学金分配列表-->
-    <el-table :data="allocScholarships" highlight-current-row v-loading="allocScholarshipListLoading" @selection-change="allAllocScholarshipSelsChange" style="width: 100%;" border max-height="1000">
+    <el-table :data="allocScholarshipsRemoveZero" highlight-current-row v-loading="allocScholarshipListLoading" @selection-change="allAllocScholarshipSelsChange" style="width: 100%;" border max-height="1000">
       <el-table-column type="index" width="60">
       </el-table-column>
       <el-table-column prop="name" label="奖学金名" width="200" sortable>
@@ -365,14 +363,14 @@
       <el-table-column prop="year" label="年份" width="100" sortable>
       </el-table-column>
       <el-table-column label="可分配总金额/名额">
-	<template scope="scope">
+        <template scope="scope">
 	  {{ findQuota(scope.row.group_quota, allocGroup, allocType) }}
-	</template>
+        </template>
       </el-table-column>
       <el-table-column label="已分配总金额/名额">
-	<template scope="scope">
+        <template scope="scope">
 	  {{ findAlready(scope.row) }}
-	</template>
+        </template>
       </el-table-column>
     </el-table>
 
@@ -439,7 +437,7 @@
 </template>
 
 <script>
-  import { mapGetters } from "vuex"
+       import { mapGetters } from "vuex"
 import { mapActions } from "vuex"
 import { apiGetScholarshipList, apiUpdateScholarship, apiGetGroupId, apiAddScholarship, apiDeleteScholarship, apiGetHonorList, apiGetGroupScholarship, apiDeleteUserScholarship, apiUpdateUserScholarshipForm, apiAddUserScholarshipForm, apiAddUserScholarship, apiGetScholarship, apiGetHonor, apiGetUser, apiGetGroupHonor, apiUpdateUserScholarship, apiGetForm } from "../../api/api"
 import { apiGetFormList } from "../../api/api"
@@ -469,7 +467,15 @@ export default {
     },
     hasPermissionScholar: function() {
       return _.includes(this.sysUserPermissions, "scholar");
-    }
+    },
+    allocRemoveZero: function() {
+      return this.alloc
+        .filter(row => this.countExistence(row.honor_states, this._APPLY_STATUS.SUCCESS) > 0);
+    },
+    allocScholarshipsRemoveZero: function() {
+      return this.allocScholarships
+        .filter(row => this.findQuota(row.group_quota, this.allocGroup, this.allocType) > 0);
+    },
   },
   data() {
     return {
@@ -1197,6 +1203,7 @@ export default {
 	      }
 	      finalAlloc.push(obj);
 	    }
+            //<template v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
 	    this.alloc = finalAlloc;
 	    this.allocScholarships = scholarships;
 	    this.allocHonors = honors;
@@ -1214,7 +1221,7 @@ export default {
 	});
 	this.allocListLoading = false;
 	this.allocScholarshipListLoading = false;
-      });			
+      });
     },
     getFormList: function () {
       var params = {};
