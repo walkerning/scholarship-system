@@ -155,9 +155,9 @@
 						case this._QUE_TYPE.PHONE:
 							if (field.required && (value === null || value === "")) {
 								callback(new Error("不能为空"));
-								break;								
+								break;
 							}
-							var re = /^1\d{10}$/;
+                                            var re= /^(\+?0?86\-?)?1[345789]\d{9}$/;
 							if (!re.test(value)) {
 								callback(new Error("请输入正确的电话号码"));
 								break;

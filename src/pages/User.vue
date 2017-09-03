@@ -39,7 +39,7 @@
 	export default {
 		data() {
 			var validatePhone = (rule, value, callback) => {
-				var re = /^1\d{10}$/;
+                          var re= /^(\+?0?86\-?)?1[345789]\d{9}$/;
 				if (value != "" && value != null && !re.test(value)) {
 					callback(new Error("请输入正确的电话号码"));
 				} else {

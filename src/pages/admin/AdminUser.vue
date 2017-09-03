@@ -215,7 +215,7 @@ export default {
   },
   data() {
     var validatePhone = (rule, value, callback) => {
-      var re = /^1\d{10}$/;
+      var re= /^(\+?0?86\-?)?1[345789]\d{9}$/;
       if (!re.test(value)) {
         callback(new Error("请输入正确的电话号码"));
       } else {
@@ -275,7 +275,7 @@ export default {
       importFormFeedbackLoading: false,
 
       sels: [],//列表选中列
-      
+
       importFormFeedback: [],
       users: [],
       total: 0,
