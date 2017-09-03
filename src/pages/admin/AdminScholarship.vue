@@ -293,7 +293,7 @@
 	<template scope="scope">
           <template v-if="countExistence(scope.row.honor_states, _APPLY_STATUS.SUCCESS) > 0">
 	    <h4>分配的奖学金及金额</h4>
-	    <template v-for="(scholarship, index) in allocScholarshipsRemoveZero" v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
+	    <template v-for="(scholarship, index) in allocScholarships" v-if="findQuota(scholarship.group_quota, allocGroup, allocType) > 0 && scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
 	      <el-row :gutter="15">
 		<el-col :span="7" :offset="1">
 		  {{scholarship.year}} {{scholarship.name}}
@@ -320,7 +320,7 @@
 	  <el-row :gutter="15">
 	    <el-col :span="7" :offset="1">
 	      <el-select v-model="scope.row.scholarship_add" placeholder="新增奖学金">
-		<template v-for="(scholarship, index) in allocScholarshipsRemoveZero" v-if="scope.row.scholarship_states[index] !== _APPLY_STATUS.SUCCESS">
+		<template v-for="(scholarship, index) in allocScholarships" v-if="findQuota(scholarship.group_quota, allocGroup, allocType) > 0 && scope.row.scholarship_states[index] !== _APPLY_STATUS.SUCCESS">
 		  <el-option :key="index" :value="index" :label="scholarship.year + ' ' + scholarship.name">
 		  </el-option>
 		</template>
@@ -328,10 +328,10 @@
 	    </el-col>
 	    <template v-if="scope.row.scholarship_add !== null">
 	      <el-col :span="7">
-		<template v-if="allocScholarshipsRemoveZero[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
-		  <el-input-number v-model="allocScholarshipsRemoveZero[scope.row.scholarship_add].money" size="small" :disabled="true"></el-input-number>
+		<template v-if="allocScholarships[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.QUOTA">
+		  <el-input-number v-model="allocScholarships[scope.row.scholarship_add].money" size="small" :disabled="true"></el-input-number>
 		</template>
-		<template v-else-if="allocScholarshipsRemoveZero[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
+		<template v-else-if="allocScholarships[scope.row.scholarship_add].alloc === _SCHOLARSHIP_ALLOC_TYPE.MONEY">
 		  <el-input-number v-model="scope.row.scholarship_money_add" size="small"></el-input-number>
 		</template>
 	      </el-col>
