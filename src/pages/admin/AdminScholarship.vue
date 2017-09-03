@@ -293,7 +293,7 @@
 	<template scope="scope">
           <template v-if="countExistence(scope.row.honor_states, _APPLY_STATUS.SUCCESS) > 0">
 	    <h4>分配的奖学金及金额</h4>
-	    <template v-for="(scholarship, index) in allocScholarshipsRemoveZero">
+	    <template v-for="(scholarship, index) in allocScholarshipsRemoveZero" v-if="scope.row.scholarship_states[index] == _APPLY_STATUS.SUCCESS">
 	      <el-row :gutter="15">
 		<el-col :span="7" :offset="1">
 		  {{scholarship.year}} {{scholarship.name}}
@@ -422,7 +422,7 @@
 	      </template>
 	    </template>
 	  </template>
-	</el-table-column>				
+	</el-table-column>
       </template>
     </el-table>
     <!--感谢信查看界面-->
@@ -551,10 +551,10 @@ export default {
     },
     allScholarshipAdd: function () {
       this.scholarshipAddFormVisible = true;
-    },	
+    },
     allScholarshipSelsChange: function (sels) {
       this.scholarshipSels = sels;
-    },	
+    },
     singleScholarshipEdit: function (index, row) {
       this.scholarshipEditForm = JSON.parse(JSON.stringify(row));
       this.scholarshipEditFormVisible = true;
@@ -609,7 +609,7 @@ export default {
 	  title: "更新失败",
 	  message: "获取组id失败",
 	  type: "error"
-	});	
+	});
       });
     },
     singleScholarshipAddSubmit: function () {
@@ -662,7 +662,7 @@ export default {
 	  title: "新增失败",
 	  message: "获取组id失败",
 	  type: "error"
-	});	
+	});
       });
     },
     singleScholarshipCopy: function(index, row) {
@@ -683,7 +683,7 @@ export default {
 	    title: "删除失败",
 	    message: "删除奖学金失败",
 	    type: "error"
-	  });	
+	  });
 	});
       }).catch(() => {
       });
@@ -745,7 +745,7 @@ export default {
 	  title: "结果为空。请查询后再导出",
 	  message: "",
 	  type: "error"
-	});					
+	});
 	return;
       }
       var book = new wijmo.xlsx.Workbook();
@@ -817,7 +817,7 @@ export default {
 	  message: "",
 	  type: "success"
 	});
-	this.getAllocList();					
+	this.getAllocList();
       }).catch(error => {
 	this.$notify({
 	  title: "删除奖学金分配失败",
@@ -838,7 +838,7 @@ export default {
 	  message: "",
 	  type: "success"
 	});
-	this.getAllocList();	
+	this.getAllocList();
       }).catch(error => {
 	console.log(error.response);
 	this.$notify({
@@ -851,7 +851,7 @@ export default {
 	  title: "修改奖学金分配失败",
 	  message: "请检查网络连接",
 	  type: "error"
-	});					
+	});
       });
     },
     singleScholarshipAllocAddSubmit: function (row) {
@@ -868,7 +868,7 @@ export default {
 	  message: "",
 	  type: "success"
 	});
-	this.getAllocList();	
+	this.getAllocList();
       }).catch(error => {
 	console.log(error.response);
 	this.$notify({
@@ -881,7 +881,7 @@ export default {
 	  title: "新增奖学金分配失败",
 	  message: "请检查网络连接",
 	  type: "error"
-	});					
+	});
       });
     },
     allAllocScholarshipSelsChange: function (sels) {
@@ -902,7 +902,7 @@ export default {
 	  title: "加载奖学金感谢信表单失败",
 	  message: error.response.data.message,
 	  type: "error"
-	});					
+	});
       }).catch(error => {
 	this.$notify({
 	  title: "加载奖学金感谢信表单失败",
@@ -934,7 +934,7 @@ export default {
 	  message: "修改奖学金感谢信失败",
 	  type: "error"
 	});
-      });				
+      });
     },
     findQuota: function (quota_list, group, type) {
       for (var i = 0; i < quota_list.length; i++) {
@@ -992,7 +992,7 @@ export default {
 	  message: "名额不允许重复",
 	  type: "error"
 	});
-	return false;					
+	return false;
       }
       return true;
     },
@@ -1065,7 +1065,7 @@ export default {
 	  type: "error"
 	});
 	this.thanksListLoading = false;
-      });	
+      });
     },
     getAllocList: function () {
       this.allocHonors = [];
@@ -1079,7 +1079,7 @@ export default {
 	var honor_ids = _.join(this.allocFilters.honors, ",");
 	var scholarship_ids = _.join(this.allocFilters.scholarships, ",");
 	var topTasks = [];
-	
+
 	var scholarships = [];
 	var newAlloc = {};
 	var emptyAlloc = {};
@@ -1180,7 +1180,7 @@ export default {
 	      honor_scores: [],
 	      honor_aveScore: []
 	    }
-	    return null;  
+	    return null;
 	  });
 	}));
 
