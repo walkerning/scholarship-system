@@ -264,7 +264,7 @@ export default {
     print: function() {
       var start = Promise.resolve(null);
       if (!this.font_loaded) {
-        start = this.$confirm("确定打印? 首次打印可能需要加载大小为19MB的字体文件, 请注意流量.", "提示", {confirmButtonText: "确定", cancelButtonText: "取消"}).then(() => {
+        start = this.$confirm("确定打印? 首次打印可能需要加载大小为19MB的字体文件, 请注意流量. (此功能在Desktop版本的IE v10+ / Firefox / Chrome / Edge测试通过, 移动端浏览器很可能不支持此功能)", "提示", {confirmButtonText: "确定", cancelButtonText: "取消"}).then(() => {
           this.scriptLoading = true;
           return this.loadScript("assets_pdf/vfs_fonts.js");
         });
@@ -287,7 +287,18 @@ export default {
             bolditalics: 'SimSun.ttf'
           }
         };
-	return pdfMake.createPdf(docdef).open();
+        // IE, chrome on android and so on,
+        // does not support `open` method: https://github.com/bpampuch/pdfmake/issues/800
+        var pdf = pdfMake.createPdf(docdef);
+        var ua = window.navigator.userAgent;
+        var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
+        var msie = ua.indexOf("MSIE ");
+        var isIE = (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./));
+        if (isMobile || isIE) {
+          pdf.download("感谢信.pdf");
+        } else {
+          pdf.open();
+        }
       })
         .then(() => {
           this.scriptLoading = false;
