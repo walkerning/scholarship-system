@@ -670,7 +670,7 @@ export default {
       this.scholarshipAddFormVisible = true;
     },
     singleScholarshipDel: function (index, row) {
-      this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+      this.$confirm("危险操作: 如果已存在对该奖学金的分配信息, 这些信息均会被删除! 仍然确定删除?", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
 	apiDeleteScholarship(row.id).then(res => {
 	  this.$notify({
 	    title: "删除成功",
@@ -697,7 +697,7 @@ export default {
       });
     },
     allScholarshipBatchRemove: function () {
-      this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+      this.$confirm("危险操作: 如果已存在对这些奖学金的分配信息, 这些信息均会被删除! 仍然确定删除?", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
 	var tasks = [];
 	for (var i in this.scholarshipSels) {
 	  tasks.push(apiDeleteScholarship(this.scholarshipSels[i].id));
@@ -1217,7 +1217,7 @@ export default {
       }).catch(error => {
 	this.$notify({
 	  title: "加载奖学金分配列表失败",
-	  message: "请检查学生年级、学生类别是否填写正确",
+	  message: "请检查学生年级、学生类别是否填写正确: " + error.response.data.message,
 	  type: "error"
 	});
 	this.allocListLoading = false;

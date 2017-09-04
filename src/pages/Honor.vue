@@ -297,13 +297,15 @@
 					var tUserHonorStates = [];
 					for (var i in userHonorStates) {
 						if (userHonorStates[i].state != this._APPLY_STATUS.TEMP) {
-							tasks.push(apiGetHonor(userHonorStates[i].honor_id));
+							tasks.push(apiGetHonor(userHonorStates[i].honor_id).then((h) => { return h; }).catch((e) => { return null; }));
 							tUserHonorStates.push(userHonorStates[i])
 						}
 					}
 					return Promise.all(tasks).then(reses => {
-						for (var i in tUserHonorStates) {
-							this.honors.push(_.extend(tUserHonorStates[i], _.pick(reses[i].data, ["form_id", "name", "year"])));
+					  for (var i in tUserHonorStates) {
+                                            if (reses[i] !== null) {
+					      this.honors.push(_.extend(tUserHonorStates[i], _.pick(reses[i].data, ["form_id", "name", "year"])));
+                                            }
 						}
 						this.listLoading = false;
 					});

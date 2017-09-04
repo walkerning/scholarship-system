@@ -185,19 +185,23 @@
 			},
 			getScholarshipList: function () {
 				this.listLoading = true;
-				var uid = sessionStorage.getItem("uid");
+			  var uid = sessionStorage.getItem("uid");
+                          var scholars = [];
 				apiGetUserScholarship(uid).then(res => {
 					var userScholarshipStates = res.data;
 					var scholarshipIds = _.map(userScholarshipStates, (h) => { return h.scholar_id });
-					var tasks = _.map(scholarshipIds, apiGetScholarship);
+					var tasks = _.map(scholarshipIds, (id) => { return apiGetScholarship(id).then((s) => { return s; }).catch((e) => { return null; }); });
 					return Promise.all(tasks).then(scholarshipReses => {
-						for (var i in userScholarshipStates) {
-							userScholarshipStates[i] = _.extend(userScholarshipStates[i], scholarshipReses[i].data);
-						}
-						this.scholarships = userScholarshipStates;
-						this.listLoading = false;
-					});
-				}).catch(error => {
+					  for (var i in userScholarshipStates) {
+                                            if (scholarshipReses[i] != null) {
+					    scholars.push(_.extend(userScholarshipStates[i], scholarshipReses[i].data));
+					  }
+						this.scholarships = scholars;
+					    this.listLoading = false;
+                                          }
+                                          
+				        });
+                                }).catch(error => {
 					this.$notify({
 						title: "加载奖学金历史列表失败",
 						message: error.response.data.message,

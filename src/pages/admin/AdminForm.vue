@@ -159,7 +159,7 @@
 					}).catch(errors => {
 						this.$notify({
 							title: "删除失败",
-							message: "批量删除表单失败",
+							message: "批量删除表单失败: " + error.response.data.message,
 							type: "error"
 						});
 						this.getFormList();
@@ -182,9 +182,9 @@
 					}).catch(error => {
 						this.$notify({
 							title: "删除失败",
-							message: "删除表单失败",
+							message: "删除表单失败: " + error.response.data.message,
 							type: "error"
-						});	
+						});
 					});
 				}).catch(() => {
 				});

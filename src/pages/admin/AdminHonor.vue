@@ -432,7 +432,7 @@ export default {
       this.honorEditFormVisible = true;
     },
     singleHonorDel: function (index, row) {
-      this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+      this.$confirm("危险操作: 如果已存在对该荣誉的申请或分配信息, 这些信息均会被删除! 仍然确定删除?", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
 	apiDeleteHonor(row.id).then(res => {
 	  this.$notify({
 	    title: "删除成功",
@@ -462,7 +462,7 @@ export default {
       this.honorAddFormVisible = true;
     },
     allHonorBatchRemove: function () {
-      this.$confirm("确定删除？", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+      this.$confirm("危险操作: 如果已存在对这些荣誉的申请或分配信息, 这些信息均会被删除! 仍然确定删除?", "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
 	var tasks = [];
 	for (var i in this.honorSels) {
 	  tasks.push(apiDeleteHonor(this.honorSels[i].id));
@@ -795,18 +795,16 @@ export default {
       var scoreList = [];
       for (var i in this.rates) {
 	if (this.rates[i].honor_states[index] != null) {
+          var score = {
+            state: this.rates[i].honor_states[index],
+	    id: this.rates[i].id,
+          };
 	  if (this.rates[i].honor_aveScore[index] == null) {
-	    scoreList.push({
-	      id: this.rates[i].id,
-	      score: 0
-	    });
+            score["score"] = 0;
 	  } else {
-	    scoreList.push({
-              state: this.rates[i].honor_states[index],
-	      id: this.rates[i].id,
-	      score: this.rates[i].honor_aveScore[index]
-	    });
-	  }
+            score["score"] = this.rates[i].honor_aveScore[index]
+          }
+	  scoreList.push(score);
 	}
       }
       scoreList = _.reverse(_.sortBy(scoreList, "score"));
