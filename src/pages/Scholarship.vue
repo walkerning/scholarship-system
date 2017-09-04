@@ -196,10 +196,9 @@ export default {
             if (scholarshipReses[i] != null) {
 	      scholars.push(_.extend(userScholarshipStates[i], scholarshipReses[i].data));
 	    }
-	    this.scholarships = scholars;
-	    this.listLoading = false;
           }
-          
+	  this.scholarships = scholars;
+	  this.listLoading = false;
 	});
       }).catch(error => {
 	this.$notify({
