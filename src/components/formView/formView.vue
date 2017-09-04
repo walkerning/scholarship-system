@@ -245,9 +245,18 @@ export default {
       return new Promise(function (resolve, reject) {
         var s;
         s = document.createElement("script");
+        if (s.readyState) {  // IE
+          s.onreadystatechange = function() {
+            if ( s.readyState === "loaded" || s.readyState === "complete" ) {
+              s.onreadystatechange = null;
+              resolve();
+            }
+          };
+        } else { // other browsers
+          s.onload = resolve;
+          s.onerror = reject;
+        }
         s.src = src;
-        s.onload = resolve;
-        s.onerror = reject;
         document.head.appendChild(s);
       });
     },
