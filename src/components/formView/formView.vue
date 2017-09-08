@@ -264,7 +264,8 @@ export default {
     print: function() {
       var start = Promise.resolve(null);
       if (!this.font_loaded) {
-        start = this.$confirm("确定打印? 首次打印可能需要加载大小为19MB的字体文件, 请注意流量. (此功能在Desktop版本的IE v10+ / Firefox / Chrome / Edge测试通过, 移动端浏览器很可能不支持此功能)", "提示", {confirmButtonText: "确定", cancelButtonText: "取消"}).then(() => {
+        start = this.$confirm("确定打印? 首次打印可能需要加载大小为19MB的字体文件, 请注意流量. (此功能在Desktop版本的IE v10+ / Firefox / Chrome / Edge测试通过, 移动端浏览器很可能不支持此功能)",
+                              "提示", {confirmButtonText: "确定", cancelButtonText: "取消"}).then(() => {
           this.scriptLoading = true;
           return this.loadScript("assets_pdf/vfs_fonts.js");
         });
@@ -274,11 +275,12 @@ export default {
 	var body = this.getForm.template;
 	for (var i in this.getFill) {
 	  var regExp = new RegExp("{{" + i + "}}", "g");
-          body = body.replace(regExp, JSON.stringify(this.getFill[i]).slice(1, -1));
+          body = body.replace(regExp, JSON.stringify(this.getFill[i].trim()).slice(1, -1));
 	}
         var docdef = JSON.parse(body);
         // 宋体小四号
         docdef["defaultStyle"] = {font: "chinese", fontSize: 12};
+        docdef["pageSize"] = "A4";
         pdfMake.fonts = {
           chinese: {
             normal: 'SimSun.ttf',
