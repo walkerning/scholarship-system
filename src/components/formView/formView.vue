@@ -275,9 +275,31 @@ export default {
 	var body = this.getForm.template;
 	for (var i in this.getFill) {
 	  var regExp = new RegExp("{{" + i + "}}", "g");
-          body = body.replace(regExp, JSON.stringify(this.getFill[i].trim()).slice(1, -1));
+          // // this method not work... \t\t will all be trimed except for the first one
+          // var str = this.getFill[i].trim().replace(/\n[\s]*\n/g, "\n").replace(/\n[\s]*/g, "\n\t\t");
+          // Remove extra newline between paragraphs
+          var str = this.getFill[i].trim().replace(/\n[\s]*\n/g, "\n");
+          body = body.replace(regExp, JSON.stringify(str).slice(1, -1));
 	}
         var docdef = JSON.parse(body);
+        // Split multiline texts into multiple content cell for correct leading indent
+        var new_contents = [];
+        for (var i in docdef["content"]) {
+          var content = docdef["content"][i];
+          if ( content.hasOwnProperty("text") && content["text"].indexOf("\n") > 0 ) {
+            var text_list = content["text"].split("\n");
+            var t = _.clone(content);
+            t["text"] = "";
+            for (var j in text_list) {
+              var new_t = _.clone(t);
+              new_t["text"] = "\t\t" + text_list[j];
+              new_contents.push(new_t);
+            }
+          } else {
+            new_contents.push(content)
+          }
+        }
+        docdef["content"] = new_contents;
         // 宋体小四号
         docdef["defaultStyle"] = {font: "chinese", fontSize: 12};
         docdef["pageSize"] = "A4";
