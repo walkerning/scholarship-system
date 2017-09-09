@@ -562,26 +562,30 @@ export default {
 	  title: "加载申请表失败",
 	  message: error.response.data.message,
 	  type: "error"
-	});	
+	});
       });
     },
     singleChangeApplyStatusSubmit: function () {
-      apiUpdateUserHonorAdmin(this.honorStateSettingUser.id, this.honorStateSettingHonor.id, {state: this.honorStateSettingState}).then(res => {
-	this.$notify({
-	  title: "修改成功",
-	  message: "修改申请状态成功",
-	  type: "success"
-	});	
-	this.honorStateSettingVisible = false;
-	this.getRateList();
-      }).catch(error => {
-	this.$notify({
-	  title: "修改失败",
-	  message: error.response.data.message,
-	  type: "error"
-	});	
-      });
+      this.$confirm("确定要修改申请状态吗? 如果对此用户分配的当前年份荣誉有变动, 此用户当前年份已经分配的奖学金会全被取消, 需要重新分配.",
+                    "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+                      apiUpdateUserHonorAdmin(this.honorStateSettingUser.id, this.honorStateSettingHonor.id, {state: this.honorStateSettingState}).then(res => {
+	                this.$notify({
+	                  title: "修改成功",
+	                  message: "修改申请状态成功",
+	                  type: "success"
+	                });
+	                this.honorStateSettingVisible = false;
+	                this.getRateList();
+                      }).catch(error => {
+	                this.$notify({
+	                  title: "修改失败",
+	                  message: error.response.data.message,
+	                  type: "error"
+	                });
+                      });
+                    });
     },
+
     singleApplyEditSubmit: function () {
       apiUpdateUserHonorAdmin(this.honorStateSettingUser.id, this.honorStateSettingHonor.id, {fill: this.getFill}).then(res => {
 	this.$notify({
@@ -778,7 +782,7 @@ export default {
 	      title: "评分失败",
 	      message: error.response.data.message,
 	      type: "error"
-	    });	
+	    });
 	  });
 	} else {
 	  this.$notify({
@@ -791,58 +795,61 @@ export default {
       }
     },
     singleAssignHonor: function (index) {
-      var quota = this.countQuota(index);
-      var scoreList = [];
-      for (var i in this.rates) {
-	if (this.rates[i].honor_states[index] != null) {
-          var score = {
-            state: this.rates[i].honor_states[index],
-	    id: this.rates[i].id,
-          };
-	  if (this.rates[i].honor_aveScore[index] == null) {
-            score["score"] = 0;
-	  } else {
-            score["score"] = this.rates[i].honor_aveScore[index]
-          }
-	  scoreList.push(score);
-	}
-      }
-      scoreList = _.reverse(_.sortBy(scoreList, "score"));
-      var success_ids = [];
-      var fail_tasks = [];
-      var successed_num = 0;
-      for (var i in scoreList) {
-	if (successed_num < quota) {
-          if (scoreList[i].state !== this._APPLY_STATUS.LEAVEOUT) {
-            success_ids.push(scoreList[i].id);
-            successed_num = successed_num + 1;
-          }
-	} else {
-          fail_tasks.push(apiUpdateUserHonorAdmin(scoreList[i].id, this.rateHonors[index].id, {state: this._APPLY_STATUS.FAIL}));
-	}
-      }
+      this.$confirm("确定要批量修改申请状态吗? 如果对任意用户分配的当前年份荣誉有变动, 对应用户当前年份已经分配的奖学金会全被取消, 需要重新分配.",
+                    "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+                      var quota = this.countQuota(index);
+                      var scoreList = [];
+                      for (var i in this.rates) {
+	                if (this.rates[i].honor_states[index] != null) {
+                          var score = {
+                            state: this.rates[i].honor_states[index],
+	                    id: this.rates[i].id,
+                          };
+	                  if (this.rates[i].honor_aveScore[index] == null) {
+                            score["score"] = 0;
+	                  } else {
+                            score["score"] = this.rates[i].honor_aveScore[index]
+                          }
+	                  scoreList.push(score);
+	                }
+                      }
+                      scoreList = _.reverse(_.sortBy(scoreList, "score"));
+                      var success_ids = [];
+                      var fail_tasks = [];
+                      var successed_num = 0;
+                      for (var i in scoreList) {
+	                if (successed_num < quota) {
+                          if (scoreList[i].state !== this._APPLY_STATUS.LEAVEOUT) {
+                            success_ids.push(scoreList[i].id);
+                            successed_num = successed_num + 1;
+                          }
+	                } else {
+                          fail_tasks.push(apiUpdateUserHonorAdmin(scoreList[i].id, this.rateHonors[index].id, {state: this._APPLY_STATUS.FAIL}));
+	                }
+                      }
 
-      Promise.all(fail_tasks).then(() => {
-        var success_tasks = [];
-        for (var i in success_ids) {
-          success_tasks.push(apiUpdateUserHonorAdmin(success_ids[i], this.rateHonors[index].id, {state: this._APPLY_STATUS.SUCCESS}));
-        }
-        return Promise.all(success_tasks);
-      })
-      .then(reses => {
-	this.$notify({
-	  title: "荣誉分配成功",
-	  message: "",
-	  type: "success"
-	});
-	this.getRateList();
-      }).catch(error => {
-	this.$notify({
-	  title: "荣誉分配失败",
-	  message: error.response.data.message,
-	  type: "error"
-	});								
-      });
+                      Promise.all(fail_tasks).then(() => {
+                        var success_tasks = [];
+                        for (var i in success_ids) {
+                          success_tasks.push(apiUpdateUserHonorAdmin(success_ids[i], this.rateHonors[index].id, {state: this._APPLY_STATUS.SUCCESS}));
+                        }
+                        return Promise.all(success_tasks);
+                      })
+                        .then(reses => {
+	                  this.$notify({
+	                    title: "荣誉分配成功",
+	                    message: "",
+	                    type: "success"
+	                  });
+	                  this.getRateList();
+                        }).catch(error => {
+	                  this.$notify({
+	                    title: "荣誉分配失败",
+	                    message: error.response.data.message,
+	                    type: "error"
+	                  });
+                        });
+                    });
     },
     updateTable: function () {
       for (var i = 0; i < this.rates.length; i++) {

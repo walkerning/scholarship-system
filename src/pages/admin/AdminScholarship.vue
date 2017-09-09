@@ -821,7 +821,7 @@ export default {
       }).catch(error => {
 	this.$notify({
 	  title: "删除奖学金分配失败",
-	  message: "",
+	  message: error.response.data.message,
 	  type: "error"
 	});
       });

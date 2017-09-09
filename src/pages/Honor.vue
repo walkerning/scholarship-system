@@ -223,14 +223,14 @@ export default {
 	      title: "提交失败",
 	      message: error.response.data.message,
 	      type: "error"
-	    });		
+	    });
 	    this.applyVisible = false;
 	  }).catch(error => {
 	    this.$notify({
 	      title: "提交失败",
 	      message: "请检查网络连接",
 	      type: "error"
-	    });		
+	    });
 	    this.applyVisible = false;
 	  });
 	}
