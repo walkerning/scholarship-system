@@ -39,9 +39,9 @@
       <el-table-column label="操作" width="230">
 	<template scope="scope">
 	  <el-button size="small" @click="singleView(scope.$index, scope.row)">查看申请表单</el-button>
-	  <template v-if="scope.row.state === _APPLY_STATUS.APPLIED">
-	    <el-button type="danger" size="small" @click="singleCancel(scope.$index, scope.row)">删除申请</el-button>
-	  </template>
+	  <!-- <template v-if="scope.row.state === _APPLY_STATUS.APPLIED"> -->
+	  <!--   <el-button type="danger" size="small" @click="singleCancel(scope.$index, scope.row)">删除申请</el-button> -->
+	  <!-- </template> -->
 	</template>
       </el-table-column>
     </el-table>
@@ -201,39 +201,42 @@ export default {
     singleApplySubmit: function () {
       this.$refs.form.validate((valid) => {
 	if (valid) {
-	  var start = null;
-	  if (this.isSave) {
-	    start = Promise.resolve(null);
-	  } else {
-	    start = this.doApply();
-	  }
-	  start.then(() => {
-	    return this.doUpdate(false).then(() => {
+          this.$confirm("确定提交荣誉申请？一旦提交, 将无法修改或删除该荣誉申请表单. 如果只是暂时保存, 需要后续修改表单, 请选择暂存申请.",
+                        "提示", {confirmButtonText: "确定", cancelButtonText: "取消", type: "warning"}).then(() => {
+	    var start = null;
+	    if (this.isSave) {
+	      start = Promise.resolve(null);
+	    } else {
+	      start = this.doApply();
+	    }
+	    start.then(() => {
+	      return this.doUpdate(false).then(() => {
+	        this.$notify({
+		  title: "提交成功",
+		  message: "提交荣誉申请表成功",
+		  type: "success"
+	        });
+	        this.applyVisible = false;
+	        this.getHistoryHonorList();
+	        this.getAvailableHonorList();
+	      });
+	    }).catch(error => {
 	      this.$notify({
-		title: "提交成功",
-		message: "提交荣誉申请表成功",
-		type: "success"
+	        title: "提交失败",
+	        message: error.response.data.message,
+	        type: "error"
 	      });
 	      this.applyVisible = false;
-	      this.getHistoryHonorList();
-	      this.getAvailableHonorList();
+	    }).catch(error => {
+	      this.$notify({
+	        title: "提交失败",
+	        message: "请检查网络连接",
+	        type: "error"
+	      });
+	      this.applyVisible = false;
 	    });
-	  }).catch(error => {
-	    this.$notify({
-	      title: "提交失败",
-	      message: error.response.data.message,
-	      type: "error"
-	    });
-	    this.applyVisible = false;
-	  }).catch(error => {
-	    this.$notify({
-	      title: "提交失败",
-	      message: "请检查网络连接",
-	      type: "error"
-	    });
-	    this.applyVisible = false;
 	  });
-	}
+        }
       });
     },
     singleSave: function () {
@@ -255,7 +258,7 @@ export default {
 	  title: "暂存失败",
 	  message: error.response.data.message,
 	  type: "error"
-	});		
+	});
 	this.applyVisible = false;
       }).catch(error => {
 	this.$notify({
