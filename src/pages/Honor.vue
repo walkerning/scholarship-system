@@ -1,6 +1,6 @@
 <template>
   <section>
-    <h1>申请理由</h1>
+    <h1>申请理由 (必须先填写申请理由, 才可以申请当年的荣誉)</h1>
     <el-table :data="reasons" highlight-current-row v-loading="reasonLoading" style="width: 100%;" border>
       <el-table-column type="index" width="60">
       </el-table-column>
