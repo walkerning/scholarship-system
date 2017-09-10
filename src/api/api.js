@@ -77,6 +77,14 @@ export const apiAddPermissionUser = (permissionName, userId) => { return postWit
 
 export const apiDeletePermissionUser = (permissionName, userId) => { return deleteWithToken(`${base}/api/v1/permissions/${permissionName}/users/${userId}`) };
 
+export const apiGetReasonList = params => { return getWithToken(`${base}/api/v1/reasons`, params) };
+
+export const apiGetUserReason = (id, params) => { return getWithToken(`${base}/api/v1/users/${id}/reasons`, params) };
+
+export const apiCreateUserReason = (id, params) => { return postWithToken(`${base}/api/v1/users/${id}/reasons`, params) };
+
+export const apiUpdateUserReason = (id, reasonId, params) => { return putWithToken(`${base}/api/v1/users/${id}/reasons/${reasonId}`, params) };
+
 export const apiGetHonorList = params => { return getWithToken(`${base}/api/v1/honors`, params) };
 
 export const apiGetHonor = id => { return getWithToken(`${base}/api/v1/honors/${id}`) };

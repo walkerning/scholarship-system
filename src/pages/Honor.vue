@@ -1,5 +1,20 @@
 <template>
   <section>
+    <h1>申请理由</h1>
+    <el-table :data="reasons" highlight-current-row v-loading="reasonLoading" style="width: 100%;" border>
+      <el-table-column type="index" width="60">
+      </el-table-column>
+      <el-table-column prop="name" label="申请理由名" width="200" sortable>
+      </el-table-column>
+      <el-table-column prop="year" label="年份" width="100" sortable>
+      </el-table-column>
+      <el-table-column label="操作" width="80">
+	<template scope="scope">
+	  <el-button size="small" :type="reasonSubmitted? null: 'primary'" @click="singleApplyReason(scope.$index, scope.row)">{{ reasonSubmitted? "修改": "填写" }}</el-button>
+	</template>
+      </el-table-column>
+    </el-table>
+
     <!--当前列表-->
     <h1>可申请荣誉</h1>
     <el-table :data="availableHonors" highlight-current-row v-loading="availableListLoading" @selection-change="availableAllSelsChange" style="width: 100%;" border>
@@ -50,6 +65,15 @@
       <form-view :disabled="true"></form-view>
     </el-dialog>
 
+    <!--申请理由提交界面-->
+    <el-dialog title="申请理由提交/修改" v-model="applyReasonVisible" :close-on-click-modal="false" size="large">
+      <form-view ref="form"></form-view>
+      <div slot="footer" class="dialog-footer">
+	<el-button @click.native="applyReasonVisible = false">取消</el-button>
+	<el-button type="primary" @click.native="singleApplyReasonSubmit" :loading="applyReasonLoading">{{ reasonSubmitted? "修改": "提交" }}</el-button>
+      </div>
+    </el-dialog>
+
     <!--申请界面-->
     <el-dialog title="申请" v-model="applyVisible" :close-on-click-modal="false" size="large">
       <form-view ref="form"></form-view>
@@ -65,7 +89,8 @@
 
 <script>
   import _ from "lodash"
-import { apiGetUser, apiGetHonorList, apiGetGroupId, apiGetUserHonor, apiGetHonor, apiGetForm, apiApplyUserHonor, apiUpdateUserHonor, apiDeleteUserHonor } from "../api/api"
+import { apiGetUser, apiGetHonorList, apiGetGroupId, apiGetUserHonor, apiGetHonor, apiGetForm, apiApplyUserHonor, apiUpdateUserHonor, apiDeleteUserHonor,
+         apiGetReasonList, apiGetUserReason, apiCreateUserReason, apiUpdateUserReason } from "../api/api"
 import { mapGetters } from "vuex"
 import { mapActions } from "vuex"
 import QueType from "../common/js/queType"
@@ -90,6 +115,7 @@ export default {
       listLoading: false,
       honors: [],
 
+      reasons: [],
       availableListLoading: false,
       availableHonors: [],
 
@@ -98,9 +124,14 @@ export default {
       viewVisible: false,
       applyVisible: false,
       applyLoading: false,
+      reasonLoading: false,
+      applyReasonVisible: false,
+      applyReasonLoading: false,
 
       sels: [],
-      availableSels: []
+      availableSels: [],
+
+      reasonSubmitted: false
     };
   },
   methods: {
@@ -189,6 +220,42 @@ export default {
 	});
       });
     },
+    singleApplyReason: function (index, row) {
+      var uid = sessionStorage.getItem("uid");
+      apiGetForm(row.form_id).then(res => {
+	res.data.reason_id = row.year;
+	this.setForm(res.data);
+	return apiGetUserReason(uid, {year: row.id}).then(res => {
+	  var fill = {};
+	  if (res.data.length != 0) {
+	    fill = JSON.parse(res.data[0].fill);
+	  } else {
+	    for (var i in this.getFields) {
+	      var field = this.getFields[i];
+	      if (field.type === this._QUE_TYPE.CHECKBOX || field.type === this._QUE_TYPE.TABLE) {
+		fill["data" + i] = [];
+	      } else {
+		fill["data" + i] = "";
+	      }
+	    }
+	  }
+	  this.setFill(fill);
+	  this.applyReasonVisible = true;
+	});
+      }).catch(error => {
+	this.$notify({
+	  title: "加载申请理由表单失败",
+	  message: error.response.data.message,
+	  type: "error"
+	});
+      }).catch(error => {
+	this.$notify({
+	  title: "加载申请理由表单失败",
+	  message: "请检查网络连接",
+	  type: "error"
+	});
+      });
+    },
     timeFormatter: function (row, column) {
       if (column.property === "end_time") {
 	return new Date(row.end_time).toLocaleString().replace(/:\d{1,2}$/,' '); 
@@ -239,6 +306,50 @@ export default {
         }
       });
     },
+    singleApplyReasonSubmit: function () {
+      this.$refs.form.validate((valid) => {
+	if (valid) {
+	  var start = null;
+          var uid = sessionStorage.getItem("uid");
+	  if (this.reasonSubmitted) {
+            params = {
+              fill: this.getFill
+            }
+	    start = apiUpdateUserReason(uid, this.getForm.reason_id, params);
+	  } else {
+            var params = {
+	      reason_id: this.getForm.reason_id,
+	      fill: this.getFill
+            }
+	    start = apiCreateUserReason(uid, params);
+	  }
+	  start.then(() => {
+	    this.$notify({
+	      title: "提交申请理由成功",
+	      message: "提交申请理由成功",
+	      type: "success"
+	    });
+	    this.applyReasonVisible = false;
+            this.getReasonList();
+	  })
+            .catch(error => {
+	      this.$notify({
+	        title: "提交申请理由失败",
+	        message: error.response.data.message,
+	        type: "error"
+	      });
+	      this.applyReasonVisible = false;
+	    }).catch(error => {
+	      this.$notify({
+	        title: "提交申请理由失败",
+	        message: "请检查网络连接",
+	        type: "error"
+	      });
+	      this.applyReasonVisible = false;
+	    });
+        }
+      });
+    },
     singleSave: function () {
       var start = null;
       if (this.isSave) {
@@ -276,7 +387,6 @@ export default {
 	fill: this.getFill
       }
       return apiApplyUserHonor(uid, params);
-
     },
     doUpdate: function (bSave) {
       var uid = sessionStorage.getItem("uid");
@@ -329,6 +439,33 @@ export default {
 	this.listLoading = false;
       });
     },
+    getReasonList: function() {
+      this.reasonLoading = true;
+      this.reasons = [];
+      var params = {
+        year: (new Date()).getFullYear()
+      };
+      apiGetReasonList(params).then(res => {
+        var reasons = res.data;
+        console.log(reasons);
+        var start = Promise.resolve(null);
+        if (reasons.length > 0) {
+          // reasons length must be 1 or 0
+          start = apiGetUserReason(sessionStorage.getItem("uid"), {"year": reasons[0]["year"]}).then((ures) => {
+            console.log(ures);
+            if (ures.data.length > 0) {
+              this.reasonSubmitted = true;
+            } else {
+              this.reasonSubmitted = false;
+            }
+            this.reasons = reasons;
+          });
+        }
+        start.then(() => {
+          this.reasonLoading = false;
+          });
+      });
+    },
     getAvailableHonorList: function () {
       this.availableListLoading = true;
       this.availableHonors = [];
@@ -375,6 +512,7 @@ export default {
       ])
   },
   mounted() {
+    this.getReasonList();
     this.getAvailableHonorList();
     this.getHistoryHonorList();
   }
