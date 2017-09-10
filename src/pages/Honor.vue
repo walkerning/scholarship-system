@@ -447,12 +447,10 @@ export default {
       };
       apiGetReasonList(params).then(res => {
         var reasons = res.data;
-        console.log(reasons);
         var start = Promise.resolve(null);
         if (reasons.length > 0) {
           // reasons length must be 1 or 0
           start = apiGetUserReason(sessionStorage.getItem("uid"), {"year": reasons[0]["year"]}).then((ures) => {
-            console.log(ures);
             if (ures.data.length > 0) {
               this.reasonSubmitted = true;
             } else {
