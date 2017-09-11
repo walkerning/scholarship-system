@@ -292,7 +292,7 @@ export default {
             t["text"] = "";
             for (var j in text_list) {
               var new_t = _.clone(t);
-              new_t["text"] = "\t\t" + text_list[j].trim();
+              new_t["text"] = "    " + text_list[j].trim();
               new_contents.push(new_t);
             }
           } else {
