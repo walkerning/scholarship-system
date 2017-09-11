@@ -79,6 +79,10 @@ export const apiDeletePermissionUser = (permissionName, userId) => { return dele
 
 export const apiGetReasonList = params => { return getWithToken(`${base}/api/v1/reasons`, params) };
 
+export const apiGetReason = id => { return getWithToken(`${base}/api/v1/reasons/${id}`) };
+
+export const apiGetGroupReason = (id, params) => { return getWithToken(`${base}/api/v1/groups/${id}/reasons`, params) };
+
 export const apiAddReason = params => { return postWithToken(`${base}/api/v1/reasons`, params) };
 
 export const apiUpdateReason = (id, params) => { return putWithToken(`${base}/api/v1/reasons/${id}`, params) };

@@ -394,6 +394,66 @@
         <el-button type="primary" @click.native="singleReasonAddSubmit" :loading="reasonAddLoading">提交</el-button>
       </div>
     </el-dialog>
+
+    <!-- 申请理由查看 -->
+    <h1>申请理由查看</h1>
+    <!--工具条-->
+    <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+      <el-form :inline="true" :model="groupReasonFilters">
+	      <el-form-item label="学生年级">
+	        <el-input v-model="groupReasonFilters.group" placeholder=""></el-input>
+	      </el-form-item>
+	      <el-form-item label="学生类别" prop="type">
+	        <el-select v-model="groupReasonFilters.type">
+	          <template v-for="userType in _USER_TYPE">
+	            <el-option :label="_userTypeString(userType)" :value="userType"></el-option>
+	          </template>
+	        </el-select>
+	      </el-form-item>
+	      <el-form-item label="申请理由年份">
+	        <el-select v-model="groupReasonFilters.reasons" :multiple="true">
+	          <template v-for="reason in reasons">
+	            <el-option :label="reason.year + ' ' + reason.name" :value="reason.year"></el-option>
+	          </template>
+	        </el-select>
+	      </el-form-item>
+	      <el-form-item>
+	        <el-button type="primary" @click="getGroupReasonList">查询</el-button>
+	      </el-form-item>
+      </el-form>
+    </el-col>
+    <!--申请理由填写列表-->
+    <el-table :data="groupReason" highlight-current-row v-loading="groupReasonListLoading" style="width: 100%;" border max-height="1000">
+      <el-table-column type="index" width="60">
+      </el-table-column>
+      <el-table-column prop="name" label="姓名" width="90" sortable>
+      </el-table-column>
+      <el-table-column prop="class" label="班级" width="90" sortable>
+      </el-table-column>
+      <el-table-column prop="student_id" label="学号" width="120" sortable>
+      </el-table-column>
+      <template v-for="(reason, index) in groupReasonReasons">
+        <el-table-column :prop="reason.year + ' ' + reason.name" :label="reason.year + ' ' + reason.name" width="150">
+          <template scope="scope">
+            <template v-if="scope.row.reason_fill_ids[index] === null">
+              未填写该申请理由
+            </template>
+            <template v-else>
+              <el-button size="small" @click="singleUserReasonView(scope.row, index)">查看申请理由</el-button>
+            </template>
+          </template>
+        </el-table-column>
+      </template>
+    </el-table>
+
+    <!-- 申请理由查看界面 -->
+    <el-dialog title="查看" v-model="userReasonViewVisible" size="large">
+      <form-view></form-view>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click.native="userReasonViewVisible = false">取消</el-button>
+        <el-button type="primary" @click.native="singleUserReasonSubmit" :loading="userReasonViewLoading">修改</el-button>
+      </div>
+    </el-dialog>
   </section>
 </template>
 
@@ -403,7 +463,8 @@ import { mapActions } from "vuex"
 import { apiGetFormList, apiGetHonorList, apiUpdateHonor, apiAddHonor, apiGetGroupId, apiDeleteHonor,
          apiGetGroupHonor, apiGetUser, apiGetHonor, apiGetForm, apiAddUserHonorScore, apiUpdateUserHonorScore,
          apiDeleteUserHonorScore, apiUpdateUserHonorAdmin,
-         apiGetReasonList, apiAddReason, apiUpdateReason, apiDeleteReason } from "../../api/api"
+         apiGetReason, apiGetReasonList, apiAddReason, apiUpdateReason, apiDeleteReason,
+         apiUpdateUserReason, apiGetGroupReason } from "../../api/api"
 import UserType from "../../common/js/userType"
 import FormType from "../../common/js/formType"
 import ApplyStatus from "../../common/js/applyStatus"
@@ -461,6 +522,23 @@ export default {
         form_id: null
       },
 
+      groupReasonReasons: [],
+      groupReasonType: "",
+      groupReasonGroup: "",
+      groupReason: [],
+      groupReasonListLoading: false,
+      groupReasonFilters: {
+        group: "",
+        type: "",
+        reasons: []
+      },
+
+      userReasonReasonId: "",
+      userReasonUserId: "",
+      userReasonViewVisible: false,
+      userReasonViewLoading: false,
+
+      // Honor attributes.
       honorFilters: {
         name: "",
         year: ""
@@ -1026,7 +1104,7 @@ export default {
         name: this.reasonAddForm.name,
         year: this.reasonAddForm.year,
         form_id: this.reasonAddForm.form_id,
-       };
+      };
       apiAddReason(params).then(res => {
         this.$notify({
           title: "新增成功",
@@ -1074,6 +1152,51 @@ export default {
         this.$notify({
           title: "更新失败",
           message: "请检查网络连接",
+          type: "error"
+        });
+      });
+    },
+
+    // Users-Reasons operations.
+    singleUserReasonView: function (row, colId) {
+      apiGetForm(this.groupReasonReasons[colId].form_id).then(res => {
+        this.setForm(res.data);
+        this.setFill(JSON.parse(row.reason_fills[colId]));
+        this.userReasonReasonId = this.groupReasonReasons[colId].year;
+        this.userReasonUserId = row.id;
+        this.userReasonViewVisible = true;
+      }).catch(error => {
+        this.$notify({
+          title: "加载申请理由表单失败",
+          message: error.response.data.message,
+          type: "error"
+        });
+      }).catch(error => {
+        this.$notify({
+          title: "加载申请理由表单失败",
+          message: "请检查网络连接",
+          type: "error"
+        });
+      });
+    },
+    singleUserReasonSubmit: function () {
+      var uid = this.userReasonUserId;
+      var reasonId = this.userReasonReasonId
+      var params = {
+        fill: this.getFill
+      }
+      apiUpdateUserReason(uid, reasonId, params).then(res => {
+        this.$notify({
+          title: "修改成功",
+          message: "修改用户申请原因填写成功",
+          type: "success"
+        });
+        this.userReasonViewVisible = false;
+        this.getGroupReasonList();
+      }).catch(error => {
+        this.$notify({
+          title: "修改失败",
+          message: error.response.data.message,
           type: "error"
         });
       });
@@ -1374,7 +1497,6 @@ export default {
         params["year"] = this.reasonFilters.year;
       }
       apiGetReasonList(params).then(res => {
-        // console.log("reasons: ", res);
         this.reasons = res.data.data;
         this.reasonListLoading = false;
         this.reasonTotal = res.data.pagination.rowCount;
@@ -1394,7 +1516,61 @@ export default {
         this.reasonListLoading = false;
       });
     },
+    getGroupReasonList: function() {
+      this.groupReasonReasons = [];
+      this.groupReasonType = "";
+      this.groupReasonGroup = "";
+      this.groupReason = [];
+      this.groupReasonListLoading = true;
 
+      apiGetGroupId(this.groupReasonFilters.group, this.groupReasonFilters.type).then(groupId => {
+        var reason_ids = _.join(this.groupReasonFilters.reasons, ",");
+        apiGetGroupReason(groupId, {reason_ids: reason_ids}).then(res => {
+          var tGroupReason = res.data;
+          var getReasonTasks = _.map(this.groupReasonFilters.reasons, apiGetReason);
+          return Promise.all(getReasonTasks).then(reasonReses => {
+            var reasons = _.map(reasonReses, (h) => { return h.data });
+            var newGroupReason = {};
+            for (var i in tGroupReason) {
+              var obj = {
+                reason_fill_ids: [],
+                reason_fills: []
+              }
+              for (var j in tGroupReason[i]) {
+                if (tGroupReason[i][j] == null) {
+                  obj.reason_fill_ids.push(null);
+                  obj.reason_fills.push(null);
+                } else {
+                  obj.reason_fill_ids.push(tGroupReason[i][j].fill_id);
+                  obj.reason_fills.push(tGroupReason[i][j].fill);
+                }
+              }
+              newGroupReason[i] = obj;
+            }
+            var allUids = _.keys(newGroupReason);
+            var getUserTasks = _.map(allUids, apiGetUser);
+            return Promise.all(getUserTasks).then(userReses => {
+              var finalGroupReason = []
+              for (var i in userReses) {
+                finalGroupReason.push(_.extend(userReses[i].data, newGroupReason[userReses[i].data.id]));
+              }
+              this.groupReason = finalGroupReason;
+              this.groupReasonReasons = reasons;
+              this.groupReasonGroup = this.groupReasonFilters.group;
+              this.groupReasonType = this.groupReasonFilters.type;
+              this.groupReasonListLoading = false;
+            });
+          });
+        });
+      }).catch(error => {
+        this.$notify({
+          title: "加载申请理由填写列表失败",
+          message: "请检查学生年级、学生类别是否填写正确",
+          type: "error"
+        });
+        this.groupReasonListLoading = false;
+      });
+    },
       ...mapActions([
         "setForm",
         "setFill",
