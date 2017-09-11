@@ -187,6 +187,7 @@ export default {
       apiGetForm(row.form_id).then(res => {
 	res.data.honor_id = row.id;
 	this.setForm(res.data);
+        this.setFill({});
 	return apiGetUserHonor(uid, {honor_id: row.id}).then(res => {
 	  var fill = {};
 	  if (res.data.length != 0 && res.data[0].state === this._APPLY_STATUS.TEMP) {
@@ -225,6 +226,7 @@ export default {
       apiGetForm(row.form_id).then(res => {
 	res.data.reason_id = row.year;
 	this.setForm(res.data);
+        this.setFill({});
 	return apiGetUserReason(uid, {year: row.id}).then(res => {
 	  var fill = {};
 	  if (res.data.length != 0) {

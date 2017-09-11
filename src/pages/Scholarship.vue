@@ -90,6 +90,7 @@ export default {
     singleFill: function (index, row) {
       apiGetForm(row.form_id).then(res => {
 	this.setForm(JSON.parse(JSON.stringify(res.data)));
+        this.setFill({});
 	var fill = {};
 	for (var i in this.getFields) {
 	  var field = this.getFields[i];
