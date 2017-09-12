@@ -278,8 +278,10 @@ export default {
           // // this method not work... \t\t will all be trimed except for the first one
           // var str = this.getFill[i].trim().replace(/\n[\s]*\n/g, "\n").replace(/\n[\s]*/g, "\n\t\t");
           // Remove extra newline between paragraphs
-          var str = this.getFill[i].trim().replace(/\n[\s]*\n/g, "\n");
-          body = body.replace(regExp, JSON.stringify(str).slice(1, -1));
+          if (this.getFill[i]) {
+            var str = this.getFill[i].trim().replace(/\n[\s]*\n/g, "\n");
+            body = body.replace(regExp, JSON.stringify(str).slice(1, -1));
+          }
 	}
         var docdef = JSON.parse(body);
         // Split multiline texts into multiple content cell for correct leading indent
