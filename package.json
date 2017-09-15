@@ -16,7 +16,7 @@
     "semver": "^5.4.1",
     "vue": "^2.1.10",
     "vuex": "^2.0.0-rc.6",
-    "webpack": "^1.15.0"
+    "webpack": "^1.5.5"
   },
   "devDependencies": {
     "autoprefixer": "^6.6.1",
@@ -31,6 +31,7 @@
     "chalk": "^1.1.3",
     "connect-history-api-fallback": "^1.1.0",
     "css-loader": "^0.26.1",
+    "deepmerge": "^1.3.2",
     "element-ui": "^1.3.6",
     "eventsource-polyfill": "^0.9.6",
     "express": "^4.13.3",
@@ -45,7 +46,7 @@
     "node-sass": "^4.5.0",
     "opn": "^4.0.2",
     "ora": "^1.0.0",
-    "sass-loader": "^6.0.0",
+    "sass-loader": "^4.0.0",
     "semver": "^5.3.0",
     "shelljs": "^0.7.6",
     "url-loader": "^0.5.7",
@@ -53,7 +54,7 @@
     "vue-router": "^2.1.2",
     "vue-style-loader": "^1.0.0",
     "vue-template-compiler": "^2.1.10",
-    "webpack": "^3.5.5",
+    "webpack": "^1.5.5",
     "webpack-dev-middleware": "^1.9.0",
     "webpack-hot-middleware": "^2.15.0",
     "webpack-merge": "^2.4.0"

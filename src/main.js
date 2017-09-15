@@ -1,5 +1,6 @@
 import babelpolyfill from 'babel-polyfill'
 import Vue from 'vue'
+import axios from 'axios'
 import App from './App'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-default/index.css'
@@ -58,5 +59,23 @@ var vueInst = new Vue({
   //components: { App }
   render: h => h(App)
 }).$mount('#app');
+
+// Intercept 401 error
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  console.log(error.response.status == 401);
+  if (error.response.status == 401) {
+    vueInst.$notify({
+      title: "登录超时，请重新登录",
+      message: "",
+      type: "error"
+    });
+    vueInst.$router.push({ path: "/login" });
+    return Promise.reject(error);
+  } else {
+    return Promise.reject(error);
+  }
+});
 
 export default vueInst;
