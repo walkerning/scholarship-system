@@ -32,7 +32,7 @@
     <el-table :data="users" highlight-current-row v-loading="listLoading" @selection-change="allSelsChange" style="width: 100%;" border>
       <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column label="#" width="60">
+      <el-table-column label="#" width="100">
         <template scope="scope">
           {{ (currentPage - 1) * pageSize + scope.$index + 1 }}
         </template>

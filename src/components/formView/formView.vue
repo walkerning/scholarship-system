@@ -278,8 +278,15 @@ export default {
           // // this method not work... \t\t will all be trimed except for the first one
           // var str = this.getFill[i].trim().replace(/\n[\s]*\n/g, "\n").replace(/\n[\s]*/g, "\n\t\t");
           // Remove extra newline between paragraphs
+          var id = parseInt(i.substring(4));
+	  var field = this.getFields[id];
           if (this.getFill[i]) {
             var str = this.getFill[i].trim().replace(/\n[\s]*\n/g, "\n");
+            if (field.type === this._QUE_TYPE.STRING_MULTIPLE_LINE) {
+              // Add a newline to MULTIPLE_LINE field fill, to enable the following split
+              // even when there is only one line in multiple line field
+              str = str + "\n";
+            }
             body = body.replace(regExp, JSON.stringify(str).slice(1, -1));
           }
 	}
