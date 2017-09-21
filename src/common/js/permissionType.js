@@ -9,7 +9,8 @@ export default {
     USER_SCHOLAR: "user_scholar",
     USER_HONOR: "user_honor",
     EXPORT: "export",
-    PERMISSION: "permission"
+    PERMISSION: "permission",
+    NOTICE: "notice"
   },
   permissionTypeString: function(type) {
     if (type === this.PERMISSION_TYPE.LOGIN) {
@@ -32,6 +33,8 @@ export default {
       return "学校奖助系统对接";
     } else if (type === this.PERMISSION_TYPE.PERMISSION) {
       return "权限管理";
+    } else if (type === this.PERMISSION_TYPE.NOTICE) {
+      return "公告管理";
     } else {
       return "";
     }

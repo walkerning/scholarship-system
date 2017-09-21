@@ -8,7 +8,7 @@ import AdminUser from './pages/admin/AdminUser.vue'
 import AdminForm from './pages/admin/AdminForm.vue'
 import AdminHonor from './pages/admin/AdminHonor.vue'
 import AdminScholarship from './pages/admin/AdminScholarship.vue'
-
+import AdminNotice from './pages/admin/AdminNotice.vue'
 
 let routes = [
   {
@@ -99,9 +99,15 @@ let routes = [
         component: AdminScholarship,
         name: '奖学金管理',
         permission: ["scholar", "user_scholar"]
+      },
+      {
+        path: '/admin/notice',
+        component: AdminNotice,
+        name: '公告管理',
+        permission: ["notice"]
       }
     ],
-    permission: ["user", "form", "honor", "scholar", "user_scholar", "user_honor"]
+    permission: ["user", "form", "honor", "scholar", "user_scholar", "user_honor", "notice"]
   },
   {
     path: '*',

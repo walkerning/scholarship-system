@@ -1,9 +1,9 @@
 import axios from 'axios';
 import UserType from "../common/js/userType"
 
-//let base = 'http://foxfi.eva6.nics.cc:8080';
-let base = 'http://foxfi.eva6.nics.cc:3000';
-//let base = 'http://localhost:3000';
+export const api_version = "v1";
+export const base = "http://foxfi.eva6.nics.cc:3000";
+export const api_base = base + "/api/" + api_version;
 
 const getWithToken = (url, params) => {
   return axios.get(url, { params: params, headers: {"Authorization": "Bearer " + sessionStorage.getItem('token')} });
@@ -56,6 +56,16 @@ export const apiGetPermissionUser = name => { return getWithToken(`${base}/api/v
 export const apiAddPermissionUser = (permissionName, userId) => { return postWithToken(`${base}/api/v1/permissions/${permissionName}/users`, {user_id: userId}) };
 
 export const apiDeletePermissionUser = (permissionName, userId) => { return deleteWithToken(`${base}/api/v1/permissions/${permissionName}/users/${userId}`) };
+
+export const apiGetNoticeList = params => { return getWithToken(`${base}/api/v1/notices`, params); }
+
+export const apiAddNotice = params => { return postWithToken(`${base}/api/v1/notices`, params) };
+
+export const apiUpdateNotice = (id, params) => { return putWithToken(`${base}/api/v1/notices/${id}`, params) };
+
+export const apiDeleteNotice = id => { return deleteWithToken(`${base}/api/v1/notices/${id}`) };
+
+export const apiDeleteNoticeAttachment = id => { return deleteWithToken(`${base}/api/v1/notices/${id}/attachment`) };
 
 export const apiGetReasonList = params => { return getWithToken(`${base}/api/v1/reasons`, params) };
 

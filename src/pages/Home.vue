@@ -13,9 +13,10 @@
 				<el-dropdown trigger="click">
 					<span class="el-dropdown-link userinfo-inner">{{sysUserName}}</span>
 					<el-dropdown-menu slot="dropdown">
-						<el-dropdown-item @click.native="userinfo">用户信息</el-dropdown-item>
-						<el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
-						<el-dropdown-item divided @click.native="aboutVisible=true">关于</el-dropdown-item>
+					  <el-dropdown-item @click.native="userinfo">用户信息</el-dropdown-item>
+					  <el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
+                                          <el-dropdown-item divided @click.native="noticeVisible=true; getNoticeList()">公告</el-dropdown-item>
+					  <el-dropdown-item @click.native="aboutVisible=true">关于</el-dropdown-item>
 					</el-dropdown-menu>
 				</el-dropdown>
 			</el-col>
@@ -35,10 +36,10 @@
 				</el-menu>
 				<!--导航菜单-折叠后-->
 				<ul class="el-menu el-menu-vertical-demo collapsed" v-show="collapsed" ref="menuCollapsed">
-					<li v-for="(item,index) in $router.options.routes" v-if="!item.hidden" class="el-submenu item">
-						<template v-if="!item.leaf">
+					<li v-for="(item,index) in $router.options.routes" v-if="!item.hidden&&hasPermission(item.permission)" class="el-submenu item">
+						<template v-if="!item.leaf&&hasPermission(item.permission)">
 							<div class="el-submenu__title" style="padding-left: 20px;" @mouseover="showMenu(index,true)" @mouseout="showMenu(index,false)"><i :class="item.iconCls"></i></div>
-							<ul class="el-menu submenu" :class="'submenu-hook-'+index" @mouseover="showMenu(index,true)" @mouseout="showMenu(index,false)"> 
+							<ul class="el-menu submenu" :class="'submenu-hook-'+index" @mouseover="showMenu(index,true)" @mouseout="showMenu(index,false)">
 								<li v-for="child in item.children" v-if="!child.hidden" class="el-menu-item" style="padding-left: 40px;" :class="$route.path==child.path?'is-active':''" @click="$router.push(child.path)">{{child.name}}</li>
 							</ul>
 						</template>
@@ -68,88 +69,149 @@
 				</div>
 			</section>
 		</el-col>
-		<el-dialog title="清华电子奖学金系统" size="small" v-model="aboutVisible">
-			<hr />
-			<b>顾问</b>
-			<ul>
-				<li><a style="color:green;" href="http://nics.ee.tsinghua.edu.cn/people/wangyu/index.html" target="_blank">汪玉</a></li>
-				<li><a style="color:green;" href="http://oa.ee.tsinghua.edu.cn/~shenyuan/" target="_blank">沈渊</a></li>
-			</ul>
-			<b>策划</b>
-			<ul>
-				<li><a style="color:green;" href="#">徐晗 清华大学电子工程系本科生工作助理</a></li>
-				<li><a style="color:green;" href="#">王超 清华大学电子工程系2015级研究生、辅导员</a></li>
-			</ul>
-			<b>开发者</b>
-			<ul>
-				<li><a style="color:green;" href="mailto:linzinan1995@126.com">林梓楠 清华大学电子工程系2013级本科生 </a></li>
-				<li><a style="color:green;" href="mailto:foxdoraame@gmail.com">宁雪妃 清华大学电子工程系2016级研究生 </a></li>
-				<li><a style="color:green;" href="mailto:huangzc13@mails.tsinghua.edu.cn">黄志超 清华大学电子工程系2013级本科生 </a></li>
-				<li><a style="color:green;" href="mailto:975114697@qq.com">许璀杰 清华大学电子工程系2016级本科生 </a></li>
-			</ul>
-			<hr />
-			<b>奖学金、荣誉申请问题请联系辅导员，系统bug请联系开发者</b>
-			<hr />
-			Powered by <a href="https://github.com/taylorchen709/vue-admin" target="_blank">vue-admin</a>, <a href="https://cn.vuejs.org/" target="_blank">Vue.js</a> and <a href="http://element.eleme.io/#/zh-CN" target="_blank">Element UI</a>.
-		</el-dialog>
+
+                <!-- 公告栏 -->
+		<el-dialog title="公告" size="large" v-model="noticeVisible">
+                  <el-table :data="notices" highlight-current-row v-loading="noticeLoading" border>
+                    <el-table-column label="#" width="60">
+                      <template scope="scope">
+                        {{ (currentNoticePage - 1) * noticePageSize + scope.$index + 1 }}
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="created_at" label="创建时间" :formatter="timeFormatter" width="180" sortable>
+                    </el-table-column>
+                    <!--<el-table-column prop="updated_at" label="最后更改时间" :formatter="timeFormatter" width="190" sortable></el-table-column>-->
+                    <el-table-column prop="name" label="公告名" width="120" sortable>
+                    </el-table-column>
+                    <el-table-column prop="description" label="描述" width="200">
+                    </el-table-column>
+                    <el-table-column label="附件" width="100">
+                      <template scope="scope">
+                        <el-row type="flex" justify="center" align="middle">
+                          <template v-if="scope.row.attachment_name">
+                            <el-tooltip class="item" effect="dark" :content="scope.row.attachment_name" placement="top-start">
+                              <el-button size="small" type="primary" @click.native="downloadAttachment(scope.$index, scope.row)"> 下载附件
+                              </el-button>
+                            </el-tooltip>
+                          </template>
+                          <template v-else>
+                            没有附件
+                          </template>
+                        </el-row>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                  <el-pagination layout="prev, pager, next" @current-change="allNoticeChange" :page-size="noticePageSize" :total="noticeTotal" style="float:right;" :current-page.sync="currentNoticePage">
+                  </el-pagination>
+                </el-dialog>
 	</el-row>
 </template>
 
 <script>
-	import { apiGetUser, apiLogout } from "../api/api";
-	export default {
-		data() {
-			return {
-				sysName: "清华电子奖学金系统",
-				collapsed:  false,
-				sysUserName: "",
-				aboutVisible: false,
-				sysUserPermissions: []
-			}
-		},
-		methods: {
-			handleopen() {
-				//console.log('handleopen');
-			},
-			handleclose() {
-				//console.log('handleclose');
-			},
-			handleselect: function (a, b) {
-			},
-			//退出登录
-			logout: function () {
-				this.$confirm("确认退出吗?", "提示").then(() => {
-					apiLogout();
-					this.$router.push({ path: "/login" });
-				}).catch(error => {
-					console.log(error);
-				});
-			},
-			//折叠导航栏
-			collapse:function(){
-				this.collapsed=!this.collapsed;
-			},
-			showMenu(i,status){
-				this.$refs.menuCollapsed.getElementsByClassName("submenu-hook-"+i)[0].style.display=status?"block":"none";
-			},
-			userinfo: function () {
-				this.$router.push("/user");
-			},
-			hasPermission: function(requiredPermissions) {
-				for (var i in requiredPermissions) {
-					if (requiredPermissions[i] == null || _.includes(this.sysUserPermissions, requiredPermissions[i])) {
-						return true;
-					}
-				}
-				return false;
-			}
-		},
-		mounted() {
-			var user = JSON.parse(sessionStorage.getItem("user"));
-			this.sysUserName = user.name;
-			this.sysUserPermissions = user.permissions;
-		}
+  import { base, apiGetUser, apiLogout, apiGetNoticeList } from "../api/api";
+export default {
+  data() {
+    return {
+      sysName: "清华电子奖学金系统",
+      collapsed:  false,
+      sysUserName: "",
+      aboutVisible: false,
+      sysUserPermissions: [],
+
+      currentNoticePage: 1,
+      noticePageSize: 5,
+      noticeTotal: 0,
+      noticeVisible: false,
+      noticeLoading: false,
+      notices: [],
+
+      attachment_path: base + "/static/attachments/"
+    }
+  },
+  methods: {
+    handleopen() {
+      //console.log('handleopen');
+    },
+    handleclose() {
+      //console.log('handleclose');
+    },
+    handleselect: function (a, b) {
+    },
+    //退出登录
+    logout: function () {
+      this.$confirm("确认退出吗?", "提示").then(() => {
+	apiLogout();
+	this.$router.push({ path: "/login" });
+      }).catch(error => {
+      });
+    },
+    //折叠导航栏
+    collapse:function(){
+      this.collapsed=!this.collapsed;
+    },
+    showMenu(i,status){
+      this.$refs.menuCollapsed.getElementsByClassName("submenu-hook-"+i)[0].style.display=status?"block":"none";
+    },
+    userinfo: function () {
+      this.$router.push("/user");
+    },
+    hasPermission: function(requiredPermissions) {
+      for (var i in requiredPermissions) {
+	if (requiredPermissions[i] == null || _.includes(this.sysUserPermissions, requiredPermissions[i])) {
+	  return true;
 	}
+      }
+      return false;
+    },
+    downloadAttachment: function(index, row) {
+      window.open(this.attachment_path + row.attachment_hash + "." + row.suffix);
+    },
+
+    // Notices
+    getNoticeList: function() {
+      this.noticeListLoading = true;
+      var params = {
+	page: this.currentNoticePage,
+	pageSize: this.noticePageSize
+      };
+      apiGetNoticeList(params).then(res => {
+	this.notices = res.data.data;
+	this.noticeListLoading = false;
+	this.noticeTotal = res.data.pagination.rowCount;
+      }).catch(error => {
+	this.$notify({
+	  title: "加载公告列表失败",
+	  message: error.response.data.message,
+	  type: "error"
+	});
+	this.scholarshipListLoading = false;
+      }).catch(error => {
+	this.$notify({
+	  title: "加载公告列表失败",
+	  message: "请检查网络连接",
+	  type: "error"
+	});
+	this.scholarshipListLoading = false;
+      });
+    },
+    allNoticeChange: function() {
+      this.getNoticeList();
+    },
+    timeFormatter: function (row, column) {
+      if (column.property === "updated_at") {
+        return new Date(row.updated_at).toLocaleString().replace(/:\d{1,2}$/,' ');
+      } else {
+        return new Date(row.created_at).toLocaleString().replace(/:\d{1,2}$/,' ');
+      }
+    },
+  },
+  mounted() {
+    var user = JSON.parse(sessionStorage.getItem("user"));
+    this.sysUserName = user.name;
+    this.sysUserPermissions = user.permissions;
+    this.getNoticeList();
+  }
+}
 
 </script>
 
