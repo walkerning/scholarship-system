@@ -281,7 +281,7 @@ export default {
           var id = parseInt(i.substring(4));
 	  var field = this.getFields[id];
           if (this.getFill[i]) {
-            var str = this.getFill[i].trim().replace(/\n[\s]*\n/g, "\n");
+            var str = this.getFill[i].replace(/\n[\s]*\n/g, "\n");
             if (field.type === this._QUE_TYPE.STRING_MULTIPLE_LINE) {
               // Add a newline to MULTIPLE_LINE field fill, to enable the following split
               // even when there is only one line in multiple line field
@@ -295,17 +295,32 @@ export default {
         var new_contents = [];
         for (var i in docdef["content"]) {
           var content = docdef["content"][i];
-          if ( content.hasOwnProperty("text") && content["text"].indexOf("\n") > 0 ) {
-            var text_list = content["text"].split("\n");
-            var t = _.clone(content);
-            t["text"] = "";
-            for (var j in text_list) {
-              var new_t = _.clone(t);
-              new_t["text"] = "    " + text_list[j].trim();
-              new_contents.push(new_t);
-            }
+          if ( content.hasOwnProperty("text")) {
+              if (content["text"].indexOf("\n") > 0 ) {
+                var text_list = content["text"].split("\n");
+                var t = _.clone(content);
+                t["text"] = "";
+                for (var j in text_list) {
+                  var new_t = _.clone(t);
+                  new_t["text"] = text_list[j].trim();
+                  if (new_t["text"].length == 0) {
+                    // Ignore empty lines.
+                    continue;
+                  }
+                  if (text_list[j].search(/^\s+\S+/) >= 0) {
+                    // Check whether this paragraph starts with whitespaces.
+                    // If so, unify the start whitespaces to be four space.
+                    new_t["text"] = "    " + new_t["text"];
+                  }
+                  new_contents.push(new_t);
+                }
+              } else {
+                var new_t = _.clone(content);
+                new_t["text"] = content["text"].trim();
+                new_contents.push(new_t);
+              }
           } else {
-            new_contents.push(content)
+            new_contents.push(content);
           }
         }
         docdef["content"] = new_contents;
