@@ -36,7 +36,8 @@
                :auto-upload="true"
                :multiple="false"
                :show-file-list="false"
-               :on-success="handleSuccess">
+               :on-success="handleSuccess"
+               :on-error="handleError">
               <el-button size="small" type="primary">上传附件</el-button>
               <div slot="tip" class="el-upload__tip">如果已有附件, 将覆盖原附件</div>
             </el-upload>
@@ -290,6 +291,14 @@ export default {
         type: "success"
       });
       this.getNoticeList();
+    },
+
+    handleError: function(err, file, fileList) {
+      this.$notify({
+        title: "上传附件失败",
+        message: JSON.parse(err.message.slice(err.message.indexOf("{"))).message,
+        type: "error"
+      });
     },
 
     // Notice flusher
