@@ -2,7 +2,7 @@ import axios from 'axios';
 import UserType from "../common/js/userType"
 
 export const api_version = "v1";
-export const base = "http://foxfi.eva6.nics.cc:3000";
+export const base = "https://jxj.eva6.nics.cc";
 export const api_base = base + "/api/" + api_version;
 
 const getWithToken = (url, params) => {
