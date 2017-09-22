@@ -64,7 +64,7 @@ var vueInst = new Vue({
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
-  console.log(error.response.status == 401);
+    // console.log(error.response.status == 401);
   if (error.response.status == 401) {
     vueInst.$notify({
       title: "登录超时，请重新登录",

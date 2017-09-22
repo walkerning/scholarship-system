@@ -840,7 +840,7 @@ export default {
 	});
 	this.getAllocList();
       }).catch(error => {
-	console.log(error.response);
+	// console.log(error.response);
 	this.$notify({
 	  title: "修改奖学金分配失败",
 	  message: error.response.data.message,
@@ -871,7 +871,7 @@ export default {
 	});
 	this.getAllocList();
       }).catch(error => {
-	console.log(error.response);
+	// console.log(error.response);
 	this.$notify({
 	  title: "新增奖学金分配失败",
 	  message: error.response.data.message,
