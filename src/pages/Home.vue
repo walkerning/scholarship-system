@@ -4,11 +4,13 @@
 			<el-col :span="10" class="logo" :class="collapsed?'logo-collapse-width':'logo-width'">
 				{{collapsed?"":sysName}}
 			</el-col>
-			<el-col :span="10">
-				<div class="tools" @click.prevent="collapse">
-					<i class="fa fa-align-justify"></i>
-				</div>
-			</el-col>
+			<!--
+				<el-col :span="10">
+					<div class="tools" @click.prevent="collapse">
+						<i class="fa fa-align-justify"></i>
+					</div>
+				</el-col>
+			-->
 			<el-col :span="4" class="userinfo">
 				<el-dropdown trigger="click">
 					<span class="el-dropdown-link userinfo-inner">{{sysUserName}}</span>
