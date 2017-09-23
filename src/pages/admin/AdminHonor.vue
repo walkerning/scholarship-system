@@ -899,7 +899,7 @@ export default {
         }
         this.scoreMap = [];
         for (var i = 0; i < form.fields.length; i++) {
-          if (form.fields[i].type === this._QUE_TYPE.STRING_SINGLE_LINE || form.fields[i].type === this._QUE_TYPE.STRING_MULTIPLE_LINE) {
+          if (form.fields[i].type === this._QUE_TYPE.STRING_SINGLE_LINE || form.fields[i].type === this._QUE_TYPE.STRING_MULTIPLE_LINE || form.fields[i].type === this._QUE_TYPE.NUMBER) {
             tmpForm.fields.push(form.fields[i]);
             tmpFill["data" + (tmpForm.fields.length - 1)] = fill["data" + i];
             for (var j in this.rates[rowId].honor_scores[colId]) {
