@@ -659,12 +659,18 @@ export default {
             };
             if (this.editForm.gpa && this.editForm.gpa !== "") {
               params.gpa = parseFloat(this.editForm.gpa);
+            } else {
+              params.gpa = null;
             }
             if (this.editForm.class_rank && this.editForm.class_rank !== "") {
               params.class_rank = parseInt(this.editForm.class_rank);
+            } else {
+              params.class_rank = null;
             }
             if (this.editForm.year_rank && this.editForm.year_rank != "") {
               params.year_rank = parseInt(this.editForm.year_rank);
+            } else {
+              params.year_rank = null;
             }
             var tasks = []
             tasks.push(apiUpdateUser(uid, params));
