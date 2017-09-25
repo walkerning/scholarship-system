@@ -293,6 +293,9 @@
 
     <!--打分表-->
     <el-dialog :title="'为【' + honorRateUser.name + '】的申请【' + honorRateHonor.year + ' ' + honorRateHonor.name + '】评分'" v-model="honorRateVisible" size="large">
+      <b>该生GPA：     {{ honorRateUser.gpa }}</b><br />
+      <b>该生班级排名：{{ honorRateUser.class_rank }}</b><br />
+      <b>该生年级排名：{{ honorRateUser.year_rank }}</b><br />
       <form-rate></form-rate>
       <div slot="footer" class="dialog-footer">
         <el-button @click.native="honorRateVisible = false">取消</el-button>
