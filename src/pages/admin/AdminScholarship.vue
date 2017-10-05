@@ -414,7 +414,7 @@
 	<el-table-column :prop="scholarship.year + ' ' + scholarship.name" :label="scholarship.year + ' ' + scholarship.name" width="125">
 	  <template scope="scope">
 	    <template v-if="scope.row.scholarship_states[index] === _APPLY_STATUS.SUCCESS">
-	      <template v-if="scope.row.scholarship_fill_ids[index] === null">
+	      <template v-if="scope.row.scholarship_fill_ids[index] === null || scope.row.scholarship_fill_ids[index] === undefined">
 		未填写感谢信
 	      </template>
 	      <template v-else>
@@ -892,6 +892,14 @@ export default {
       this.thanksSels = sels;
     },
     singleThanksView: function (row, colId) {
+      if (row.scholarship_fills[colId] === null) {
+        this.$notify({
+          title: "错误",
+          message: "该生没有填写感谢信",
+          type: "error"
+        });
+        return;
+      }
       apiGetForm(this.thanksScholarships[colId].form_id).then(res => {
 	this.setForm(res.data);
 	this.setFill(JSON.parse(row.scholarship_fills[colId]));
