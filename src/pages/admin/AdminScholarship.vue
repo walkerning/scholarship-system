@@ -775,7 +775,11 @@ export default {
 	}
 	for (var j in this.alloc[i].scholarship_states) {
 	  if (this.alloc[i].scholarship_states[j] == this._APPLY_STATUS.SUCCESS) {
-	    row.cells.push(cell(this.allocScholarships[j].year + " " + this.allocScholarships[j].name));
+            var name = this.allocScholarships[j].year + " " + this.allocScholarships[j].name;
+            if (this.allocScholarships[j].alloc == this._SCHOLARSHIP_ALLOC_TYPE.MONEY) {
+              name = name + " (" + this.alloc[i].scholarship_money[j] + ")";
+            }
+	    row.cells.push(cell(name));
 	    if (this.allocScholarships[j].alloc == this._SCHOLARSHIP_ALLOC_TYPE.MONEY) {
 	      row.cells.push(cell(this.alloc[i].scholarship_money[j]));
 	    } else {
