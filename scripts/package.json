@@ -1,0 +1,16 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "download_all_thanksletter.js",
+  "author": "foxfi",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "bluebird": "^3.5.1",
+    "lodash": "^4.17.4",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "pdfmake": "^0.1.33"
+  }
+}
