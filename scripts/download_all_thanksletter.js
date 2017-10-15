@@ -226,7 +226,7 @@ apiLogin(user_id, password)
                     promises.push(new Promise(resolve => {
                       mkdirp(dir_name, () => {
                         var fname = path.join(dir_name,
-                                              util.format("%s_%s_%s.pdf", s_name,
+                                              util.format("%s_电子系_%s_%s.pdf", s_name,
                                                           user_obj["name"], user_obj["class"]));
                         var fill_obj = JSON.parse(alloc.fill);
                         var pdf = render_pdf(s_obj["template"], s_obj["fields"], fill_obj);
