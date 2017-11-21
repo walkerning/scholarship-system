@@ -6,15 +6,17 @@ const rl = readline.createInterface({
 });
 const assert = require("assert");
 var fs = require("fs");
+var shell = require("shelljs");
 var path = require("path");
 var util = require("util");
 var axios = require("axios");
 var Promise = require("bluebird");
 var pdfMakePrinter = require("pdfmake/src/printer");
-var mkdirp = require("mkdirp");
+// var mkdirp = require("mkdirp");
 var argv = require("minimist")(process.argv.slice(2));
 
-const base = "http://jxj.eva6.nics.cc:8000";
+const base = "https://jxj.eva6.nics.cc";
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var token = null;
 const apiLogin = (student_id, password) => {
   return axios.post(`${base}/auth`, {
@@ -126,6 +128,7 @@ var user_id = argv.manageid;
 var save_dir = argv.save;
 var password = argv.password
 var verbose = argv.v;
+var argv_sid = argv.sid;
 assert(user_id !== undefined, "Must specify --manageid cmdline arg.")
 assert(password !== undefined, "Must specify --password cmdline arg.")
 assert(save_dir !== undefined, "Must specify --save cmdline arg.")
@@ -191,6 +194,9 @@ apiLogin(user_id, password)
               .then(() => {
                 // We only need scholarship that has printing template.
                 scholarshipList = _.filter(res.data, (s) => { return s.template.length > 0; });
+                if (argv_sid !== undefined) {
+                  scholarshipList = _.filter(scholarshipList, (s) => { return s.id == argv_sid; });
+                }
                 sid_s_map = _.keyBy(scholarshipList, "id");
               });
           });
@@ -205,7 +211,10 @@ apiLogin(user_id, password)
           return apiGetGroupScholarship(gid, {scholar_ids: s_ids})
             .then((res) => {
               // return Promise.all(_.map(res.data, (allocs, uid) => {
-              return Promise.all(_.map(res.data, function (allocs, uid) {
+              // return Promise.all(_.map(res.data, function (allocs, uid) {
+              return Promise.mapSeries(_.map(res.data, (allocs, uid) => { return {allocs: allocs, uid: uid}; }), function (obj) {
+                var allocs = obj.allocs;
+                var uid = obj.uid;
                 var promises = [];
                 for (var i=0; i < s_ids.length; i++) {
                   if (allocs[i] != null && allocs[i] != undefined) {
@@ -222,33 +231,37 @@ apiLogin(user_id, password)
                     // console.log(util.format("Start handle %s %s %s %s(%s)", uid, user_obj["name"], user_obj["student_id"], s_name, sid))
                     var dir_name = path.join(save_dir, s_name,
                                              util.format("%s_%s", gid_g_map[gid]["name"], gid_g_map[gid]["type"]));
-
-                    promises.push(new Promise(resolve => {
-                      mkdirp(dir_name, () => {
-                        var fname = path.join(dir_name,
-                                              util.format("%s_电子系_%s_%s.pdf", s_name,
-                                                          user_obj["name"], user_obj["class"]));
-                        var fill_obj = JSON.parse(alloc.fill);
-                        var pdf = render_pdf(s_obj["template"], s_obj["fields"], fill_obj);
-                        pdf.pipe(fs.createWriteStream(fname))
-                          .on("finish", function() {
-                            //success
-                            if (verbose) {
-                              console.log(util.format("处理学生 %s(%s) 的奖学金 %s 感谢信, 存至 %s", user_obj["name"], user_obj["student_id"], s_name, fname));
-                              // console.log(util.format("End handle %s %s %s %s(%s)", uid, user_obj["name"], user_obj["student_id"], s_name, sid))
-                            }
-                            resolve();
-                          })
-                          .on("error", function(e) {
-                            console.error(util.format("ERROR: 处理学生 %s(%s) 的奖学金 %s 感谢信出错", user_obj["name"], user_obj["student_id"], s_name), e);
-                          });
-                        pdf.end();
-                      });
+                    // mkdir synchronizely to avoid race condition in mkdirp
+                    if (!fs.existsSync(dir_name)) {
+                      shell.mkdir("-p", dir_name);
+                    }
+                    promises.push(new Promise((resolve, reject) => {
+                      //mkdirp(dir_name, () => {
+                      var fname = path.join(dir_name,
+                                            util.format("%s_电子系_%s_%s.pdf", s_name,
+                                                        user_obj["name"], user_obj["class"]));
+                      var fill_obj = JSON.parse(alloc.fill);
+                      var pdf = render_pdf(s_obj["template"], s_obj["fields"], fill_obj);
+                      pdf.pipe(fs.createWriteStream(fname))
+                        .on("finish", function() {
+                          //success
+                          if (verbose) {
+                            console.log(util.format("处理学生 %s(%s) 的奖学金 %s 感谢信, 存至 %s", user_obj["name"], user_obj["student_id"], s_name, fname));
+                            // console.log(util.format("End handle %s %s %s %s(%s)", uid, user_obj["name"], user_obj["student_id"], s_name, sid))
+                          }
+                          resolve();
+                        })
+                        .on("error", function(e) {
+                          console.error(util.format("ERROR: 处理学生 %s(%s) 的奖学金 %s 感谢信出错", user_obj["name"], user_obj["student_id"], s_name), e);
+                          // reject(e);
+                          resolve();
+                        });
+                      pdf.end();
                     }));
                   }
                 }
                 return Promise.all(promises);
-              }));
+              });
             });
         });
       });
